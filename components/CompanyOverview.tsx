@@ -255,12 +255,20 @@ export default function CompanyOverview() {
             Yahoo Finance
           </a>
           <a
-            href="https://www.drsgme.org/"
+            href="https://www.whydrs.org/"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-stock-green/10 text-stock-green hover:bg-stock-green/20 transition-colors"
           >
             WhyDRS.org
+          </a>
+          <a
+            href="https://www.drsgme.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+          >
+            DRSGME.org
           </a>
         </div>
       </div>
