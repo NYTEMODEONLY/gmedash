@@ -33,4 +33,12 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts 
+next-env.d.ts
+
+# Claude Code local files
+.claude/
+
+# Internal documentation (not needed for deployment)
+FREE_API_UPDATE.md
+SETUP_INSTRUCTIONS.md
+TASK_LIST.md 
