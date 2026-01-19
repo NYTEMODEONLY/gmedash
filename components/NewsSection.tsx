@@ -97,7 +97,7 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       {/* Tab Description */}
       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
         {activeTab === 'official' ? (
-          <span>Official press releases and announcements from GameStop Investor Relations</span>
+          <span>Official SEC filings (8-K reports) containing material events and press releases from GameStop</span>
         ) : (
           <span>News coverage from Yahoo Finance, Google News, and other media sources</span>
         )}
@@ -165,14 +165,14 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Sources:</span> GameStop IR, Yahoo Finance, Google News
+            <span className="font-medium">Sources:</span> SEC EDGAR (Official), Yahoo Finance, Google News
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Auto-refresh: 5 min
           </div>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          News may have 15-60 min delay from original publication due to RSS aggregation.
+          Official news from SEC filings. Media news may have 15-60 min delay due to RSS aggregation.
         </div>
       </div>
     </div>

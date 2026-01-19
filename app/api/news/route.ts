@@ -3,10 +3,8 @@ import axios from 'axios';
 
 // More reliable RSS feeds that focus on GME/GameStop
 const RSS_FEEDS = {
-  gamestopIR: 'https://news.gamestop.com/rss/news-releases.xml',
   yahoo: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=GME&region=US&lang=en-US',
   google: 'https://news.google.com/rss/search?q=GameStop+GME&hl=en-US&gl=US&ceid=US:en',
-  sec: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326380&type=8-K&dateb=&owner=include&count=10&output=atom',
 };
 
 // Helper function to decode HTML entities
@@ -84,9 +82,7 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
         title.toLowerCase().includes('gamestop') ||
         title.toLowerCase().includes('gme') ||
         description.toLowerCase().includes('gamestop') ||
-        description.toLowerCase().includes('gme') ||
-        sourceName === 'SEC' ||
-        sourceName === 'GameStop IR';
+        description.toLowerCase().includes('gme');
 
       if (isRelevant && title && link) {
         // Handle Google News redirect URLs
@@ -114,26 +110,59 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
   return articles;
 };
 
-// Fetch news from Yahoo Finance API (alternative)
-const fetchYahooFinanceNews = async (): Promise<any[]> => {
+// Fetch official GameStop news from SEC EDGAR (8-K filings and press releases)
+const fetchSECOfficialNews = async (): Promise<any[]> => {
+  const articles: any[] = [];
+  const cik = '1326380'; // GameStop CIK
+
   try {
-    const response = await axios.get('https://query1.finance.yahoo.com/v8/finance/chart/GME', {
-      params: {
-        interval: '1d',
-        range: '5d',
-      },
-      timeout: 5000,
+    const response = await axios.get(`https://data.sec.gov/submissions/CIK${cik.padStart(10, '0')}.json`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
+        'User-Agent': 'GMEDASH-SEC-Reader/1.0 contact@example.com',
+        'Accept': 'application/json',
       },
+      timeout: 10000,
     });
 
-    // Yahoo chart API doesn't return news, but we can use it to verify the ticker is valid
-    // The actual news comes from RSS
-    return [];
+    const data = response.data;
+    if (data && data.filings && data.filings.recent) {
+      const recent = data.filings.recent;
+      const forms = recent.form || [];
+      const filingDates = recent.filingDate || [];
+      const accessionNumbers = recent.accessionNumber || [];
+      const primaryDocuments = recent.primaryDocument || [];
+      const primaryDocDescriptions = recent.primaryDocDescription || [];
+
+      // Get 8-K filings (current reports / material events / press releases)
+      for (let i = 0; i < Math.min(forms.length, 50); i++) {
+        if (forms[i] === '8-K' || forms[i] === '8-K/A') {
+          const accessionNumber = accessionNumbers[i].replace(/-/g, '');
+          const primaryDoc = primaryDocuments[i];
+          const description = primaryDocDescriptions[i] || 'Current Report - Material Event';
+
+          // Create a readable title from the document
+          let title = `GameStop ${forms[i]}: ${description}`;
+          if (title.length > 100) {
+            title = title.substring(0, 97) + '...';
+          }
+
+          articles.push({
+            title: title,
+            description: `SEC Form ${forms[i]} - Report of material corporate events or changes filed with the Securities and Exchange Commission.`,
+            url: `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionNumber}/${primaryDoc}`,
+            publishedAt: new Date(filingDates[i]).toISOString(),
+            source: { name: 'GameStop IR' },
+          });
+
+          if (articles.length >= 15) break;
+        }
+      }
+    }
   } catch (error) {
-    return [];
+    console.error('Error fetching SEC official news:', error);
   }
+
+  return articles;
 };
 
 export async function GET() {
@@ -142,18 +171,8 @@ export async function GET() {
 
     // Fetch from multiple sources with timeout handling
     const feedPromises = [
-      // GameStop Investor Relations Official RSS (highest priority)
-      axios.get(RSS_FEEDS.gamestopIR, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-        },
-      }).then(res => parseRSSFeed(res.data, 'GameStop IR'))
-        .catch((err) => {
-          console.log('GameStop IR RSS failed:', err.message);
-          return [];
-        }),
+      // Official GameStop news from SEC EDGAR (8-K filings)
+      fetchSECOfficialNews(),
 
       // Yahoo Finance GME RSS
       axios.get(RSS_FEEDS.yahoo, {
@@ -217,7 +236,7 @@ export async function GET() {
       }]);
     }
 
-    return NextResponse.json(uniqueArticles.slice(0, 15));
+    return NextResponse.json(uniqueArticles.slice(0, 20));
 
   } catch (error) {
     console.error('News API error:', error);
