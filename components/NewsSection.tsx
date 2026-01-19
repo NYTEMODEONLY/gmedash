@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { NewsArticle } from '@/lib/api';
 
@@ -9,6 +10,8 @@ interface NewsSectionProps {
 }
 
 export default function NewsSection({ news, isLoading }: NewsSectionProps) {
+  const [showAll, setShowAll] = useState(false);
+  const displayedNews = showAll ? news : news.slice(0, 8);
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
@@ -52,7 +55,7 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       </div>
 
       <div className="space-y-4">
-        {news.slice(0, 8).map((article, index) => (
+        {displayedNews.map((article, index) => (
           <article key={index} className="border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all">
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
@@ -88,8 +91,11 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
 
       {news.length > 8 && (
         <div className="mt-4 text-center">
-          <button className="text-sm text-gme-red hover:text-gme-red-dark font-medium transition-colors">
-            View all {news.length} articles
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-sm text-gme-red hover:text-gme-red-dark font-medium transition-colors cursor-pointer"
+          >
+            {showAll ? 'Show fewer articles' : `View all ${news.length} articles`}
           </button>
         </div>
       )}
@@ -97,7 +103,7 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Sources:</span> Yahoo Finance RSS, Google News
+            <span className="font-medium">Sources:</span> GameStop IR, Yahoo Finance, Google News
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Auto-refresh: 5 min

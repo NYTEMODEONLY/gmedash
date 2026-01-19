@@ -3,6 +3,7 @@ import axios from 'axios';
 
 // More reliable RSS feeds that focus on GME/GameStop
 const RSS_FEEDS = {
+  gamestopIR: 'https://news.gamestop.com/rss/news-releases.xml',
   yahoo: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=GME&region=US&lang=en-US',
   google: 'https://news.google.com/rss/search?q=GameStop+GME&hl=en-US&gl=US&ceid=US:en',
   sec: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326380&type=8-K&dateb=&owner=include&count=10&output=atom',
@@ -84,7 +85,8 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
         title.toLowerCase().includes('gme') ||
         description.toLowerCase().includes('gamestop') ||
         description.toLowerCase().includes('gme') ||
-        sourceName === 'SEC';
+        sourceName === 'SEC' ||
+        sourceName === 'GameStop IR';
 
       if (isRelevant && title && link) {
         // Handle Google News redirect URLs
@@ -140,6 +142,19 @@ export async function GET() {
 
     // Fetch from multiple sources with timeout handling
     const feedPromises = [
+      // GameStop Investor Relations Official RSS (highest priority)
+      axios.get(RSS_FEEDS.gamestopIR, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        },
+      }).then(res => parseRSSFeed(res.data, 'GameStop IR'))
+        .catch((err) => {
+          console.log('GameStop IR RSS failed:', err.message);
+          return [];
+        }),
+
       // Yahoo Finance GME RSS
       axios.get(RSS_FEEDS.yahoo, {
         timeout: 10000,
