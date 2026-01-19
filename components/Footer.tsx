@@ -2,68 +2,68 @@
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-8">
+    <footer className="bg-gme-dark-100 border-t border-gme-dark-300 mt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">About This Dashboard</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              100% Real-time GameStop (GME) financial data dashboard sourced directly from official exchanges, 
-              regulatory filings, and verified financial data providers. No simulated or mock data.
+            <h3 className="text-sm font-semibold text-white mb-4">About This Dashboard</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Real-time GameStop (GME) financial data dashboard sourced directly from official exchanges,
+              regulatory filings, and verified financial data providers.
             </p>
             <div className="text-xs text-gray-500">
-              <p>Data sources: Yahoo Finance, SEC EDGAR, FINRA, NASDAQ</p>
+              <p>Data sources: Yahoo Finance, SEC EDGAR, FINRA</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Important Disclaimers</h3>
-            <div className="text-sm text-gray-600 space-y-2">
+            <h3 className="text-sm font-semibold text-white mb-4">Important Disclaimers</h3>
+            <div className="text-sm text-gray-400 space-y-2">
               <p>
-                <strong>Not Financial Advice:</strong> This dashboard is for informational purposes only 
+                <strong className="text-gray-300">Not Financial Advice:</strong> This dashboard is for informational purposes only
                 and should not be considered as financial advice.
               </p>
               <p>
-                <strong>Data Accuracy:</strong> All data is sourced directly from official financial institutions 
-                and regulatory bodies. Real-time data may have minor delays as permitted by exchanges.
+                <strong className="text-gray-300">Data Accuracy:</strong> All data is sourced directly from official financial institutions
+                and regulatory bodies. Real-time data may have minor delays.
               </p>
               <p>
-                <strong>Investment Risk:</strong> Stock trading involves substantial risk of loss. 
+                <strong className="text-gray-300">Investment Risk:</strong> Stock trading involves substantial risk of loss.
                 Past performance does not guarantee future results.
               </p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Quick Links</h3>
-            <ul className="text-sm text-gray-600 space-y-2">
+            <h3 className="text-sm font-semibold text-white mb-4">Quick Links</h3>
+            <ul className="text-sm text-gray-400 space-y-2">
               <li>
-                <a 
-                  href="https://www.gamestop.com" 
-                  target="_blank" 
+                <a
+                  href="https://www.gamestop.com"
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   GameStop Official Website
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://www.sec.gov/edgar/browse/?CIK=0001326380" 
-                  target="_blank" 
+                <a
+                  href="https://www.sec.gov/edgar/browse/?CIK=0001326380"
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   SEC EDGAR Database
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://finance.yahoo.com/quote/GME" 
-                  target="_blank" 
+                <a
+                  href="https://finance.yahoo.com/quote/GME"
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   Yahoo Finance - GME
                 </a>
@@ -73,7 +73,7 @@ export default function Footer() {
                   href="https://www.marketwatch.com/investing/stock/gme"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   MarketWatch - GME
                 </a>
@@ -83,7 +83,7 @@ export default function Footer() {
                   href="https://news.gamestop.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   GameStop Investor Relations
                 </a>
@@ -93,7 +93,7 @@ export default function Footer() {
                   href="https://twitter.com/ryancohen"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   Ryan Cohen on X/Twitter
                 </a>
@@ -103,7 +103,7 @@ export default function Footer() {
                   href="https://whydrs.org"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-gme-red transition-colors"
                 >
                   WhyDRS.org
                 </a>
@@ -112,14 +112,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gray-200">
+        <div className="mt-8 pt-8 border-t border-gme-dark-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-500 mb-4 md:mb-0">
-              <p>© {new Date().getFullYear()} GameStop Dashboard. Built with Next.js and Tailwind CSS.</p>
+              <p>&copy; {new Date().getFullYear()} GME Dashboard. Built with Next.js and Tailwind CSS.</p>
               <p className="mt-1">
-                a <a href="https://nytemode.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">nytemode</a> project
+                a <a href="https://nytemode.com" target="_blank" rel="noopener noreferrer" className="text-gme-red hover:underline">NYTEMODE</a> project
               </p>
-              <p className="mt-1">
+              <p className="mt-1 text-xs text-gray-600">
                 This is not an official GameStop product. Data provided by third-party APIs.
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function Footer() {
                 href="https://github.com/NYTEMODEONLY/gmedash"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-500 hover:text-white transition-colors"
               >
                 <span className="sr-only">GitHub</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
@@ -141,4 +141,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-} 
+}

@@ -62,15 +62,15 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
 
   if (!data.length) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gme-dark-300">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Short Interest Data</h2>
+          <h2 className="text-lg font-semibold text-white">Short Interest Data</h2>
         </div>
         <div className="text-center py-8">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="mx-auto h-12 w-12 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <h3 className="mt-4 text-sm font-medium text-gray-900">Premium Feature</h3>
+          <h3 className="mt-4 text-sm font-medium text-white">Premium Feature</h3>
           <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
             Real-time short interest data requires premium API access which involves ongoing costs.
           </p>
@@ -79,20 +79,20 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
               href="https://www.finra.org/finra-data/browse-catalog/short-sale-data/daily-short-sale-volume-data"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gme-dark-300 text-gray-300 hover:bg-gme-dark-400 transition-colors"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
               View on FINRA
             </a>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500">
               Consider{' '}
               <a
                 href="https://github.com/NYTEMODEONLY/gmedash"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
+                className="text-gme-red hover:underline"
               >
                 sponsoring the developer
               </a>

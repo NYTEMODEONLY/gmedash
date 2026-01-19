@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -13,7 +14,7 @@ interface HeaderProps {
 
 type MarketStatus = 'pre-market' | 'open' | 'after-hours' | 'closed';
 
-const getMarketStatus = (): { status: MarketStatus; label: string; color: string } => {
+const getMarketStatus = (): { status: MarketStatus; label: string; color: string; bgColor: string; textColor: string } => {
   const now = new Date();
   const day = now.getDay();
   const hours = now.getHours();
@@ -22,7 +23,7 @@ const getMarketStatus = (): { status: MarketStatus; label: string; color: string
 
   // Weekend
   if (day === 0 || day === 6) {
-    return { status: 'closed', label: 'Market Closed', color: 'bg-gray-500' };
+    return { status: 'closed', label: 'Market Closed', color: 'bg-gray-500', bgColor: 'bg-gray-500/20', textColor: 'text-gray-400' };
   }
 
   // Times in EST (adjust for local timezone would be better in production)
@@ -32,13 +33,13 @@ const getMarketStatus = (): { status: MarketStatus; label: string; color: string
   const afterHoursClose = 20 * 60; // 8:00 PM
 
   if (totalMinutes >= preMarketOpen && totalMinutes < marketOpen) {
-    return { status: 'pre-market', label: 'Pre-Market', color: 'bg-yellow-500' };
+    return { status: 'pre-market', label: 'Pre-Market', color: 'bg-yellow-500', bgColor: 'bg-yellow-500/20', textColor: 'text-yellow-500' };
   } else if (totalMinutes >= marketOpen && totalMinutes < marketClose) {
-    return { status: 'open', label: 'Market Open', color: 'bg-green-500' };
+    return { status: 'open', label: 'Market Open', color: 'bg-stock-green', bgColor: 'bg-stock-green/20', textColor: 'text-stock-green' };
   } else if (totalMinutes >= marketClose && totalMinutes < afterHoursClose) {
-    return { status: 'after-hours', label: 'After Hours', color: 'bg-orange-500' };
+    return { status: 'after-hours', label: 'After Hours', color: 'bg-orange-500', bgColor: 'bg-orange-500/20', textColor: 'text-orange-500' };
   } else {
-    return { status: 'closed', label: 'Market Closed', color: 'bg-gray-500' };
+    return { status: 'closed', label: 'Market Closed', color: 'bg-gray-500', bgColor: 'bg-gray-500/20', textColor: 'text-gray-400' };
   }
 };
 
@@ -46,6 +47,7 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [marketStatus, setMarketStatus] = useState(getMarketStatus());
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { theme, toggleTheme } = useTheme();
 
   // Update market status every minute
   useEffect(() => {
@@ -64,20 +66,20 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-gme-dark-100 dark:bg-gme-dark-100 border-b border-gme-dark-300 dark:border-gme-dark-300 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-4 sm:gap-0">
           {/* Left side - Title and status */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-700 rounded-lg flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 bg-gme-gradient rounded-lg flex items-center justify-center shadow-lg gme-glow">
                 <span className="text-white font-bold text-sm">GME</span>
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
                   GameStop Dashboard
                 </h1>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs text-gray-400">
                   <span>NYSE: GME</span>
                   <span className="hidden sm:inline">|</span>
                   <span className="hidden sm:inline">{format(currentTime, 'h:mm a')} ET</span>
@@ -87,25 +89,17 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
 
             {/* Market Status Badge */}
             <div className="flex items-center gap-2">
-              <div className={`flex items-center px-2.5 py-1 rounded-full ${
-                marketStatus.status === 'open' ? 'bg-green-100' :
-                marketStatus.status === 'pre-market' ? 'bg-yellow-100' :
-                marketStatus.status === 'after-hours' ? 'bg-orange-100' : 'bg-gray-100'
-              }`}>
+              <div className={`flex items-center px-2.5 py-1 rounded-full ${marketStatus.bgColor}`}>
                 <div className={`w-2 h-2 rounded-full mr-2 ${marketStatus.color} ${marketStatus.status === 'open' ? 'animate-pulse' : ''}`}></div>
-                <span className={`text-xs font-medium ${
-                  marketStatus.status === 'open' ? 'text-green-700' :
-                  marketStatus.status === 'pre-market' ? 'text-yellow-700' :
-                  marketStatus.status === 'after-hours' ? 'text-orange-700' : 'text-gray-700'
-                }`}>
+                <span className={`text-xs font-medium ${marketStatus.textColor}`}>
                   {marketStatus.label}
                 </span>
               </div>
 
               {isLiveMode && (
-                <div className="flex items-center px-2.5 py-1 rounded-full bg-blue-100">
-                  <div className="w-2 h-2 rounded-full mr-2 bg-blue-500 animate-pulse"></div>
-                  <span className="text-xs font-medium text-blue-700">Live</span>
+                <div className="flex items-center px-2.5 py-1 rounded-full bg-accent-blue/20">
+                  <div className="w-2 h-2 rounded-full mr-2 bg-accent-blue animate-pulse"></div>
+                  <span className="text-xs font-medium text-accent-blue">Live</span>
                 </div>
               )}
             </div>
@@ -119,16 +113,33 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
               </div>
             )}
 
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-gme-dark-300 hover:bg-gme-dark-400 border border-gme-dark-400 transition-all"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+              )}
+            </button>
+
             {onToggleLiveMode && (
               <button
                 onClick={onToggleLiveMode}
                 className={`inline-flex items-center px-3 py-1.5 border text-xs font-medium rounded-lg transition-all ${
                   isLiveMode
-                    ? 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
-                    : 'border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100'
+                    ? 'border-stock-green/50 text-stock-green bg-stock-green/10 hover:bg-stock-green/20'
+                    : 'border-gme-dark-400 text-gray-400 bg-gme-dark-300 hover:bg-gme-dark-400'
                 }`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isLiveMode ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isLiveMode ? 'bg-stock-green' : 'bg-gray-500'}`}></div>
                 {isLiveMode ? 'Live' : 'Manual'}
               </button>
             )}
@@ -136,7 +147,7 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
             <button
               onClick={handleRefresh}
               disabled={isLoading || isRefreshing}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gme-red hover:bg-gme-red-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gme-red disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-gme-red/25"
             >
               {isRefreshing || isLoading ? (
                 <>

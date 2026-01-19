@@ -174,7 +174,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gme-dark">
       <Header
         onRefresh={handleRefresh}
         lastUpdated={lastUpdated}

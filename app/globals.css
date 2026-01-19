@@ -2,20 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Light Theme Variables */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 249, 250, 251;
-  --accent-red: 220, 38, 38;
-  --accent-green: 22, 163, 74;
+  --background: #f8f9fa;
+  --foreground: #111111;
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --muted: #6b7280;
+  --muted-foreground: #9ca3af;
+  --accent: #E31837;
+  --accent-foreground: #ffffff;
+}
+
+/* Dark Theme Variables (GameStop Style) */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card-bg: #111111;
+  --card-border: #222222;
+  --muted: #888888;
+  --muted-foreground: #666666;
+  --accent: #E31837;
+  --accent-foreground: #ffffff;
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background-color: rgb(var(--background-rgb));
+  color: var(--foreground);
+  background-color: var(--background);
   font-feature-settings: 'rlig' 1, 'calt' 1;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Light Mode */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -35,14 +57,43 @@ body {
   background: #94a3b8;
 }
 
-/* Card hover effects */
-.card-hover {
+/* Custom scrollbar - Dark Mode */
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #444444;
+}
+
+/* Card styles */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
   transition: all 0.2s ease-in-out;
 }
 
-.card-hover:hover {
+.card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.dark .card:hover {
+  box-shadow: 0 10px 25px -5px rgba(227, 24, 55, 0.2);
+}
+
+/* GameStop Red Glow Effect */
+.gme-glow {
+  box-shadow: 0 0 20px rgba(227, 24, 55, 0.3);
+}
+
+.dark .gme-glow {
+  box-shadow: 0 0 30px rgba(227, 24, 55, 0.5);
 }
 
 /* Pulse animation for live indicator */
@@ -64,7 +115,7 @@ body {
 /* Stock price animations */
 @keyframes price-up {
   0% {
-    background-color: rgba(22, 163, 74, 0.2);
+    background-color: rgba(0, 200, 83, 0.3);
   }
   100% {
     background-color: transparent;
@@ -73,7 +124,7 @@ body {
 
 @keyframes price-down {
   0% {
-    background-color: rgba(220, 38, 38, 0.2);
+    background-color: rgba(255, 23, 68, 0.3);
   }
   100% {
     background-color: transparent;
@@ -107,16 +158,6 @@ body {
   }
 }
 
-/* Twitter embed styling */
-.twitter-embed-container {
-  border-radius: 0.5rem;
-  overflow: hidden;
-}
-
-.twitter-embed-container iframe {
-  border-radius: 0.5rem !important;
-}
-
 /* Line clamp utilities */
 .line-clamp-2 {
   display: -webkit-box;
@@ -132,15 +173,15 @@ body {
   overflow: hidden;
 }
 
-/* Gradient text */
+/* Gradient text - GameStop Red */
 .gradient-text {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: linear-gradient(135deg, #E31837 0%, #FF1F43 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Loading shimmer effect */
+/* Loading shimmer effect - Light */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -161,10 +202,21 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
+/* Loading shimmer - Dark */
+.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    #1a1a1a 25%,
+    #222222 50%,
+    #1a1a1a 75%
+  );
+  background-size: 200% 100%;
+}
+
 /* Focus states */
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #E31837;
   outline-offset: 2px;
 }
 
@@ -180,6 +232,95 @@ a:focus-visible {
   transition: none !important;
 }
 
+/* GameStop branded elements */
+.gme-button {
+  @apply bg-gme-red hover:bg-gme-red-dark text-white font-medium rounded-lg transition-all;
+}
+
+.gme-button:hover {
+  box-shadow: 0 4px 15px rgba(227, 24, 55, 0.4);
+}
+
+/* Dark mode card backgrounds */
+.dark .bg-white {
+  background-color: #111111;
+}
+
+.dark .bg-gray-50 {
+  background-color: #0a0a0a;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1a1a1a;
+}
+
+/* Dark mode text colors */
+.dark .text-gray-900 {
+  color: #ffffff;
+}
+
+.dark .text-gray-800 {
+  color: #f0f0f0;
+}
+
+.dark .text-gray-700 {
+  color: #e0e0e0;
+}
+
+.dark .text-gray-600 {
+  color: #b0b0b0;
+}
+
+.dark .text-gray-500 {
+  color: #888888;
+}
+
+.dark .text-gray-400 {
+  color: #666666;
+}
+
+/* Dark mode borders */
+.dark .border-gray-200 {
+  border-color: #222222;
+}
+
+.dark .border-gray-300 {
+  border-color: #333333;
+}
+
+/* Dark mode hover states */
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1a1a1a;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #222222;
+}
+
+/* Dark mode shadows */
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Recharts dark mode */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: #222222;
+}
+
+.dark .recharts-text {
+  fill: #888888;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+}
+
 /* Print styles */
 @media print {
   .no-print {
@@ -188,6 +329,7 @@ a:focus-visible {
 
   body {
     background: white;
+    color: black;
   }
 
   .shadow-md {
