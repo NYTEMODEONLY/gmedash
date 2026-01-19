@@ -33,14 +33,14 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
 
   if (isLoading) {
     return (
-      <div className="bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gme-dark-300">
+      <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
         <div className="animate-pulse">
-          <div className="h-4 bg-gme-dark-300 rounded w-1/4 mb-4"></div>
-          <div className="h-10 bg-gme-dark-300 rounded w-1/2 mb-4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gme-dark-300 rounded w-1/4 mb-4"></div>
+          <div className="h-10 bg-gray-200 dark:bg-gme-dark-300 rounded w-1/2 mb-4"></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gme-dark-300 rounded"></div>
-            <div className="h-4 bg-gme-dark-300 rounded w-3/4"></div>
-            <div className="h-4 bg-gme-dark-300 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gme-dark-300 rounded"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gme-dark-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gme-dark-300 rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -49,13 +49,13 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
 
   if (!stockData) {
     return (
-      <div className="bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gme-dark-300">
+      <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
         <div className="text-center text-gray-500 py-8">
-          <svg className="mx-auto h-12 w-12 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-white">No Data Available</h3>
-          <p className="mt-1 text-sm text-gray-500">Unable to fetch stock data</p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Data Available</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Unable to fetch stock data</p>
         </div>
       </div>
     );
@@ -70,15 +70,15 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
   const currentPosition = dayRange > 0 ? ((stockData.price - stockData.low) / dayRange) * 100 : 50;
 
   return (
-    <div className="bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gme-dark-300">
+    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-white">{stockData.symbol}</h2>
-            <span className="text-xs px-2 py-0.5 bg-gme-dark-300 text-gray-400 rounded-full">NYSE</span>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{stockData.symbol}</h2>
+            <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gme-dark-300 text-gray-600 dark:text-gray-400 rounded-full">NYSE</span>
           </div>
-          <p className="text-sm text-gray-500">GameStop Corp.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">GameStop Corp.</p>
         </div>
         <div className={`px-3 py-1.5 rounded-lg text-sm font-semibold border ${changeBgColor} ${changeColor}`}>
           {isPositive ? '+' : ''}{stockData.changePercent}
@@ -88,9 +88,9 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
       {/* Price */}
       <div className={`mb-6 p-4 rounded-lg transition-colors ${
         priceFlash === 'up' ? 'bg-stock-green/20' :
-        priceFlash === 'down' ? 'bg-stock-red/20' : 'bg-gme-dark-200'
+        priceFlash === 'down' ? 'bg-stock-red/20' : 'bg-gray-50 dark:bg-gme-dark-200'
       }`}>
-        <div className="text-4xl font-bold text-white mb-1">
+        <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
           ${stockData.price.toFixed(2)}
         </div>
         <div className={`text-lg font-medium ${changeColor} flex items-center gap-2`}>
@@ -109,17 +109,17 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
 
       {/* Day Range Slider */}
       <div className="mb-6">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
           <span>Day Range</span>
           <span>${stockData.low.toFixed(2)} - ${stockData.high.toFixed(2)}</span>
         </div>
-        <div className="relative h-2 bg-gme-dark-300 rounded-full overflow-hidden">
+        <div className="relative h-2 bg-gray-200 dark:bg-gme-dark-300 rounded-full overflow-hidden">
           <div
             className="absolute h-full bg-gradient-to-r from-stock-red via-yellow-500 to-stock-green rounded-full"
             style={{ width: '100%' }}
           />
           <div
-            className="absolute w-3 h-3 bg-white rounded-full shadow-md -top-0.5 transform -translate-x-1/2"
+            className="absolute w-3 h-3 bg-white dark:bg-white rounded-full shadow-md -top-0.5 transform -translate-x-1/2 border border-gray-300 dark:border-transparent"
             style={{ left: `${currentPosition}%` }}
           />
         </div>
@@ -127,42 +127,42 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gme-dark-200 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Open</div>
-          <div className="text-sm font-semibold text-white">${stockData.open.toFixed(2)}</div>
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Open</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-white">${stockData.open.toFixed(2)}</div>
         </div>
-        <div className="bg-gme-dark-200 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Prev Close</div>
-          <div className="text-sm font-semibold text-white">${stockData.previousClose.toFixed(2)}</div>
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Prev Close</div>
+          <div className="text-sm font-semibold text-gray-900 dark:text-white">${stockData.previousClose.toFixed(2)}</div>
         </div>
-        <div className="bg-gme-dark-200 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Day High</div>
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Day High</div>
           <div className="text-sm font-semibold text-stock-green">${stockData.high.toFixed(2)}</div>
         </div>
-        <div className="bg-gme-dark-200 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Day Low</div>
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Day Low</div>
           <div className="text-sm font-semibold text-stock-red">${stockData.low.toFixed(2)}</div>
         </div>
       </div>
 
       {/* Volume */}
-      <div className="mt-4 pt-4 border-t border-gme-dark-300">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-500">Volume</span>
-          <span className="text-sm font-semibold text-white">
+          <span className="text-sm text-gray-500 dark:text-gray-400">Volume</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
             {parseInt(stockData.volume).toLocaleString()}
           </span>
         </div>
       </div>
 
       {/* Quick Links */}
-      <div className="mt-4 pt-4 border-t border-gme-dark-300">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex flex-wrap gap-2">
           <a
             href="https://finance.yahoo.com/quote/GME"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-full hover:bg-purple-500/30 transition-colors"
+            className="text-xs px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded-full hover:bg-purple-200 dark:hover:bg-purple-500/30 transition-colors"
           >
             Yahoo Finance
           </a>
@@ -170,7 +170,7 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
             href="https://www.tradingview.com/symbols/NYSE-GME/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-full hover:bg-blue-500/30 transition-colors"
+            className="text-xs px-2.5 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors"
           >
             TradingView
           </a>
@@ -182,13 +182,13 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
         <div className="mt-3 flex items-center justify-between text-xs">
           <span className={`px-2 py-0.5 rounded ${
             stockData.source === 'finnhub' ? 'bg-stock-green/20 text-stock-green' :
-            stockData.source === 'yahoo' ? 'bg-purple-500/20 text-purple-400' :
-            'bg-gme-dark-300 text-gray-500'
+            stockData.source === 'yahoo' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
+            'bg-gray-100 dark:bg-gme-dark-300 text-gray-500 dark:text-gray-400'
           }`}>
             {stockData.source}
           </span>
           {stockData.stale && (
-            <span className="text-amber-500">Data may be stale</span>
+            <span className="text-amber-600 dark:text-amber-500">Data may be stale</span>
           )}
         </div>
       )}

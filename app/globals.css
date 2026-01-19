@@ -70,7 +70,7 @@ body {
   background: #444444;
 }
 
-/* Card styles */
+/* Card styles - Enhanced elevation system */
 .card {
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -78,13 +78,24 @@ body {
   transition: all 0.2s ease-in-out;
 }
 
-.card:hover {
+/* Light mode card shadows - Subtle, clean elevation */
+:root .card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+:root .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+/* Dark mode card shadows - Deeper, with subtle red glow */
+.dark .card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dark .card:hover {
-  box-shadow: 0 10px 25px -5px rgba(227, 24, 55, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(227, 24, 55, 0.15);
 }
 
 /* GameStop Red Glow Effect */
@@ -213,11 +224,42 @@ body {
   background-size: 200% 100%;
 }
 
-/* Focus states */
+/* Focus states - Enhanced for accessibility */
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid #E31837;
   outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Light mode specific focus ring */
+:root button:focus-visible,
+:root a:focus-visible {
+  box-shadow: 0 0 0 3px rgba(227, 24, 55, 0.25);
+}
+
+/* Dark mode specific focus ring */
+.dark button:focus-visible,
+.dark a:focus-visible {
+  box-shadow: 0 0 0 3px rgba(227, 24, 55, 0.4);
+}
+
+/* Skip to main content link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #E31837;
+  color: white;
+  padding: 8px 16px;
+  z-index: 100;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
 }
 
 /* Smooth transitions */
@@ -297,9 +339,26 @@ a:focus-visible {
   background-color: #222222;
 }
 
-/* Dark mode shadows */
+/* Light mode shadows - Refined */
+:root .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+:root .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+}
+
+:root .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode shadows - Deep, immersive */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 .dark .shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
 }
 
 .dark .shadow-lg {
@@ -321,6 +380,41 @@ a:focus-visible {
   border-color: #333333 !important;
 }
 
+/* Reduced motion preference - Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-spin,
+  .animate-pulse-dot,
+  .animate-glow {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --card-border: #000000;
+  }
+
+  .dark {
+    --card-border: #ffffff;
+  }
+
+  button,
+  a {
+    text-decoration: underline;
+  }
+}
+
 /* Print styles */
 @media print {
   .no-print {
@@ -336,4 +430,35 @@ a:focus-visible {
     box-shadow: none;
     border: 1px solid #e5e7eb;
   }
+
+  .dark {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(227, 24, 55, 0.3);
+  color: inherit;
+}
+
+.dark ::selection {
+  background-color: rgba(227, 24, 55, 0.5);
+}
+
+/* Smooth color transitions for theme switching */
+html {
+  color-scheme: light dark;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Improve text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }

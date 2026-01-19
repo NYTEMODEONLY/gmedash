@@ -8,6 +8,44 @@ const RSS_FEEDS = {
   sec: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326380&type=8-K&dateb=&owner=include&count=10&output=atom',
 };
 
+// Helper function to decode HTML entities
+const decodeHTMLEntities = (text: string): string => {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+};
+
+// Helper function to strip HTML tags and clean text
+const stripHTMLAndClean = (text: string): string => {
+  // First decode HTML entities (so &lt;a&gt; becomes <a>)
+  let cleaned = decodeHTMLEntities(text);
+
+  // Remove CDATA wrappers
+  cleaned = cleaned.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+
+  // Remove all HTML tags (including multiline)
+  cleaned = cleaned.replace(/<[^>]*>/g, '');
+
+  // Remove any remaining HTML-like patterns (handles malformed tags)
+  cleaned = cleaned.replace(/<[^>]*$/g, ''); // Unclosed tags at end
+  cleaned = cleaned.replace(/^[^<]*>/g, ''); // Unclosed tags at start
+
+  // Clean up whitespace
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+  // If still contains URL patterns from stripped anchor tags, remove them
+  cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, '').trim();
+
+  return cleaned;
+};
+
 // Utility function to parse RSS XML
 const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
   const articles: any[] = [];
@@ -26,31 +64,19 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
       const linkMatch = itemContent.match(/<link[^>]*>([^<]*)<\/link>|<link[^>]*href="([^"]+)"/i);
       const pubDateMatch = itemContent.match(/<pubDate[^>]*>(.*?)<\/pubDate>|<published[^>]*>(.*?)<\/published>|<updated[^>]*>(.*?)<\/updated>/i);
 
-      let title = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim() : '';
+      // Process title - decode entities then strip any HTML
+      let title = titleMatch ? titleMatch[1] : '';
+      title = stripHTMLAndClean(title);
+
+      // Process description - decode entities then strip all HTML
       let description = '';
       if (descMatch) {
-        description = (descMatch[1] || descMatch[2] || descMatch[3] || '')
-          .replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
-          .replace(/<[^>]+>/g, '')
-          .trim();
+        const rawDesc = descMatch[1] || descMatch[2] || descMatch[3] || '';
+        description = stripHTMLAndClean(rawDesc);
       }
+
       let link = linkMatch ? (linkMatch[1] || linkMatch[2]).trim() : '';
       const pubDate = pubDateMatch ? (pubDateMatch[1] || pubDateMatch[2] || pubDateMatch[3]) : '';
-
-      // Decode HTML entities
-      title = title
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
-
-      description = description
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
 
       // Filter for GameStop/GME related content
       const isRelevant =
