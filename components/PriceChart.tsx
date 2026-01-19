@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -30,7 +30,6 @@ const periods = [
 ];
 
 export default function PriceChart({ data, isLoading, onPeriodChange, selectedPeriod }: PriceChartProps) {
-  const [hoveredData, setHoveredData] = useState<any>(null);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
@@ -129,7 +128,6 @@ export default function PriceChart({ data, isLoading, onPeriodChange, selectedPe
               left: 20,
               bottom: 5,
             }}
-            onMouseMove={(data) => setHoveredData(data)}
           >
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
@@ -165,16 +163,20 @@ export default function PriceChart({ data, isLoading, onPeriodChange, selectedPe
         </ResponsiveContainer>
       </div>
 
-      {hoveredData && (
-        <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
+        <div className="flex items-center justify-between mb-1">
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            <span className="font-medium">Current Period:</span> {selectedPeriod}
+            <span className="font-medium">Period:</span> {selectedPeriod}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-300">
-            <span className="font-medium">Data Points:</span> {chartData.length}
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {chartData.length} data points
           </div>
         </div>
-      )}
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gme-dark-300">
+          <span><span className="font-medium">Source:</span> Yahoo Finance</span>
+          <span>Historical data (end of day)</span>
+        </div>
+      </div>
     </div>
   );
 }

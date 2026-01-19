@@ -127,22 +127,27 @@ export default function SECFilings({ filings, isLoading }: SECFilingsProps) {
       )}
 
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium">Form Types:</span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium">Source:</span> SEC EDGAR Database
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Auto-refresh: 10 min
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2">
           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gme-red/10 text-gme-red dark:bg-gme-red/20">
-            10-K (Annual Report)
+            10-K (Annual)
           </span>
           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400">
-            10-Q (Quarterly Report)
+            10-Q (Quarterly)
           </span>
           <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-stock-green/10 text-stock-green dark:bg-stock-green/20">
-            8-K (Current Report)
+            8-K (Current)
           </span>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          SEC filings are official documents submitted to the Securities and Exchange Commission.
+          New filings appear within minutes of SEC submission.
         </div>
       </div>
     </div>

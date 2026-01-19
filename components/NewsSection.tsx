@@ -95,11 +95,16 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       )}
 
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          <span className="font-medium">Source:</span> NewsAPI - Latest GameStop and GME related news
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium">Sources:</span> Yahoo Finance RSS, Google News
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Auto-refresh: 5 min
+          </div>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Articles are automatically updated and sorted by publication date.
+          News may have 15-60 min delay from original publication due to RSS aggregation.
         </div>
       </div>
     </div>

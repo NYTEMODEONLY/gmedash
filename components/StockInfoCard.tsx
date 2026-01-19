@@ -177,21 +177,25 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
         </div>
       </div>
 
-      {/* Data Source */}
-      {stockData.source && (
-        <div className="mt-3 flex items-center justify-between text-xs">
+      {/* Data Source & Timing */}
+      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gme-dark-300">
+        <div className="flex items-center justify-between text-xs">
           <span className={`px-2 py-0.5 rounded ${
             stockData.source === 'finnhub' ? 'bg-stock-green/20 text-stock-green' :
             stockData.source === 'yahoo' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
             'bg-gray-100 dark:bg-gme-dark-300 text-gray-500 dark:text-gray-400'
           }`}>
-            {stockData.source}
+            {stockData.source || 'Yahoo Finance'}
           </span>
-          {stockData.stale && (
-            <span className="text-amber-600 dark:text-amber-500">Data may be stale</span>
-          )}
+          <span className="text-gray-500 dark:text-gray-400">
+            {stockData.stale ? (
+              <span className="text-amber-600 dark:text-amber-500">Data may be stale</span>
+            ) : (
+              'Live: 30 sec refresh'
+            )}
+          </span>
         </div>
-      )}
+      </div>
     </div>
   );
 }
