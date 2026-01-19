@@ -150,7 +150,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.className} bg-gme-dark dark:bg-gme-dark min-h-screen antialiased`}>
+      <body className={`${inter.className} bg-gme-light-100 dark:bg-gme-dark min-h-screen antialiased transition-colors duration-200`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

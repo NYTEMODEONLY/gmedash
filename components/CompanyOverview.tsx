@@ -61,15 +61,15 @@ export default function CompanyOverview() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-6"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gme-dark-300 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gme-dark-300 rounded w-full mb-6"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
               <div key={i}>
-                <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gme-dark-300 rounded w-1/2 mb-2"></div>
+                <div className="h-5 bg-gray-200 dark:bg-gme-dark-300 rounded w-3/4"></div>
               </div>
             ))}
           </div>
@@ -83,16 +83,16 @@ export default function CompanyOverview() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-14 h-14 bg-gradient-to-br from-gme-red to-gme-red-dark rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">GME</span>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{companyInfo.name}</h2>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{companyInfo.name}</h2>
+            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
               <span>{companyInfo.exchange}: {companyInfo.symbol}</span>
               <span>•</span>
               <span>{companyInfo.sector}</span>
@@ -103,7 +103,7 @@ export default function CompanyOverview() {
           href={companyInfo.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"
         >
           Website
           <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,31 +113,31 @@ export default function CompanyOverview() {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
         {companyInfo.description}
       </p>
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Market Cap</div>
-          <div className="text-lg font-semibold text-gray-900">{companyInfo.marketCapFormatted}</div>
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Market Cap</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-white">{companyInfo.marketCapFormatted}</div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">P/E Ratio</div>
-          <div className="text-lg font-semibold text-gray-900">
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">P/E Ratio</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-white">
             {companyInfo.peRatio ? companyInfo.peRatio.toFixed(2) : 'N/A'}
           </div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">EPS</div>
-          <div className="text-lg font-semibold text-gray-900">
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-white">
             {companyInfo.eps ? `$${companyInfo.eps.toFixed(2)}` : 'N/A'}
           </div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Avg Volume</div>
-          <div className="text-lg font-semibold text-gray-900">
+        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Volume</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-white">
             {companyInfo.avgVolume ? formatNumber(companyInfo.avgVolume) : 'N/A'}
           </div>
         </div>
@@ -146,49 +146,49 @@ export default function CompanyOverview() {
       {/* 52-Week Range */}
       {companyInfo.fiftyTwoWeekHigh && companyInfo.fiftyTwoWeekLow ? (
         <div className="mb-6">
-          <div className="flex justify-between text-xs text-gray-500 mb-2">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-2">
             <span>52-Week Range</span>
             <span>${companyInfo.fiftyTwoWeekLow.toFixed(2)} - ${companyInfo.fiftyTwoWeekHigh.toFixed(2)}</span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full" style={{ width: '100%' }}></div>
+          <div className="h-2 bg-gray-200 dark:bg-gme-dark-300 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-stock-red via-yellow-400 to-stock-green rounded-full" style={{ width: '100%' }}></div>
           </div>
         </div>
       ) : (
         <div className="mb-6">
-          <div className="text-xs text-gray-500 mb-2">52-Week Range</div>
-          <div className="text-sm text-gray-400">Data unavailable</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">52-Week Range</div>
+          <div className="text-sm text-gray-400 dark:text-gray-500">Data unavailable</div>
         </div>
       )}
 
       {/* Additional Info */}
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">CEO</span>
-            <span className="text-sm font-medium text-gray-900">{companyInfo.ceo}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">CEO</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.ceo}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Headquarters</span>
-            <span className="text-sm font-medium text-gray-900">{companyInfo.headquarters}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Headquarters</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.headquarters}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Founded</span>
-            <span className="text-sm font-medium text-gray-900">{companyInfo.founded}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Founded</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.founded}</span>
           </div>
         </div>
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Employees</span>
-            <span className="text-sm font-medium text-gray-900">~{companyInfo.employees.toLocaleString()}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Employees</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">~{companyInfo.employees.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Industry</span>
-            <span className="text-sm font-medium text-gray-900">{companyInfo.industry}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Industry</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.industry}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Beta</span>
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm text-gray-500 dark:text-gray-400">Beta</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {companyInfo.beta ? companyInfo.beta.toFixed(2) : 'N/A'}
             </span>
           </div>
@@ -197,16 +197,16 @@ export default function CompanyOverview() {
 
       {/* Shares Info */}
       {companyInfo.sharesOutstanding && companyInfo.sharesOutstanding > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-gray-500">Shares Outstanding</div>
-              <div className="text-sm font-semibold text-gray-900">{formatNumber(companyInfo.sharesOutstanding)}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Shares Outstanding</div>
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">{formatNumber(companyInfo.sharesOutstanding)}</div>
             </div>
             {companyInfo.floatShares && (
               <div className="text-right">
-                <div className="text-xs text-gray-500">Float</div>
-                <div className="text-sm font-semibold text-gray-900">{formatNumber(companyInfo.floatShares)}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Float</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-white">{formatNumber(companyInfo.floatShares)}</div>
               </div>
             )}
           </div>
@@ -215,26 +215,26 @@ export default function CompanyOverview() {
 
       {/* Data Source Indicator */}
       {companyInfo.dataSource && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
               Data source: {companyInfo.dataSource}
             </span>
             {companyInfo.message && (
-              <span className="text-xs text-amber-600">{companyInfo.message}</span>
+              <span className="text-xs text-amber-600 dark:text-amber-500">{companyInfo.message}</span>
             )}
           </div>
         </div>
       )}
 
       {/* Quick Links */}
-      <div className="mt-6 pt-4 border-t border-gray-100">
+      <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex flex-wrap gap-2">
           <a
             href="https://news.gamestop.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
           >
             Investor Relations
           </a>
@@ -242,7 +242,7 @@ export default function CompanyOverview() {
             href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326380&type=&dateb=&owner=include&count=40"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-colors"
           >
             SEC Filings
           </a>
@@ -250,7 +250,7 @@ export default function CompanyOverview() {
             href="https://finance.yahoo.com/quote/GME"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-colors"
           >
             Yahoo Finance
           </a>

@@ -2,42 +2,42 @@
 
 export default function Footer() {
   return (
-    <footer className="bg-gme-dark-100 border-t border-gme-dark-300 mt-8">
+    <footer className="bg-gray-50 dark:bg-gme-dark-100 border-t border-gray-200 dark:border-gme-dark-300 mt-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">About This Dashboard</h3>
-            <p className="text-sm text-gray-400 mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">About This Dashboard</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Real-time GameStop (GME) financial data dashboard sourced directly from official exchanges,
               regulatory filings, and verified financial data providers.
             </p>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 dark:text-gray-500">
               <p>Data sources: Yahoo Finance, SEC EDGAR, FINRA</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">Important Disclaimers</h3>
-            <div className="text-sm text-gray-400 space-y-2">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Important Disclaimers</h3>
+            <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
               <p>
-                <strong className="text-gray-300">Not Financial Advice:</strong> This dashboard is for informational purposes only
+                <strong className="text-gray-700 dark:text-gray-300">Not Financial Advice:</strong> This dashboard is for informational purposes only
                 and should not be considered as financial advice.
               </p>
               <p>
-                <strong className="text-gray-300">Data Accuracy:</strong> All data is sourced directly from official financial institutions
+                <strong className="text-gray-700 dark:text-gray-300">Data Accuracy:</strong> All data is sourced directly from official financial institutions
                 and regulatory bodies. Real-time data may have minor delays.
               </p>
               <p>
-                <strong className="text-gray-300">Investment Risk:</strong> Stock trading involves substantial risk of loss.
+                <strong className="text-gray-700 dark:text-gray-300">Investment Risk:</strong> Stock trading involves substantial risk of loss.
                 Past performance does not guarantee future results.
               </p>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">Quick Links</h3>
-            <ul className="text-sm text-gray-400 space-y-2">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Quick Links</h3>
+            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
               <li>
                 <a
                   href="https://www.gamestop.com"
@@ -112,14 +112,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gme-dark-300">
+        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gme-dark-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-gray-500 mb-4 md:mb-0">
+            <div className="text-sm text-gray-500 dark:text-gray-500 mb-4 md:mb-0">
               <p>&copy; {new Date().getFullYear()} GME Dashboard. Built with Next.js and Tailwind CSS.</p>
               <p className="mt-1">
                 a <a href="https://nytemode.com" target="_blank" rel="noopener noreferrer" className="text-gme-red hover:underline">NYTEMODE</a> project
               </p>
-              <p className="mt-1 text-xs text-gray-600">
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-600">
                 This is not an official GameStop product. Data provided by third-party APIs.
               </p>
             </div>
@@ -128,7 +128,7 @@ export default function Footer() {
                 href="https://github.com/NYTEMODEONLY/gmedash"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-500 hover:text-white transition-colors"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 <span className="sr-only">GitHub</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
