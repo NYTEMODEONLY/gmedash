@@ -254,6 +254,14 @@ export default function CompanyOverview() {
           >
             Yahoo Finance
           </a>
+          <a
+            href="https://www.drsgme.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-stock-green/10 text-stock-green hover:bg-stock-green/20 transition-colors"
+          >
+            WhyDRS.org
+          </a>
         </div>
       </div>
     </div>
