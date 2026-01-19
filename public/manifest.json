@@ -1,0 +1,16 @@
+{
+  "name": "GameStop (GME) Dashboard",
+  "short_name": "GME Dashboard",
+  "description": "Real-time GameStop stock data, charts, news, and SEC filings dashboard",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
