@@ -1,6 +1,8 @@
 # GameStop (GME) Dashboard
 
-A comprehensive, real-time dashboard for GameStop (GME) investors. View live stock data, SEC filings, Ryan Cohen tweets, press releases, and company news all in one place.
+A comprehensive, real-time dashboard for GameStop (GME) investors. View live stock data, historical charts, SEC filings, company news, and more - all in one elegant interface with full dark/light mode support.
+
+**Live Demo:** [gmedash.vercel.app](https://gmedash.vercel.app)
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
@@ -10,52 +12,75 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 ## Features
 
 ### Live Stock Data
-- **Real-time Stock Price** - Updates every 30 seconds during market hours
-- **Market Status Indicator** - Pre-market, Open, After-hours, Closed
-- **Price Flash Animation** - Visual feedback when price changes
-- **Day Range Indicator** - Visual slider showing current price position
+- **Real-time Stock Price** - Live price updates with visual flash animation on changes
+- **Market Status Indicator** - Pre-market, Open, After-hours, Closed status
+- **Day Range Slider** - Visual indicator showing current price position within daily range
+- **Key Metrics** - Open, Close, High, Low, Volume, Previous Close
 
 ### Charts & Analytics
-- **Price Charts** - Interactive historical charts (1W, 1M, 3M, 6M, 1Y, 5Y)
-- **Volume Analysis** - Trading volume visualization
-- **Short Interest** - Track short positions over time
+- **Interactive Price Chart** - Historical price data with period selection (1M, 3M, 6M, 1Y)
+- **Volume Analysis** - Trading volume visualization with statistics
+- **Theme-Aware Charts** - Charts adapt colors for optimal visibility in both themes
 
 ### Company Information
-- **Company Overview** - Key metrics, financials, company details
-- **CEO, Headquarters, Industry** - Essential company information
-- **Market Cap, P/E Ratio, EPS, Beta** - Financial indicators
-- **52-Week Range** - Visual price range indicator
+- **Company Overview** - Business description, sector, industry
+- **Key Statistics** - Market cap, P/E ratio, EPS, dividend yield
+- **Quick Links** - Direct links to Yahoo Finance, TradingView
 
-### News & Social
-- **Ryan Cohen Twitter Feed** - Embedded timeline from @ryancohen
-- **Latest News** - Aggregated GME news from Yahoo Finance & Google News
+### News & Updates
+- **Latest News** - Aggregated GME news from Yahoo Finance & Google News RSS
 - **Press Releases** - Official GameStop investor relations announcements
-
-### Regulatory Filings
 - **SEC Filings** - 10-K, 10-Q, 8-K documents from SEC EDGAR
-- **Upcoming Events** - Earnings dates, annual meetings, filing deadlines
+- **Upcoming Events** - Earnings dates, annual meetings, key dates
+
+### User Experience
+- **Dark/Light Mode** - Full theme support with smooth transitions
+- **Responsive Design** - Optimized for desktop, tablet, and mobile
+- **Accessibility** - Focus states, reduced motion support, high contrast mode
+- **Live Mode Toggle** - Switch between live updates and manual refresh
+
+---
+
+## Premium Features (API Access Required)
+
+Some features require paid API subscriptions to display live data. These are marked as "Premium Features" in the dashboard and link to free alternatives:
+
+| Feature | Required API | Why It's Gated | Free Alternative |
+|---------|--------------|----------------|------------------|
+| **Short Interest Data** | Finnhub, ORTEX, or S3 Partners | Real-time short data requires expensive institutional feeds | [FINRA Short Sale Data](https://www.finra.org/finra-data/browse-catalog/short-sale-data) |
+| **Ryan Cohen Twitter Feed** | X/Twitter API (Basic tier: $100/mo) | Twitter API is no longer free | [View on X directly](https://twitter.com/ryancohen) |
+| **Options Flow** | CBOE, Unusual Whales, or similar | Real-time options data requires premium subscriptions | Public options chains on broker platforms |
+
+> **Want these features enabled?** Consider [sponsoring the developer](https://github.com/NYTEMODEONLY/gmedash) to help cover premium API costs.
+
+---
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts
+- **Styling**: Tailwind CSS with custom theme system
+- **Charts**: Recharts (responsive, theme-aware)
 - **HTTP Client**: Axios
 - **Date Utilities**: date-fns
+- **Theming**: Custom React Context with system preference detection
 
 ## Data Sources
 
-| Data Type | Source | API Key Required |
-|-----------|--------|------------------|
-| Stock Quotes | Yahoo Finance API | No |
-| Historical Data | Yahoo Finance API | No |
-| SEC Filings | SEC EDGAR API | No |
-| News | Yahoo Finance RSS, Google News RSS | No |
-| Press Releases | GameStop IR, SEC 8-K Filings | No |
-| Twitter | Twitter Embed Widget | No |
+| Data Type | Source | Cost | Status |
+|-----------|--------|------|--------|
+| Stock Quotes | Yahoo Finance API | Free | Active |
+| Historical Data | Yahoo Finance API | Free | Active |
+| News | Yahoo Finance RSS, Google News RSS | Free | Active |
+| SEC Filings | SEC EDGAR Database | Free | Active |
+| Press Releases | GameStop IR / SEC 8-K | Free | Active |
+| Company Info | Yahoo Finance API | Free | Active |
+| Upcoming Events | Manually curated | Free | Active |
+| Short Interest | Finnhub API | Paid | Premium |
+| Twitter Feed | X/Twitter API | Paid | Premium |
+| Options Flow | Various | Paid | Premium |
 
-**No API keys required!** All data sources use public APIs.
+---
 
 ## Getting Started
 
@@ -66,48 +91,55 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 
 ### Installation
 
-1. Clone the repository:
 ```bash
-git clone <repository-url>
+# Clone the repository
+git clone https://github.com/NYTEMODEONLY/gmedash.git
 cd gmedash
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Run the development server:
-```bash
+# Run the development server
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Deployment to Vercel
+### Environment Variables (Optional)
 
-### Option 1: Vercel CLI
+The dashboard works out of the box with free APIs. For premium features, create a `.env.local` file:
+
+```bash
+# Optional: For premium features
+FINNHUB_API_KEY=your_finnhub_key_here
+TWITTER_BEARER_TOKEN=your_twitter_token_here
+```
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
 
 ```bash
 # Install Vercel CLI
 npm i -g vercel
 
-# Deploy
-vercel
-
-# Production deployment
+# Deploy to production
 vercel --prod
 ```
 
-### Option 2: Git Integration
+Or connect your GitHub repo to [Vercel](https://vercel.com) for automatic deployments.
 
-1. Push your code to GitHub
-2. Import the project in [Vercel Dashboard](https://vercel.com/new)
-3. Vercel will automatically deploy on every push
+### Other Platforms
 
-### Option 3: One-Click Deploy
+Works on any platform supporting Next.js:
+- Netlify
+- Railway
+- AWS Amplify
+- Self-hosted with `npm run build && npm start`
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+---
 
 ## Project Structure
 
@@ -115,49 +147,42 @@ vercel --prod
 gmedash/
 ├── app/
 │   ├── api/                 # API routes
-│   │   ├── stock/          # Stock quote endpoint
-│   │   ├── historical/     # Historical data endpoint
-│   │   ├── news/           # News aggregation endpoint
-│   │   ├── sec/            # SEC filings endpoint
-│   │   ├── twitter/        # Twitter data endpoint
-│   │   ├── press-releases/ # Press releases endpoint
-│   │   ├── company-info/   # Company info endpoint
-│   │   └── events/         # Upcoming events endpoint
-│   ├── globals.css         # Global styles
-│   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Main dashboard page
-│   └── icon.svg            # Favicon
+│   │   ├── stock/          # Live stock quote
+│   │   ├── historical/     # Historical price data
+│   │   ├── news/           # News aggregation
+│   │   ├── sec/            # SEC filings
+│   │   ├── press-releases/ # Press releases
+│   │   ├── company-info/   # Company metrics
+│   │   ├── events/         # Upcoming events
+│   │   ├── short-interest/ # Short data (premium)
+│   │   ├── twitter/        # Twitter feed (premium)
+│   │   └── options-flow/   # Options data (premium)
+│   ├── globals.css         # Global styles & theme
+│   ├── layout.tsx          # Root layout with metadata
+│   └── page.tsx            # Main dashboard
 ├── components/
-│   ├── Header.tsx          # Header with market status
-│   ├── StockInfoCard.tsx   # Live stock price card
+│   ├── Header.tsx          # Header with theme toggle
+│   ├── StockInfoCard.tsx   # Live stock card
 │   ├── CompanyOverview.tsx # Company information
 │   ├── PriceChart.tsx      # Price history chart
 │   ├── VolumeChart.tsx     # Volume chart
-│   ├── ShortingChart.tsx   # Short interest chart
-│   ├── RyanCohenTwitter.tsx# Twitter feed
+│   ├── ShortingChart.tsx   # Short interest (premium)
+│   ├── RyanCohenTwitter.tsx# Twitter feed (premium)
 │   ├── NewsSection.tsx     # News articles
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases
 │   ├── UpcomingEvents.tsx  # Events calendar
-│   └── Footer.tsx          # Footer with links
+│   └── Footer.tsx          # Footer
 ├── lib/
-│   └── api.ts              # API client utilities
+│   ├── api.ts              # API client
+│   ├── ThemeContext.tsx    # Theme provider
+│   └── cache.ts            # Caching utilities
 └── public/
-    ├── icon.svg            # Public favicon
+    ├── icon.svg            # Favicon
     └── manifest.json       # PWA manifest
 ```
 
-## API Endpoints
-
-| Endpoint | Description | Update Frequency |
-|----------|-------------|------------------|
-| `/api/stock` | Live stock quote | 30 seconds |
-| `/api/historical` | Historical price data | On demand |
-| `/api/news` | Aggregated news | 5 minutes |
-| `/api/sec` | SEC filings | 10 minutes |
-| `/api/press-releases` | Press releases | 15 minutes |
-| `/api/company-info` | Company metrics | On demand |
-| `/api/events` | Upcoming events | On demand |
+---
 
 ## Browser Support
 
@@ -166,17 +191,21 @@ gmedash/
 - Safari 14+
 - Edge 90+
 
-## Performance
+## Accessibility
 
-- First Load JS: ~140 kB (page) + 82 kB (shared)
-- Static generation with dynamic API routes
-- Responsive design for all screen sizes
+- WCAG 2.1 AA compliant contrast ratios
+- Keyboard navigation with visible focus states
+- Reduced motion support (`prefers-reduced-motion`)
+- High contrast mode support (`prefers-contrast`)
+- Screen reader friendly
+
+---
 
 ## Legal Disclaimer
 
-This dashboard is for informational purposes only and should not be considered financial advice. All data is sourced from third-party APIs and may have delays. Stock trading involves substantial risk of loss. Past performance does not guarantee future results.
+This dashboard is for **informational purposes only** and should not be considered financial advice. All data is sourced from third-party APIs and may have delays. Stock trading involves substantial risk of loss. Past performance does not guarantee future results.
 
-This is not an official GameStop product. GameStop and the GameStop logo are trademarks of GameStop Corp.
+**This is not an official GameStop product.** GameStop and the GameStop logo are trademarks of GameStop Corp.
 
 ## License
 
@@ -185,6 +214,12 @@ MIT License - See LICENSE file for details.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Ways to Contribute
+- Report bugs or request features via [Issues](https://github.com/NYTEMODEONLY/gmedash/issues)
+- Submit PRs for bug fixes or new features
+- Sponsor the project to help cover premium API costs
+- Share the project with other GME investors
 
 ---
 
