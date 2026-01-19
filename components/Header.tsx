@@ -88,20 +88,11 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
             </div>
 
             {/* Market Status Badge */}
-            <div className="flex items-center gap-2">
-              <div className={`flex items-center px-2.5 py-1 rounded-full ${marketStatus.bgColor}`}>
-                <div className={`w-2 h-2 rounded-full mr-2 ${marketStatus.color} ${marketStatus.status === 'open' ? 'animate-pulse' : ''}`}></div>
-                <span className={`text-xs font-medium ${marketStatus.textColor}`}>
-                  {marketStatus.label}
-                </span>
-              </div>
-
-              {isLiveMode && (
-                <div className="flex items-center px-2.5 py-1 rounded-full bg-accent-blue/20">
-                  <div className="w-2 h-2 rounded-full mr-2 bg-accent-blue animate-pulse"></div>
-                  <span className="text-xs font-medium text-accent-blue">Live</span>
-                </div>
-              )}
+            <div className={`flex items-center px-2.5 py-1 rounded-full ${marketStatus.bgColor}`}>
+              <div className={`w-2 h-2 rounded-full mr-2 ${marketStatus.color} ${marketStatus.status === 'open' ? 'animate-pulse' : ''}`}></div>
+              <span className={`text-xs font-medium ${marketStatus.textColor}`}>
+                {marketStatus.label}
+              </span>
             </div>
           </div>
 

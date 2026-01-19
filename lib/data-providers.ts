@@ -350,6 +350,172 @@ export async function yahooGetMetricsFromChart(symbol: string = 'GME'): Promise<
   }
 }
 
+// Cache for Yahoo crumb (needed for authenticated API calls)
+let yahooCrumb: string | null = null;
+let yahooCookies: string | null = null;
+let yahooCrumbTime: number = 0;
+const CRUMB_TTL = 30 * 60 * 1000; // 30 minutes
+
+async function getYahooCrumb(): Promise<{ crumb: string; cookies: string } | null> {
+  // Return cached crumb if still valid
+  if (yahooCrumb && yahooCookies && Date.now() - yahooCrumbTime < CRUMB_TTL) {
+    return { crumb: yahooCrumb, cookies: yahooCookies };
+  }
+
+  try {
+    // Step 1: Get cookies from the main page
+    const pageResponse = await axios.get('https://finance.yahoo.com/quote/GME', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      maxRedirects: 5,
+    });
+
+    const cookies = pageResponse.headers['set-cookie']?.map((c: string) => c.split(';')[0]).join('; ') || '';
+
+    // Step 2: Get crumb from the crumb endpoint
+    const crumbResponse = await axios.get('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+      timeout: 5000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Cookie': cookies,
+      },
+    });
+
+    const crumb = crumbResponse.data;
+    if (crumb && typeof crumb === 'string') {
+      yahooCrumb = crumb;
+      yahooCookies = cookies;
+      yahooCrumbTime = Date.now();
+      return { crumb, cookies };
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error('Failed to get Yahoo crumb:', error?.message || error);
+    return null;
+  }
+}
+
+export async function yahooGetFullMetrics(symbol: string = 'GME'): Promise<CompanyMetrics | null> {
+  try {
+    // Get crumb for authenticated API access
+    const auth = await getYahooCrumb();
+
+    if (auth) {
+      // Use the quoteSummary endpoint with crumb
+      const response = await axios.get(
+        `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}`,
+        {
+          params: {
+            modules: 'summaryDetail,defaultKeyStatistics,financialData,price',
+            crumb: auth.crumb,
+          },
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Cookie': auth.cookies,
+          },
+        }
+      );
+
+      const result = response.data?.quoteSummary?.result?.[0];
+      if (result) {
+        const summaryDetail = result.summaryDetail || {};
+        const keyStats = result.defaultKeyStatistics || {};
+        const financialData = result.financialData || {};
+        const price = result.price || {};
+
+        const marketCap = price.marketCap?.raw || summaryDetail.marketCap?.raw || null;
+        const peRatio = summaryDetail.trailingPE?.raw || keyStats.trailingPE?.raw || null;
+        const eps = keyStats.trailingEps?.raw || financialData.trailingEps?.raw || null;
+        const beta = summaryDetail.beta?.raw || keyStats.beta?.raw || null;
+        const avgVolume = summaryDetail.averageVolume?.raw || price.averageDailyVolume10Day?.raw || null;
+        const fiftyTwoWeekHigh = summaryDetail.fiftyTwoWeekHigh?.raw || null;
+        const fiftyTwoWeekLow = summaryDetail.fiftyTwoWeekLow?.raw || null;
+        const sharesOutstanding = keyStats.sharesOutstanding?.raw || null;
+        const dividendYield = summaryDetail.dividendYield?.raw || null;
+
+        updateProviderHealth('yahoo', true);
+        return {
+          marketCap,
+          marketCapFormatted: formatMarketCap(marketCap),
+          peRatio,
+          eps,
+          beta,
+          fiftyTwoWeekHigh,
+          fiftyTwoWeekLow,
+          avgVolume,
+          sharesOutstanding,
+          dividendYield,
+          source: 'yahoo',
+        };
+      }
+    }
+
+    // Fallback: Try without crumb (might work for some endpoints)
+    const chartResponse = await axios.get(`${YAHOO_BASE}/chart/${symbol}`, {
+      params: { interval: '1d', range: '1y' },
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
+      },
+    });
+
+    const chartResult = chartResponse.data?.chart?.result?.[0];
+    const meta = chartResult?.meta;
+
+    if (meta) {
+      // Get what we can from chart meta
+      const quotes = chartResult?.indicators?.quote?.[0];
+      let fiftyTwoWeekHigh = meta.fiftyTwoWeekHigh || null;
+      let fiftyTwoWeekLow = meta.fiftyTwoWeekLow || null;
+      const avgVolume = meta.regularMarketVolume || null;
+
+      // Calculate 52-week from historical if not in meta
+      if (quotes?.high && quotes?.low) {
+        const validHighs = quotes.high.filter((h: number | null) => h !== null && h > 0);
+        const validLows = quotes.low.filter((l: number | null) => l !== null && l > 0);
+        if (validHighs.length > 0 && !fiftyTwoWeekHigh) {
+          fiftyTwoWeekHigh = Math.max(...validHighs);
+        }
+        if (validLows.length > 0 && !fiftyTwoWeekLow) {
+          fiftyTwoWeekLow = Math.min(...validLows);
+        }
+      }
+
+      // Calculate market cap if we have price and can estimate shares
+      // GME has approximately 446.5 million shares outstanding as of recent filings
+      const ESTIMATED_SHARES = 446500000;
+      const price = meta.regularMarketPrice;
+      const estimatedMarketCap = price ? price * ESTIMATED_SHARES : null;
+
+      updateProviderHealth('yahoo', true);
+      return {
+        marketCap: estimatedMarketCap,
+        marketCapFormatted: formatMarketCap(estimatedMarketCap),
+        peRatio: null, // Can't calculate without EPS
+        eps: null,
+        beta: null,
+        fiftyTwoWeekHigh,
+        fiftyTwoWeekLow,
+        avgVolume,
+        sharesOutstanding: ESTIMATED_SHARES,
+        dividendYield: null,
+        source: 'yahoo',
+      };
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error('Yahoo full metrics error:', error?.message || error);
+    updateProviderHealth('yahoo', false);
+    return null;
+  }
+}
+
 // ============================================
 // UNIFIED FETCHERS WITH FALLBACK
 // ============================================
@@ -390,7 +556,13 @@ export async function getCompanyMetrics(symbol: string = 'GME'): Promise<Company
     return finnhubMetrics;
   }
 
-  // Fallback: Try to get partial data from Yahoo chart
+  // Fallback: Try to get full data from Yahoo quoteSummary
+  const yahooFullMetrics = await yahooGetFullMetrics(symbol);
+  if (yahooFullMetrics) {
+    return yahooFullMetrics;
+  }
+
+  // Last resort: Try to get partial data from Yahoo chart
   const yahooData = await yahooGetMetricsFromChart(symbol);
   if (yahooData) {
     return {
