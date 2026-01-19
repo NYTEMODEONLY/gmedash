@@ -85,7 +85,7 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
           </p>
           <div className="mt-4 space-y-3">
             <a
-              href="https://www.finra.org/finra-data/browse-catalog/short-sale-data/daily-short-sale-volume-data"
+              href="https://www.finra.org/finra-data/browse-catalog/short-sale-volume-data"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"

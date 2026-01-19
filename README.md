@@ -47,7 +47,7 @@ Some features require paid API subscriptions to display live data. These are mar
 
 | Feature | Required API | Why It's Gated | Free Alternative |
 |---------|--------------|----------------|------------------|
-| **Short Interest Data** | Finnhub, ORTEX, or S3 Partners | Real-time short data requires expensive institutional feeds | [FINRA Short Sale Data](https://www.finra.org/finra-data/browse-catalog/short-sale-data) |
+| **Short Interest Data** | Finnhub, ORTEX, or S3 Partners | Real-time short data requires expensive institutional feeds | [FINRA Short Sale Data](https://www.finra.org/finra-data/browse-catalog/short-sale-volume-data) |
 | **Ryan Cohen Twitter Feed** | X/Twitter API (Basic tier: $100/mo) | Twitter API is no longer free | [View on X directly](https://twitter.com/ryancohen) |
 | **Options Flow** | CBOE, Unusual Whales, or similar | Real-time options data requires premium subscriptions | Public options chains on broker platforms |
 
