@@ -108,6 +108,16 @@ export default function Footer() {
                   WhyDRS.org
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://www.drsgme.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gme-red transition-colors"
+                >
+                  DRSGME.org
+                </a>
+              </li>
             </ul>
           </div>
         </div>
