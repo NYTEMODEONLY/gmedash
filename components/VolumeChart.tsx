@@ -21,8 +21,8 @@ interface VolumeChartProps {
 }
 
 export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   const chartData = useMemo(() => {
     if (!data.length) return [];
