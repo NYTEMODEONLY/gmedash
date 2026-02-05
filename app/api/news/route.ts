@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-// More reliable RSS feeds that focus on GME/GameStop
+// Revalidate every 5 minutes - prevents Vercel from serving stale cached responses
+export const revalidate = 300;
+
+// RSS feeds for GME/GameStop news
 const RSS_FEEDS = {
-  yahoo: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=GME&region=US&lang=en-US',
   google: 'https://news.google.com/rss/search?q=GameStop+GME&hl=en-US&gl=US&ceid=US:en',
-  sec: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001326380&type=8-K&dateb=&owner=include&count=10&output=atom',
+  bing: 'https://www.bing.com/news/search?q=GameStop+GME&format=rss',
 };
 
 // Helper function to decode HTML entities
@@ -56,7 +58,7 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
     let match;
     let count = 0;
 
-    while ((match = itemRegex.exec(xmlText)) && count < 10) {
+    while ((match = itemRegex.exec(xmlText)) && count < 25) {
       const itemContent = match[1] || match[2];
 
       const titleMatch = itemContent.match(/<title[^>]*>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/i);
@@ -95,6 +97,14 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
           }
         }
 
+        // Handle Bing News redirect URLs
+        if (link.includes('bing.com') && link.includes('url=')) {
+          const urlMatch = link.match(/url=([^&]+)/);
+          if (urlMatch) {
+            link = decodeURIComponent(urlMatch[1]);
+          }
+        }
+
         articles.push({
           title: title.substring(0, 200),
           description: description.substring(0, 300) + (description.length > 300 ? '...' : ''),
@@ -112,48 +122,13 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
   return articles;
 };
 
-// Fetch news from Yahoo Finance API (alternative)
-const fetchYahooFinanceNews = async (): Promise<any[]> => {
-  try {
-    const response = await axios.get('https://query1.finance.yahoo.com/v8/finance/chart/GME', {
-      params: {
-        interval: '1d',
-        range: '5d',
-      },
-      timeout: 5000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
-      },
-    });
-
-    // Yahoo chart API doesn't return news, but we can use it to verify the ticker is valid
-    // The actual news comes from RSS
-    return [];
-  } catch (error) {
-    return [];
-  }
-};
-
 export async function GET() {
   try {
     const allArticles: any[] = [];
 
     // Fetch from multiple sources with timeout handling
     const feedPromises = [
-      // Yahoo Finance GME RSS
-      axios.get(RSS_FEEDS.yahoo, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'application/rss+xml, application/xml, text/xml, */*',
-        },
-      }).then(res => parseRSSFeed(res.data, 'Yahoo Finance'))
-        .catch((err) => {
-          console.log('Yahoo Finance RSS failed:', err.message);
-          return [];
-        }),
-
-      // Google News GME search
+      // Google News GME search (primary source)
       axios.get(RSS_FEEDS.google, {
         timeout: 10000,
         headers: {
@@ -163,6 +138,19 @@ export async function GET() {
       }).then(res => parseRSSFeed(res.data, 'Google News'))
         .catch((err) => {
           console.log('Google News RSS failed:', err.message);
+          return [];
+        }),
+
+      // Bing News GME search (secondary source)
+      axios.get(RSS_FEEDS.bing, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        },
+      }).then(res => parseRSSFeed(res.data, 'Bing News'))
+        .catch((err) => {
+          console.log('Bing News RSS failed:', err.message);
           return [];
         }),
     ];
@@ -191,18 +179,21 @@ export async function GET() {
       });
     });
 
+    const headers = {
+      'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
+    };
+
     if (uniqueArticles.length === 0) {
-      // Return a message indicating no news is available
       return NextResponse.json([{
         title: 'Visit Yahoo Finance for Latest GME News',
         description: 'Click to view the latest GameStop news and updates on Yahoo Finance.',
         url: 'https://finance.yahoo.com/quote/GME/news',
         publishedAt: new Date().toISOString(),
         source: { name: 'Yahoo Finance' },
-      }]);
+      }], { headers });
     }
 
-    return NextResponse.json(uniqueArticles.slice(0, 15));
+    return NextResponse.json(uniqueArticles.slice(0, 15), { headers });
 
   } catch (error) {
     console.error('News API error:', error);
@@ -212,6 +203,8 @@ export async function GET() {
       url: 'https://finance.yahoo.com/quote/GME/news',
       publishedAt: new Date().toISOString(),
       source: { name: 'Yahoo Finance' },
-    }]);
+    }], {
+      headers: { 'Cache-Control': 'no-cache' },
+    });
   }
 }

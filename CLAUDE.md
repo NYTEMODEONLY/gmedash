@@ -31,8 +31,9 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 | Source | Purpose | Cache |
 |--------|---------|-------|
 | Yahoo Finance | Stock quotes, historical data | 30s (market open) / 5m (closed) |
-| Yahoo Finance RSS | News aggregation | 5 min |
-| SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) | 10 min |
+| Google News RSS | News aggregation | 5 min |
+| Bing News RSS | News aggregation (secondary) | 5 min |
+| SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) & press releases | 10 min |
 | Finnhub (optional) | Company metrics | 1 hour |
 
 ### Theming System
