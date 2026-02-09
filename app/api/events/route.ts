@@ -9,6 +9,8 @@ interface UpcomingEvent {
   source?: string;
 }
 
+export const dynamic = 'force-dynamic';
+
 // Get estimated earnings date from Yahoo Finance
 const fetchEarningsDate = async (): Promise<UpcomingEvent | null> => {
   try {
@@ -123,6 +125,10 @@ const getAnnualMeetingEstimate = (): UpcomingEvent | null => {
 };
 
 export async function GET(request: NextRequest) {
+  const responseHeaders = {
+    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=300',
+  };
+
   try {
     const events: UpcomingEvent[] = [];
 
@@ -153,19 +159,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         events: [],
         message: 'No upcoming events scheduled. Check GameStop Investor Relations for updates.',
-      });
+      }, { headers: responseHeaders });
     }
 
     return NextResponse.json({
       events: upcomingEvents.slice(0, 5),
       lastUpdated: new Date().toISOString(),
-    });
+    }, { headers: responseHeaders });
 
   } catch (error) {
     console.error('Events API error:', error);
     return NextResponse.json({
       events: [],
       error: 'Unable to fetch upcoming events',
-    }, { status: 200 }); // Return 200 so UI handles gracefully
+    }, { status: 200, headers: responseHeaders }); // Return 200 so UI handles gracefully
   }
 }

@@ -150,18 +150,42 @@ export const createPriceStream = (symbol: string = 'GME', callback: (quote: Stoc
 
 // Market hours checker
 const isMarketOpen = (date: Date): boolean => {
-  const day = date.getDay(); // 0 = Sunday, 6 = Saturday
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(date);
+  const partMap = parts.reduce<Record<string, string>>((acc, part) => {
+    if (part.type !== 'literal') {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+
+  const day = dayMap[partMap.weekday || 'Sun'];
+  const hours = Number(partMap.hour || 0);
+  const minutes = Number(partMap.minute || 0);
   const totalMinutes = hours * 60 + minutes;
-  
-  // Weekend check
+
   if (day === 0 || day === 6) return false;
-  
-  // Market hours: 9:30 AM - 4:00 PM EST (convert to local time would be more accurate)
-  const marketOpen = 9 * 60 + 30; // 9:30 AM in minutes
-  const marketClose = 16 * 60; // 4:00 PM in minutes
-  
+
+  const marketOpen = 9 * 60 + 30;
+  const marketClose = 16 * 60;
+
   return totalMinutes >= marketOpen && totalMinutes < marketClose;
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '@/components/Header';
 import StockInfoCard from '@/components/StockInfoCard';
 import CompanyOverview from '@/components/CompanyOverview';
@@ -49,50 +49,76 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [isLiveMode, setIsLiveMode] = useState(true);
   const [priceStreamCleanup, setPriceStreamCleanup] = useState<(() => void) | null>(null);
+  const lastNewsRefreshRef = useRef<number>(0);
+  const lastSECRefreshRef = useRef<number>(0);
+
+  const NEWS_REFRESH_MS = 5 * 60 * 1000;
+  const SEC_REFRESH_MS = 10 * 60 * 1000;
 
   // Fetch all data
   const fetchAllData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsLoadingStock(true);
+    setIsLoadingHistorical(true);
+    setIsLoadingShorting(true);
+    setIsLoadingNews(true);
+    setIsLoadingSEC(true);
 
-    try {
-      // Fetch stock quote
-      setIsLoadingStock(true);
-      const quote = await getStockQuote();
-      setStockData(quote);
-      setIsLoadingStock(false);
+    const results = await Promise.allSettled([
+      getStockQuote(),
+      getHistoricalData('GME', selectedPeriod),
+      getShortInterest(),
+      getNews(),
+      getSECFilings(),
+    ]);
 
-      // Fetch historical data
-      setIsLoadingHistorical(true);
-      const historical = await getHistoricalData('GME', selectedPeriod);
-      setHistoricalData(historical);
-      setIsLoadingHistorical(false);
+    const [quoteResult, historicalResult, shortResult, newsResult, filingsResult] = results;
+    let hadError = false;
 
-      // Fetch shorting data
-      setIsLoadingShorting(true);
-      const shorting = await getShortInterest();
-      setShortingData(shorting);
-      setIsLoadingShorting(false);
-
-      // Fetch news
-      setIsLoadingNews(true);
-      const news = await getNews();
-      setNewsData(news);
-      setIsLoadingNews(false);
-
-      // Fetch SEC filings
-      setIsLoadingSEC(true);
-      const filings = await getSECFilings();
-      setSecFilings(filings);
-      setIsLoadingSEC(false);
-
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Failed to fetch data. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (quoteResult.status === 'fulfilled') {
+      setStockData(quoteResult.value);
+    } else {
+      hadError = true;
     }
+    setIsLoadingStock(false);
+
+    if (historicalResult.status === 'fulfilled') {
+      setHistoricalData(historicalResult.value);
+    } else {
+      hadError = true;
+    }
+    setIsLoadingHistorical(false);
+
+    if (shortResult.status === 'fulfilled') {
+      setShortingData(shortResult.value);
+    } else {
+      hadError = true;
+    }
+    setIsLoadingShorting(false);
+
+    if (newsResult.status === 'fulfilled') {
+      setNewsData(newsResult.value);
+      lastNewsRefreshRef.current = Date.now();
+    } else {
+      hadError = true;
+    }
+    setIsLoadingNews(false);
+
+    if (filingsResult.status === 'fulfilled') {
+      setSecFilings(filingsResult.value);
+      lastSECRefreshRef.current = Date.now();
+    } else {
+      hadError = true;
+    }
+    setIsLoadingSEC(false);
+
+    if (hadError) {
+      setError('Some data failed to load. Please try again.');
+    }
+
+    setLastUpdated(new Date());
+    setIsLoading(false);
   }, [selectedPeriod]);
 
   // Initial data fetch
@@ -126,26 +152,30 @@ export default function Dashboard() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (isLiveMode) {
-        // Refresh news every 5 minutes
-        setIsLoadingNews(true);
-        getNews().then(news => {
-          setNewsData(news);
-          setIsLoadingNews(false);
-        }).catch(() => setIsLoadingNews(false));
+        const now = Date.now();
 
-        // Refresh SEC filings every 10 minutes
-        if (Math.random() > 0.5) { // 50% chance to reduce API calls
+        if (now - lastNewsRefreshRef.current >= NEWS_REFRESH_MS) {
+          setIsLoadingNews(true);
+          getNews().then(news => {
+            setNewsData(news);
+            lastNewsRefreshRef.current = Date.now();
+            setIsLoadingNews(false);
+          }).catch(() => setIsLoadingNews(false));
+        }
+
+        if (now - lastSECRefreshRef.current >= SEC_REFRESH_MS) {
           setIsLoadingSEC(true);
           getSECFilings().then(filings => {
             setSecFilings(filings);
+            lastSECRefreshRef.current = Date.now();
             setIsLoadingSEC(false);
           }).catch(() => setIsLoadingSEC(false));
         }
       }
-    }, 300000); // 5 minutes
+    }, 60000); // 1 minute tick for precise scheduling
 
     return () => clearInterval(interval);
-  }, [isLiveMode]);
+  }, [isLiveMode, NEWS_REFRESH_MS, SEC_REFRESH_MS]);
 
   // Handle period change
   const handlePeriodChange = useCallback(async (period: string) => {

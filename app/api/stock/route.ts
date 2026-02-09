@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStockQuote, StockQuote } from '@/lib/data-providers';
 import { cache, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 
+export const dynamic = 'force-dynamic';
+
 // Check if market is currently open
 function isMarketOpen(): boolean {
   const now = new Date();
@@ -23,6 +25,9 @@ function isMarketOpen(): boolean {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const symbol = searchParams.get('symbol') || 'GME';
+  const responseHeaders = {
+    'Cache-Control': 'no-store, max-age=0',
+  };
 
   try {
     // Check cache first
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
         ...cached.data,
         source: 'cache',
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
-      });
+      }, { headers: responseHeaders });
     }
 
     // Fetch fresh data
@@ -46,7 +51,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...quote,
         cacheAge: 0,
-      });
+      }, { headers: responseHeaders });
     }
 
     // If fresh fetch failed, try to return stale cache
@@ -57,12 +62,12 @@ export async function GET(request: NextRequest) {
         source: 'cache',
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
-      });
+      }, { headers: responseHeaders });
     }
 
     return NextResponse.json(
       { error: 'Unable to fetch stock data from any provider' },
-      { status: 503 }
+      { status: 503, headers: responseHeaders }
     );
   } catch (error) {
     console.error('Stock API error:', error);
@@ -75,12 +80,12 @@ export async function GET(request: NextRequest) {
         source: 'cache',
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
-      });
+      }, { headers: responseHeaders });
     }
 
     return NextResponse.json(
       { error: 'Failed to fetch stock data' },
-      { status: 500 }
+      { status: 500, headers: responseHeaders }
     );
   }
 }

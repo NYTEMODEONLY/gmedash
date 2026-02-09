@@ -16,9 +16,32 @@ type MarketStatus = 'pre-market' | 'open' | 'after-hours' | 'closed';
 
 const getMarketStatus = (): { status: MarketStatus; label: string; color: string; bgColor: string; textColor: string } => {
   const now = new Date();
-  const day = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(now);
+  const partMap = parts.reduce<Record<string, string>>((acc, part) => {
+    if (part.type !== 'literal') {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  const day = dayMap[partMap.weekday || 'Sun'];
+  const hours = Number(partMap.hour || 0);
+  const minutes = Number(partMap.minute || 0);
   const totalMinutes = hours * 60 + minutes;
 
   // Weekend
@@ -26,7 +49,7 @@ const getMarketStatus = (): { status: MarketStatus; label: string; color: string
     return { status: 'closed', label: 'Market Closed', color: 'bg-gray-500', bgColor: 'bg-gray-500/20', textColor: 'text-gray-400' };
   }
 
-  // Times in EST (adjust for local timezone would be better in production)
+  // Times in ET
   const preMarketOpen = 4 * 60; // 4:00 AM
   const marketOpen = 9 * 60 + 30; // 9:30 AM
   const marketClose = 16 * 60; // 4:00 PM
@@ -46,14 +69,26 @@ const getMarketStatus = (): { status: MarketStatus; label: string; color: string
 export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode = true, onToggleLiveMode }: HeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [marketStatus, setMarketStatus] = useState(getMarketStatus());
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentETTime, setCurrentETTime] = useState(() =>
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    }).format(new Date())
+  );
   const { resolvedTheme, toggleTheme } = useTheme();
 
   // Update market status every minute
   useEffect(() => {
     const interval = setInterval(() => {
       setMarketStatus(getMarketStatus());
-      setCurrentTime(new Date());
+      setCurrentETTime(new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/New_York',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      }).format(new Date()));
     }, 60000);
 
     return () => clearInterval(interval);
@@ -82,7 +117,7 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
                 <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                   <span>NYSE: GME</span>
                   <span className="hidden sm:inline">|</span>
-                  <span className="hidden sm:inline">{format(currentTime, 'h:mm a')} ET</span>
+                  <span className="hidden sm:inline">{currentETTime} ET</span>
                 </div>
               </div>
             </div>

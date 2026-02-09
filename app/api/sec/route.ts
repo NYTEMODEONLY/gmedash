@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const cik = searchParams.get('cik') || '1326380';
+  const responseHeaders = {
+    'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=60',
+  };
   
   try {
     const allFilings: any[] = [];
@@ -53,14 +58,17 @@ export async function GET(request: NextRequest) {
     uniqueFilings.sort((a, b) => new Date(b.filingDate).getTime() - new Date(a.filingDate).getTime());
 
     if (uniqueFilings.length === 0) {
-      return NextResponse.json({ error: 'No real SEC filings data available from EDGAR' }, { status: 503 });
+      return NextResponse.json(
+        { error: 'No real SEC filings data available from EDGAR' },
+        { status: 503, headers: responseHeaders }
+      );
     }
 
-    return NextResponse.json(uniqueFilings.slice(0, 10));
+    return NextResponse.json(uniqueFilings.slice(0, 10), { headers: responseHeaders });
     
   } catch (error) {
     console.error('SEC API error:', error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json([], { status: 500, headers: responseHeaders });
   }
 }
 

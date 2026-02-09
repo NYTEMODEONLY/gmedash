@@ -7,10 +7,15 @@ interface CachedHistoricalData {
   source: string;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const symbol = searchParams.get('symbol') || 'GME';
   const period = searchParams.get('period') || '1Y';
+  const responseHeaders = {
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
+  };
 
   const cacheKey = CACHE_KEYS.HISTORICAL(period);
 
@@ -24,7 +29,7 @@ export async function GET(request: NextRequest) {
         originalSource: cached.data.source,
         cacheAge: cache.getAge(cacheKey),
         count: cached.data.data.length,
-      });
+      }, { headers: responseHeaders });
     }
 
     // Fetch fresh data with retry logic built into the provider
@@ -39,7 +44,7 @@ export async function GET(request: NextRequest) {
         source: result.source,
         cacheAge: 0,
         count: result.data.length,
-      });
+      }, { headers: responseHeaders });
     }
 
     // If fresh fetch failed, try to return stale cache
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
         stale: true,
         cacheAge: cache.getAge(cacheKey),
         count: staleData.data.length,
-      });
+      }, { headers: responseHeaders });
     }
 
     // No data available
@@ -61,7 +66,7 @@ export async function GET(request: NextRequest) {
       source: 'none',
       message: 'Unable to fetch historical data. Add FINNHUB_API_KEY to enable real-time data.',
       count: 0,
-    });
+    }, { headers: responseHeaders });
 
   } catch (error) {
     console.error('Historical data API error:', error);
@@ -76,7 +81,7 @@ export async function GET(request: NextRequest) {
         stale: true,
         cacheAge: cache.getAge(cacheKey),
         count: staleData.data.length,
-      });
+      }, { headers: responseHeaders });
     }
 
     return NextResponse.json({
@@ -84,6 +89,6 @@ export async function GET(request: NextRequest) {
       source: 'error',
       error: 'Failed to fetch historical data',
       count: 0,
-    });
+    }, { headers: responseHeaders });
   }
 }

@@ -47,6 +47,10 @@ const STATIC_INFO = {
 };
 
 export async function GET(request: NextRequest) {
+  const responseHeaders = {
+    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=300',
+  };
+
   try {
     // Check cache first
     const cached = cache.get<CompanyInfo>(CACHE_KEYS.COMPANY_INFO);
@@ -54,7 +58,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...cached.data,
         cacheAge: cache.getAge(CACHE_KEYS.COMPANY_INFO),
-      });
+      }, { headers: responseHeaders });
     }
 
     // Fetch fresh metrics
@@ -83,7 +87,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...companyInfo,
         cacheAge: 0,
-      });
+      }, { headers: responseHeaders });
     }
 
     // If fresh fetch failed, try to return stale cache
@@ -93,7 +97,7 @@ export async function GET(request: NextRequest) {
         ...staleData,
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.COMPANY_INFO),
-      });
+      }, { headers: responseHeaders });
     }
 
     // Return static info with null metrics (not fake 0 values)
@@ -116,7 +120,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       ...fallbackInfo,
       message: 'Unable to fetch live metrics. Add FINNHUB_API_KEY to enable real-time data.',
-    });
+    }, { headers: responseHeaders });
 
   } catch (error) {
     console.error('Company Info API error:', error);
@@ -128,7 +132,7 @@ export async function GET(request: NextRequest) {
         ...staleData,
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.COMPANY_INFO),
-      });
+      }, { headers: responseHeaders });
     }
 
     // Return static info with null metrics
@@ -147,6 +151,6 @@ export async function GET(request: NextRequest) {
       floatShares: null,
       dataSource: 'error',
       error: 'Failed to fetch company data',
-    });
+    }, { headers: responseHeaders });
   }
 }
