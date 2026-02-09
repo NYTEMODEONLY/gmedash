@@ -10,6 +10,11 @@ const RSS_FEEDS = {
   bing: 'https://www.bing.com/news/search?q=GameStop+GME&format=rss',
 };
 
+const EXCLUDED_DOMAINS = ['investor.gamestop.com', 'news.gamestop.com'];
+
+const isExcludedUrl = (url: string): boolean =>
+  EXCLUDED_DOMAINS.some((domain) => url.includes(domain));
+
 // Helper function to decode HTML entities
 const decodeHTMLEntities = (text: string): string => {
   return text
@@ -89,26 +94,30 @@ const parseRSSFeed = (xmlText: string, sourceName: string): any[] => {
         sourceName === 'SEC';
 
       if (isRelevant && title && link) {
-        // Handle Google News redirect URLs
-        if (link.includes('news.google.com') && link.includes('url=')) {
-          const urlMatch = link.match(/url=([^&]+)/);
-          if (urlMatch) {
-            link = decodeURIComponent(urlMatch[1]);
-          }
+      // Handle Google News redirect URLs
+      if (link.includes('news.google.com') && link.includes('url=')) {
+        const urlMatch = link.match(/url=([^&]+)/);
+        if (urlMatch) {
+          link = decodeURIComponent(urlMatch[1]);
         }
+      }
 
-        // Handle Bing News redirect URLs
-        if (link.includes('bing.com') && link.includes('url=')) {
-          const urlMatch = link.match(/url=([^&]+)/);
-          if (urlMatch) {
-            link = decodeURIComponent(urlMatch[1]);
-          }
+      // Handle Bing News redirect URLs
+      if (link.includes('bing.com') && link.includes('url=')) {
+        const urlMatch = link.match(/url=([^&]+)/);
+        if (urlMatch) {
+          link = decodeURIComponent(urlMatch[1]);
         }
+      }
 
-        articles.push({
-          title: title.substring(0, 200),
-          description: description.substring(0, 300) + (description.length > 300 ? '...' : ''),
-          url: link,
+      if (isExcludedUrl(link)) {
+        continue;
+      }
+
+      articles.push({
+        title: title.substring(0, 200),
+        description: description.substring(0, 300) + (description.length > 300 ? '...' : ''),
+        url: link,
           publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
           source: { name: sourceName },
         });

@@ -48,13 +48,13 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
     fetchReleases();
   }, [fetchReleases]);
 
-  // Auto-refresh every 15 minutes
+  // Auto-refresh every 5 minutes
   useEffect(() => {
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
       fetchReleases();
-    }, 900000); // 15 minutes
+    }, 300000); // 5 minutes
 
     return () => clearInterval(interval);
   }, [autoRefresh, fetchReleases]);
@@ -63,8 +63,6 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
     switch (source) {
       case 'GameStop IR':
         return 'bg-gme-red/10 text-gme-red dark:bg-gme-red/20';
-      case 'SEC EDGAR':
-        return 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-400';
       default:
         return 'bg-gray-100 dark:bg-gme-dark-300 text-gray-800 dark:text-gray-300';
     }
@@ -176,8 +174,8 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Source: GameStop IR & SEC EDGAR</span>
-          <span>Auto-updates every 15 min</span>
+          <span>Source: GameStop Investor Relations</span>
+          <span>Auto-updates every 5 min</span>
         </div>
       </div>
     </div>
