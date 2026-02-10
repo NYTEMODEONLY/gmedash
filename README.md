@@ -223,4 +223,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-Built with Next.js and Tailwind CSS. Deployed on Vercel.
+Built with Next.js and Tailwind CSS. Deployed on Vercel. A [nytemode](https://nytemode.com) project.
