@@ -28,8 +28,8 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 - **Quick Links** - Direct links to Yahoo Finance, TradingView
 
 ### News & Updates
-- **Latest News** - Aggregated GME news from Yahoo Finance & Google News RSS
-- **Press Releases** - Official GameStop investor relations announcements
+- **Latest News** - Aggregated GME news from Google News & Bing News RSS (IR excluded)
+- **Press Releases** - Official GameStop investor relations announcements (IR feed)
 - **SEC Filings** - 10-K, 10-Q, 8-K documents from SEC EDGAR
 - **Upcoming Events** - Earnings dates, annual meetings, key dates
 
@@ -71,9 +71,9 @@ Some features require paid API subscriptions to display live data. These are mar
 |-----------|--------|------|--------|
 | Stock Quotes | Yahoo Finance API | Free | Active |
 | Historical Data | Yahoo Finance API | Free | Active |
-| News | Yahoo Finance RSS, Google News RSS | Free | Active |
+| News | Google News RSS, Bing News RSS (IR excluded) | Free | Active |
 | SEC Filings | SEC EDGAR Database | Free | Active |
-| Press Releases | GameStop IR / SEC 8-K | Free | Active |
+| Press Releases | GameStop Investor Relations (IR feed) | Free | Active |
 | Company Info | Yahoo Finance API | Free | Active |
 | Upcoming Events | Manually curated | Free | Active |
 | Short Interest | Finnhub API | Paid | Premium |

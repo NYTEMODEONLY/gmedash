@@ -31,9 +31,11 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 | Source | Purpose | Cache |
 |--------|---------|-------|
 | Yahoo Finance | Stock quotes, historical data | 30s (market open) / 5m (closed) |
-| Google News RSS | News aggregation | 5 min |
-| Bing News RSS | News aggregation (secondary) | 5 min |
-| SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) & press releases | 10 min |
+| Google News RSS | News aggregation (IR excluded) | 5 min |
+| Bing News RSS | News aggregation (secondary, IR excluded) | 5 min |
+| GameStop IR Feed | Press releases (company announcements only) | 5 min |
+| SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) | 10 min |
+| Finnhub / Yahoo | Short interest (premium, optional) | 24 hours |
 | Finnhub (optional) | Company metrics | 1 hour |
 
 ### Theming System
@@ -71,7 +73,7 @@ export default function Component({ data, isLoading }: Props) { ... }
 ## Environment Variables
 
 Optional - all features work without them, but these enable premium data:
-- `FINNHUB_API_KEY` - Enables company metrics (Market Cap, P/E, EPS, Beta)
+- `FINNHUB_API_KEY` - Enables company metrics (Market Cap, P/E, EPS, Beta) and short interest when available
 
 ## Tech Stack
 
