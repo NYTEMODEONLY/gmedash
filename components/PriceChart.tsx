@@ -177,7 +177,17 @@ export default function PriceChart({ data, isLoading, onPeriodChange, selectedPe
           </div>
         </div>
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gme-dark-300">
-          <span><span className="font-medium">Source:</span> Yahoo Finance</span>
+          <span>
+            <span className="font-medium">Source:</span>{' '}
+            <a
+              href="https://finance.yahoo.com/quote/GME/history"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors"
+            >
+              Yahoo Finance
+            </a>
+          </span>
           <span>Historical data (end of day)</span>
         </div>
       </div>

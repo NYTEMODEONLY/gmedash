@@ -25,13 +25,15 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 ### Company Information
 - **Company Overview** - Business description, sector, industry
 - **Key Statistics** - Market cap, P/E ratio, EPS, dividend yield
-- **Quick Links** - Direct links to Yahoo Finance, TradingView
+- **Live Company Facts** - CEO and employee range from the latest SEC 10-K; founded year from Wikipedia's public summary API
+- **Investor Snapshot** - Balance sheet liquidity, debt, net income, store footprint, segment/product mix, shareholder registration, and Bitcoin/capital-allocation disclosures
+- **Quick Links** - Direct links to the source filing, Yahoo Finance, SEC EDGAR, Wikipedia, TradingView, and investor relations
 
 ### News & Updates
 - **Latest News** - Aggregated GME news from Google News & Bing News RSS (IR excluded)
 - **Press Releases** - Official GameStop investor relations announcements (IR feed)
-- **SEC Filings** - 10-K, 10-Q, 8-K documents from SEC EDGAR
-- **Upcoming Events** - Earnings dates, annual meetings, key dates
+- **SEC Filings** - Latest EDGAR submissions from SEC, including newer forms such as 425 and 144
+- **Upcoming Events** - Confirmed GameStop IR event feed and Yahoo Finance metadata only
 
 ### User Experience
 - **Dark/Light Mode** - Full theme support with smooth transitions
@@ -43,13 +45,28 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 
 ## Source Coverage
 
-The dashboard uses free public sources only. If a source is unavailable or does not expose a confirmed current value, the app shows an unavailable state instead of mock, paid, or estimated data.
+The dashboard uses free public sources only. If a source is unavailable or does not expose a confirmed current value, the app shows an unavailable state instead of mock, paid, or estimated data. Source links are exposed in the relevant dashboard cards so end users can verify the underlying data.
 
 | Feature | Current Behavior | Source |
 |---------|------------------|--------|
+| **Live Quote Card** | Current OHLCV quote with live refresh cadence | Stooq quote CSV with Yahoo Finance fallback |
+| **Historical Price / Volume** | End-of-day historical price and volume charts | Yahoo Finance chart endpoint |
+| **Company Overview** | SEC identity, CEO, employees, headquarters, market metrics, founded year | SEC submissions, latest SEC 10-K, Yahoo Finance metrics, Wikipedia summary API |
+| **Investor Snapshot** | Liquidity, debt, FY results, stores, product/segment mix, registered holders, DRS/DSPP context, Bitcoin disclosures | Latest GameStop SEC 10-K, Coinbase public BTC spot |
 | **Short Interest** | Live reported short-position history | FINRA Consolidated Short Interest |
-| **Ryan Cohen Posts** | Direct official-profile link | X.com profile |
+| **Ryan Cohen Posts** | Free public feed when available, with official post links | Nitter RSS mirror; Jina AI public X snapshot fallback; official X profile |
+| **Press Releases** | Official GameStop announcements | GameStop Investor Relations feed |
+| **News** | Third-party GME news excluding official IR releases | Google News RSS, Bing News RSS |
+| **SEC Filings** | Latest EDGAR filings with filing links | SEC submissions API and SEC Archives |
+| **Upcoming Events** | Confirmed events only; no estimates if sources are empty | GameStop IR event/presentation feeds, Yahoo Finance chart metadata |
 | **Options** | Not shown as a core card until a reliable free public source is wired | N/A |
+
+### Accuracy Contract
+
+- The app does not use mock records, static fake finance values, or paid API-only fields.
+- Company/fundamental facts are factual to the cited filing or public-source response date.
+- Market, news, RSS, and third-party feeds can have source-side delays or outages; the UI surfaces source links and unavailable states rather than silently inventing values.
+- Bitcoin spot price is shown only as live context for the SEC-disclosed pledged BTC amount and is not presented as a formal company holding valuation.
 
 ---
 
@@ -72,9 +89,11 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | News | Google News RSS, Bing News RSS (IR excluded) | Free | Active |
 | SEC Filings | SEC EDGAR Database | Free | Active |
 | Press Releases | GameStop Investor Relations (IR feed) | Free | Active |
-| Company Info | Yahoo Finance API | Free | Active |
+| Company Info | SEC submissions, SEC 10-K, Yahoo Finance, Wikipedia summary API | Free | Active |
+| Investor Snapshot | SEC 10-K, Coinbase BTC spot | Free | Active |
 | Upcoming Events | Confirmed Yahoo Finance metadata and GameStop IR links | Free | Active |
 | Short Interest | FINRA public API | Free | Active |
+| Ryan Cohen Posts | Nitter RSS mirror, Jina AI public X snapshot, X profile links | Free | Active |
 
 ---
 
@@ -143,6 +162,7 @@ gmedash/
 │   │   ├── sec/            # SEC filings
 │   │   ├── press-releases/ # Press releases
 │   │   ├── company-info/   # Company metrics
+│   │   ├── investor-snapshot/ # SEC-backed investor facts
 │   │   ├── events/         # Upcoming events
 │   │   ├── short-interest/ # FINRA short interest
 │   │   ├── twitter/        # External X profile fallback
@@ -154,10 +174,11 @@ gmedash/
 │   ├── Header.tsx          # Header with theme toggle
 │   ├── StockInfoCard.tsx   # Live stock card
 │   ├── CompanyOverview.tsx # Company information
+│   ├── InvestorSnapshot.tsx# SEC-backed investor facts
 │   ├── PriceChart.tsx      # Price history chart
 │   ├── VolumeChart.tsx     # Volume chart
 │   ├── ShortingChart.tsx   # FINRA short interest
-│   ├── RyanCohenTwitter.tsx# Official profile link
+│   ├── RyanCohenTwitter.tsx# Free public X/Ryan feed with official links
 │   ├── NewsSection.tsx     # News articles
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases

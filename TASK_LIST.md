@@ -16,18 +16,23 @@
 ## Components
 - [x] Header component with title and refresh button
 - [x] Current Stock Info Card
+- [x] Company Overview with source links
+- [x] Investor Snapshot component
 - [x] Historical Price Chart component
 - [x] Shorting Data Chart component
 - [x] Volume Chart component
 - [x] News Section component
 - [x] SEC Filings component
+- [x] Ryan Cohen public-post component
 - [x] Loading and Error components
 
 ## API Integration
 - [x] Free public stock quote and historical data integration
 - [x] FINRA short-interest integration
 - [x] News RSS integration (Google/Bing)
-- [x] SEC-API integration (filings)
+- [x] SEC EDGAR integration (filings)
+- [x] SEC 10-K investor snapshot integration
+- [x] Free Ryan Cohen public-post fallback integration
 
 ## Styling & Responsiveness
 - [x] Tailwind CSS configuration
@@ -46,6 +51,7 @@
 - [x] README.md with setup instructions
 - [x] No-key setup instructions
 - [x] Deployment guide for Vercel
+- [x] Source-link and accuracy policy documentation
 
 ## Testing & Deployment
 - [x] Ensure app runs locally
@@ -61,3 +67,4 @@
 - [x] Update all documentation
 - [x] Test application with free APIs
 - [x] Verify no API keys required for core features
+- [x] Verify core dashboard sections expose source links

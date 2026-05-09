@@ -121,7 +121,17 @@ export default function InvestorSnapshot() {
 
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>All company facts are sourced from the latest GameStop SEC 10-K unless noted.</span>
+          <span>
+            All company facts are sourced from the latest GameStop SEC 10-K unless noted. BTC spot context:{' '}
+            <a
+              href="https://www.coinbase.com/price/bitcoin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              Coinbase
+            </a>
+          </span>
           <span>{snapshot?.asOf ? `As of ${snapshot.asOf}` : 'SEC sourced'}</span>
         </div>
       </div>

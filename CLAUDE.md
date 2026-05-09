@@ -13,7 +13,7 @@ npm run lint     # ESLint checks
 
 ## Architecture Overview
 
-This is a **Next.js 14 App Router** dashboard displaying real-time GameStop (GME) financial data. All data is fetched from free public APIs.
+This is a **Next.js 14 App Router** dashboard displaying real-time and filing-backed GameStop (GME) investor data. All data is fetched from free public APIs or public filing endpoints.
 
 ### Data Flow
 ```
@@ -34,9 +34,13 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 | Google News RSS | News aggregation (IR excluded) | 5 min |
 | Bing News RSS | News aggregation (secondary, IR excluded) | 5 min |
 | GameStop IR Feed | Press releases (company announcements only) | 5 min |
-| SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) | 10 min |
+| SEC EDGAR | SEC filings and latest submissions | 10 min |
+| SEC 10-K | Company facts and investor snapshot | 1 hour |
 | FINRA | Consolidated short interest | 24 hours |
 | Yahoo Finance | Company metrics where available | 1 hour |
+| Wikipedia Summary API | Founded year reference | 1 hour via company-info |
+| Coinbase public BTC spot | BTC spot context for SEC-disclosed collateral | 1 hour via investor snapshot |
+| Nitter RSS / Jina AI X snapshot | Free Ryan Cohen public post feed fallback | 5 min |
 
 ### Theming System
 - Uses React Context (`lib/ThemeContext.tsx`)
@@ -47,7 +51,8 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 ### Free-source policy
 - Do not add paid API requirements.
 - If a live public source is unavailable, show an empty or unavailable state instead of estimates or mock records.
-- Ryan Cohen's X panel links to the official profile rather than using a paid X API dependency.
+- Ryan Cohen's X panel uses free public mirrors where available and always links to the official post/profile rather than using a paid X API dependency.
+- User-facing data sections should include clickable source links. Filing-backed facts should point to SEC filings or SEC EDGAR; market-backed facts should point to public market-source pages.
 
 ## Key Patterns
 

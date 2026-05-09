@@ -28,6 +28,8 @@ interface CompanyInfo {
   sharesOutstanding: number | null;
   floatShares: number | null;
   dataSource?: string;
+  annualReportUrl?: string | null;
+  wikipediaUrl?: string;
   message?: string;
 }
 
@@ -219,10 +221,40 @@ export default function CompanyOverview() {
       {/* Data Source Indicator */}
       {companyInfo.dataSource && (
         <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs text-gray-400 dark:text-gray-500">
               Data source: {companyInfo.dataSource}
             </span>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {companyInfo.annualReportUrl && (
+                <a
+                  href={companyInfo.annualReportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gme-red hover:text-gme-red-dark font-medium transition-colors"
+                >
+                  SEC 10-K source
+                </a>
+              )}
+              {companyInfo.wikipediaUrl && (
+                <a
+                  href={companyInfo.wikipediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  Founded source
+                </a>
+              )}
+              <a
+                href="https://finance.yahoo.com/quote/GME/key-statistics"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors"
+              >
+                Market metrics source
+              </a>
+            </div>
             {companyInfo.message && (
               <span className="text-xs text-amber-600 dark:text-amber-500">{companyInfo.message}</span>
             )}

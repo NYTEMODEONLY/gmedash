@@ -129,7 +129,15 @@ export default function SECFilings({ filings, isLoading }: SECFilingsProps) {
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Source:</span> SEC EDGAR Database
+            <span className="font-medium">Source:</span>{' '}
+            <a
+              href="https://www.sec.gov/edgar/browse/?CIK=0001326380"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              SEC EDGAR Database
+            </a>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Auto-refresh: 10 min

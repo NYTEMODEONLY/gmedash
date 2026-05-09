@@ -31,6 +31,16 @@ The GameStop Dashboard has been updated so dashboard data uses free public APIs 
 - **After**: FINRA Consolidated Short Interest API (no key required)
 - **Features**: Shares short, days to cover, average daily volume, and change from previous reporting cycle
 
+### 6. **Company Facts + Investor Snapshot** - SEC 10-K + Public Reference APIs (Free)
+- **Before**: Some company facts depended on removed static fallbacks or incomplete finance profiles
+- **After**: CEO, employee range, store footprint, registered-holder data, liquidity, debt, net income, product mix, segment mix, and Bitcoin disclosures are sourced from SEC filings and public endpoints
+- **Features**: Direct source links in the dashboard for SEC 10-K, SEC EDGAR, Yahoo Finance, Wikipedia, Coinbase BTC spot, and official profile/feed pages
+
+### 7. **Ryan Cohen Posts** - Free Public Fallbacks (Free)
+- **Before**: Paid X API was intentionally avoided, so the card could only link to X
+- **After**: The card attempts a free Nitter RSS feed and falls back to Jina AI's public X snapshot, while preserving official X post/profile links
+- **Features**: Recent public posts where reachable from free sources, with a clear fallback state if mirrors are blocked
+
 ## 🚀 Benefits of Free APIs
 
 ### ✅ **No API Keys Required for Core Features**
@@ -63,6 +73,17 @@ The GameStop Dashboard has been updated so dashboard data uses free public APIs 
 | SEC Filings | SEC EDGAR | Excellent | Very High |
 | Press Releases | GameStop IR Feed | Excellent | Very High |
 | Short Interest | FINRA | Excellent | Very High |
+| Company Facts | SEC 10-K + SEC submissions + Wikipedia | Excellent for filing facts | High |
+| Investor Snapshot | SEC 10-K + Coinbase BTC spot | Excellent for filing facts | High |
+| Ryan Cohen Posts | Nitter/Jina public X snapshot | Good | Medium |
+
+## Source-Link and Accuracy Policy
+
+- Every core dashboard section exposes a user-facing source link or item-level source link.
+- SEC-backed facts link to the relevant SEC filing or EDGAR page.
+- Market-backed facts link to Stooq or Yahoo Finance public source pages.
+- News, press releases, SEC filings, and X/Ryan items link to the original article, release, filing, or post.
+- The app does not claim third-party feeds are infallible in real time. It presents data as live from the cited free source, with unavailable states when a source cannot confirm a value.
 
 ## 🔧 Technical Implementation
 
@@ -72,6 +93,9 @@ The GameStop Dashboard has been updated so dashboard data uses free public APIs 
 - `getNews()` - Now uses Google News + Bing News RSS
 - `getSECFilings()` - Now uses SEC EDGAR
 - `getShortInterest()` - Uses FINRA public data
+- `/api/company-info` - Uses SEC submissions, latest 10-K, Yahoo metrics, and Wikipedia summary API
+- `/api/investor-snapshot` - Uses latest SEC 10-K plus Coinbase public BTC spot context
+- `/api/twitter` - Uses Nitter RSS with Jina public X snapshot fallback
 
 ### Error Handling:
 - Graceful fallbacks for all APIs
@@ -132,6 +156,7 @@ The GameStop Dashboard is now:
 - ✅ **Always Available** - No rate limits or quotas
 - ✅ **Production Ready** - Deploy anywhere immediately
 - ✅ **User Friendly** - Works out of the box
+- ✅ **Source Linked** - End users can click through to public backing sources
 
 ## 🚀 Next Steps
 

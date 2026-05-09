@@ -31,6 +31,8 @@ interface CompanyInfo {
   sharesOutstanding: number | null;
   floatShares: number | null;
   dataSource: string;
+  annualReportUrl?: string | null;
+  wikipediaUrl?: string;
 }
 
 const STATIC_INFO = {
@@ -82,6 +84,8 @@ async function getSECCompanyProfile() {
       ceo: annualReportFacts?.ceo || null,
       employeesText: annualReportFacts?.employeesText || null,
       founded,
+      annualReportUrl,
+      wikipediaUrl: 'https://en.wikipedia.org/wiki/GameStop',
       dataSource: [
         'sec',
         'yahoo',
@@ -100,6 +104,8 @@ async function getSECCompanyProfile() {
       ceo: null,
       employeesText: null,
       founded: null,
+      annualReportUrl: null,
+      wikipediaUrl: 'https://en.wikipedia.org/wiki/GameStop',
       dataSource: 'yahoo',
     };
   }
@@ -195,6 +201,8 @@ export async function GET(request: NextRequest) {
         ceo: secProfile.ceo || STATIC_INFO.ceo,
         employeesText: secProfile.employeesText || STATIC_INFO.employeesText,
         founded: secProfile.founded || STATIC_INFO.founded,
+        annualReportUrl: secProfile.annualReportUrl,
+        wikipediaUrl: secProfile.wikipediaUrl,
         marketCap: metrics.marketCap,
         marketCapFormatted: metrics.marketCapFormatted,
         peRatio: metrics.peRatio,
@@ -235,6 +243,8 @@ export async function GET(request: NextRequest) {
       ceo: secProfile.ceo || STATIC_INFO.ceo,
       employeesText: secProfile.employeesText || STATIC_INFO.employeesText,
       founded: secProfile.founded || STATIC_INFO.founded,
+      annualReportUrl: secProfile.annualReportUrl,
+      wikipediaUrl: secProfile.wikipediaUrl,
       marketCap: null,
       marketCapFormatted: 'N/A',
       peRatio: null,

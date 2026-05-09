@@ -20,8 +20,12 @@ The `.env.local` file is optional since no API keys are needed.
 - **Stooq + Yahoo Finance**: Real-time stock and historical chart data (no key required)
 - **Google News + Bing News RSS**: Public news feeds (IR excluded)
 - **SEC EDGAR**: Official SEC filings (no key required)
+- **SEC 10-K**: Company facts and investor snapshot metrics
 - **GameStop IR Feed**: Official press releases from investor relations
 - **FINRA**: Public consolidated short-interest data (no key required)
+- **Wikipedia Summary API**: Founded year reference
+- **Coinbase Public Price API**: BTC spot context for SEC-disclosed Bitcoin collateral
+- **Nitter RSS / Jina AI public X snapshot**: Free Ryan Cohen public post fallback
 
 ### 3. Run the Application
 ```bash
@@ -34,6 +38,8 @@ Open http://localhost:3000 in your browser.
 
 - **Header**: Title, live indicator, refresh button
 - **Stock Info Card**: Current GME price and OHLCV data
+- **Company Overview**: SEC/Wikipedia/Yahoo-backed company facts with source links
+- **Investor Snapshot**: SEC-backed liquidity, debt, store, shareholder, product mix, segment, and capital-allocation facts
 - **Price Chart**: Interactive historical price chart (1M/3M/6M/1Y)
 - **Short Interest Chart**: FINRA shares-short and days-to-cover history
 - **Volume Chart**: Trading volume analysis
@@ -49,6 +55,7 @@ Open http://localhost:3000 in your browser.
 - ✅ Loading states and error handling
 - ✅ Time period selection
 - ✅ Data refresh functionality
+- ✅ User-facing source links for core data sections
 - ✅ TypeScript support
 - ✅ Tailwind CSS styling
 

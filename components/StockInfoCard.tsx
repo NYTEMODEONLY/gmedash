@@ -159,6 +159,14 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex flex-wrap gap-2">
           <a
+            href="https://stooq.com/q/?s=gme.us"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs px-2.5 py-1 bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"
+          >
+            Stooq
+          </a>
+          <a
             href="https://finance.yahoo.com/quote/GME"
             target="_blank"
             rel="noopener noreferrer"
@@ -180,13 +188,17 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
       {/* Data Source & Timing */}
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs">
-          <span className={`px-2 py-0.5 rounded ${
+          <a
+            href={stockData.source === 'stooq' ? 'https://stooq.com/q/?s=gme.us' : 'https://finance.yahoo.com/quote/GME'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`px-2 py-0.5 rounded hover:opacity-80 transition-opacity ${
             stockData.source === 'finnhub' ? 'bg-stock-green/20 text-stock-green' :
             stockData.source === 'yahoo' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
             'bg-gray-100 dark:bg-gme-dark-300 text-gray-500 dark:text-gray-400'
           }`}>
             {stockData.source || 'Yahoo Finance'}
-          </span>
+          </a>
           <span className="text-gray-500 dark:text-gray-400">
             {stockData.stale ? (
               <span className="text-amber-600 dark:text-amber-500">Data may be stale</span>

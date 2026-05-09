@@ -12,7 +12,7 @@ export default function Footer() {
               regulatory filing, and investor relations endpoints.
             </p>
             <div className="text-xs text-gray-500 dark:text-gray-500">
-              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR, FINRA, GameStop IR</p>
+              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR, FINRA, GameStop IR, Google/Bing News RSS, Jina/X, Wikipedia, Coinbase</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>
@@ -26,7 +26,7 @@ export default function Footer() {
               </p>
               <p>
                 <strong className="text-gray-700 dark:text-gray-300">Data Accuracy:</strong> Data is sourced from public financial, company,
-                and regulatory endpoints. Real-time data may have minor delays.
+                and regulatory endpoints with source links shown in the dashboard. Market and third-party feeds may have delays or temporary outages.
               </p>
               <p>
                 <strong className="text-gray-700 dark:text-gray-300">Investment Risk:</strong> Stock trading involves substantial risk of loss.
@@ -90,12 +90,32 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://twitter.com/ryancohen"
+                  href="https://x.com/ryancohen"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-gme-red transition-colors"
                 >
-                  Ryan Cohen on X/Twitter
+                  Ryan Cohen on X
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.finra.org/finra-data/browse-catalog/equity-short-interest/data"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gme-red transition-colors"
+                >
+                  FINRA Short Interest
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.coinbase.com/price/bitcoin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gme-red transition-colors"
+                >
+                  Coinbase BTC Spot
                 </a>
               </li>
               <li>
