@@ -2,13 +2,13 @@
 
 ## 🎉 Successfully Updated to 100% Free APIs!
 
-The GameStop Dashboard has been updated so core data uses free APIs and data sources. **No API keys are required for core features.** Premium features still require paid access.
+The GameStop Dashboard has been updated so dashboard data uses free public APIs and data sources. **No API keys are required.**
 
 ## ✅ Changes Made
 
-### 1. **Stock Data** - Yahoo Finance API (Free)
+### 1. **Stock Data** - Stooq + Yahoo Finance (Free)
 - **Before**: Alpha Vantage API (required API key, rate limited)
-- **After**: Yahoo Finance API (no key required, no rate limits)
+- **After**: Stooq quote CSV with Yahoo Finance chart fallback (no key required)
 - **Features**: Real-time stock prices, historical data, OHLCV data
 
 ### 2. **News** - Google News + Bing News RSS (Free)
@@ -26,17 +26,17 @@ The GameStop Dashboard has been updated so core data uses free APIs and data sou
 - **After**: Official SEC EDGAR database (no key required, public data)
 - **Features**: Official SEC filings (10-K, 10-Q, 8-K)
 
-### 5. **Short Interest Data** - Premium (Optional)
+### 5. **Short Interest Data** - FINRA Public API (Free)
 - **Before**: Finnhub API (required API key, rate limited)
-- **After**: Still requires premium access (Finnhub) with Yahoo fallback when available
-- **Features**: Short interest data is shown when a premium source is available; otherwise the UI handles empty data gracefully
+- **After**: FINRA Consolidated Short Interest API (no key required)
+- **Features**: Shares short, days to cover, average daily volume, and change from previous reporting cycle
 
 ## 🚀 Benefits of Free APIs
 
 ### ✅ **No API Keys Required for Core Features**
 - Zero setup complexity for the main dashboard
 - No registration needed for stock/news/filings/press releases
-- Premium features are optional and remain gated
+- No paid API branches are required
 
 ### ✅ **No Rate Limits (Core Features)**
 - Yahoo Finance: No limits for basic usage
@@ -57,31 +57,31 @@ The GameStop Dashboard has been updated so core data uses free APIs and data sou
 
 | Data Type | Source | Quality | Reliability |
 |-----------|--------|---------|-------------|
-| Stock Prices | Yahoo Finance | Excellent | Very High |
+| Stock Prices | Stooq + Yahoo Finance | Good | High |
 | Historical Data | Yahoo Finance | Excellent | Very High |
 | News | Google News + Bing News RSS | Good | High |
 | SEC Filings | SEC EDGAR | Excellent | Very High |
 | Press Releases | GameStop IR Feed | Excellent | Very High |
-| Short Interest | Finnhub (Premium) | Varies | Varies |
+| Short Interest | FINRA | Excellent | Very High |
 
 ## 🔧 Technical Implementation
 
 ### API Functions Updated:
-- `getStockQuote()` - Now uses Yahoo Finance
+- `getStockQuote()` - Now uses Stooq with Yahoo fallback
 - `getHistoricalData()` - Now uses Yahoo Finance
 - `getNews()` - Now uses Google News + Bing News RSS
 - `getSECFilings()` - Now uses SEC EDGAR
-- `getShortInterest()` - Uses premium sources when available
+- `getShortInterest()` - Uses FINRA public data
 
 ### Error Handling:
 - Graceful fallbacks for all APIs
-- Mock data when external APIs fail
+- Empty unavailable states when external APIs fail
 - Comprehensive error messages
 
 ### Performance:
 - Faster loading (no API key validation)
 - No rate limit delays
-- Local mock data generation
+- No local mock data generation
 
 ## 📱 User Experience
 
@@ -96,7 +96,7 @@ The GameStop Dashboard has been updated so core data uses free APIs and data sou
 1. Clone the repository
 2. Run `npm install`
 3. Run `npm run dev`
-4. Done! 🎉 (Premium features remain optional)
+4. Done!
 
 ## 🚀 Deployment
 

@@ -41,17 +41,15 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 
 ---
 
-## Premium Features (API Access Required)
+## Source Coverage
 
-Some features require paid API subscriptions to display live data. These are marked as "Premium Features" in the dashboard and link to free alternatives:
+The dashboard uses free public sources only. If a source is unavailable or does not expose a confirmed current value, the app shows an unavailable state instead of mock, paid, or estimated data.
 
-| Feature | Required API | Why It's Gated | Free Alternative |
-|---------|--------------|----------------|------------------|
-| **Short Interest Data** | Finnhub, ORTEX, or S3 Partners | Real-time short data requires expensive institutional feeds | [FINRA Short Sale Data](https://www.finra.org/finra-data/browse-catalog/short-sale-volume-data) |
-| **Ryan Cohen Twitter Feed** | X/Twitter API (Basic tier: $100/mo) | Twitter API is no longer free | [View on X directly](https://twitter.com/ryancohen) |
-| **Options Flow** | CBOE, Unusual Whales, or similar | Real-time options data requires premium subscriptions | Public options chains on broker platforms |
-
-> **Want these features enabled?** Consider [sponsoring the developer](https://github.com/NYTEMODEONLY/gmedash) to help cover premium API costs.
+| Feature | Current Behavior | Source |
+|---------|------------------|--------|
+| **Short Interest** | Live reported short-position history | FINRA Consolidated Short Interest |
+| **Ryan Cohen Posts** | Direct official-profile link | X.com profile |
+| **Options** | Not shown as a core card until a reliable free public source is wired | N/A |
 
 ---
 
@@ -69,16 +67,14 @@ Some features require paid API subscriptions to display live data. These are mar
 
 | Data Type | Source | Cost | Status |
 |-----------|--------|------|--------|
-| Stock Quotes | Yahoo Finance API | Free | Active |
+| Stock Quotes | Stooq quote CSV, Yahoo Finance fallback | Free | Active |
 | Historical Data | Yahoo Finance API | Free | Active |
 | News | Google News RSS, Bing News RSS (IR excluded) | Free | Active |
 | SEC Filings | SEC EDGAR Database | Free | Active |
 | Press Releases | GameStop Investor Relations (IR feed) | Free | Active |
 | Company Info | Yahoo Finance API | Free | Active |
-| Upcoming Events | Manually curated | Free | Active |
-| Short Interest | Finnhub API | Paid | Premium |
-| Twitter Feed | X/Twitter API | Paid | Premium |
-| Options Flow | Various | Paid | Premium |
+| Upcoming Events | Confirmed Yahoo Finance metadata and GameStop IR links | Free | Active |
+| Short Interest | FINRA public API | Free | Active |
 
 ---
 
@@ -105,15 +101,9 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Environment Variables (Optional)
+### Environment Variables
 
-The dashboard works out of the box with free APIs. For premium features, create a `.env.local` file:
-
-```bash
-# Optional: For premium features
-FINNHUB_API_KEY=your_finnhub_key_here
-TWITTER_BEARER_TOKEN=your_twitter_token_here
-```
+No environment variables are required. The dashboard works out of the box with free public sources.
 
 ---
 
@@ -154,9 +144,9 @@ gmedash/
 │   │   ├── press-releases/ # Press releases
 │   │   ├── company-info/   # Company metrics
 │   │   ├── events/         # Upcoming events
-│   │   ├── short-interest/ # Short data (premium)
-│   │   ├── twitter/        # Twitter feed (premium)
-│   │   └── options-flow/   # Options data (premium)
+│   │   ├── short-interest/ # FINRA short interest
+│   │   ├── twitter/        # External X profile fallback
+│   │   └── options-flow/   # Experimental public options lookup
 │   ├── globals.css         # Global styles & theme
 │   ├── layout.tsx          # Root layout with metadata
 │   └── page.tsx            # Main dashboard
@@ -166,8 +156,8 @@ gmedash/
 │   ├── CompanyOverview.tsx # Company information
 │   ├── PriceChart.tsx      # Price history chart
 │   ├── VolumeChart.tsx     # Volume chart
-│   ├── ShortingChart.tsx   # Short interest (premium)
-│   ├── RyanCohenTwitter.tsx# Twitter feed (premium)
+│   ├── ShortingChart.tsx   # FINRA short interest
+│   ├── RyanCohenTwitter.tsx# Official profile link
 │   ├── NewsSection.tsx     # News articles
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases
@@ -218,7 +208,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ### Ways to Contribute
 - Report bugs or request features via [Issues](https://github.com/NYTEMODEONLY/gmedash/issues)
 - Submit PRs for bug fixes or new features
-- Sponsor the project to help cover premium API costs
 - Share the project with other GME investors
 
 ---

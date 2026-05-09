@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import axios from 'axios';
 import { getCompanyMetrics, CompanyMetrics, formatMarketCap } from '@/lib/data-providers';
 import { cache, CACHE_TTL, CACHE_KEYS } from '@/lib/cache';
 
@@ -13,10 +14,10 @@ interface CompanyInfo {
   industry: string;
   marketCap: number | null;
   marketCapFormatted: string;
-  employees: number;
-  headquarters: string;
-  ceo: string;
-  founded: string;
+  employees: number | null;
+  headquarters: string | null;
+  ceo: string | null;
+  founded: string | null;
   website: string;
   description: string;
   peRatio: number | null;
@@ -31,20 +32,56 @@ interface CompanyInfo {
   dataSource: string;
 }
 
-// Static company info that doesn't change
 const STATIC_INFO = {
   name: 'GameStop Corp.',
   symbol: 'GME',
   exchange: 'NYSE',
   sector: 'Consumer Cyclical',
   industry: 'Specialty Retail',
-  employees: 8000,
-  headquarters: 'Grapevine, Texas',
-  ceo: 'Ryan Cohen',
-  founded: '1984',
+  employees: null,
+  headquarters: null,
+  ceo: null,
+  founded: null,
   website: 'https://www.gamestop.com',
   description: 'GameStop Corp. is a leading specialty retailer offering video games, consumer electronics, and gaming merchandise through its e-commerce properties and thousands of stores.',
 };
+
+async function getSECCompanyProfile() {
+  try {
+    const response = await axios.get('https://data.sec.gov/submissions/CIK0001326380.json', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'GMEDASH-SEC-Reader/1.0 contact@example.com',
+        Accept: 'application/json',
+      },
+    });
+
+    const data = response.data;
+    const business = data?.addresses?.business;
+    const headquarters = business?.city && business?.stateOrCountry
+      ? `${business.city}, ${business.stateOrCountry}`
+      : null;
+
+    return {
+      name: data?.name || STATIC_INFO.name,
+      symbol: data?.tickers?.[0] || STATIC_INFO.symbol,
+      exchange: data?.exchanges?.[0] || STATIC_INFO.exchange,
+      industry: data?.sicDescription || STATIC_INFO.industry,
+      headquarters,
+      dataSource: 'sec/yahoo',
+    };
+  } catch (error) {
+    console.error('SEC company profile error:', error);
+    return {
+      name: STATIC_INFO.name,
+      symbol: STATIC_INFO.symbol,
+      exchange: STATIC_INFO.exchange,
+      industry: STATIC_INFO.industry,
+      headquarters: null,
+      dataSource: 'yahoo',
+    };
+  }
+}
 
 export async function GET(request: NextRequest) {
   const responseHeaders = {
@@ -61,12 +98,20 @@ export async function GET(request: NextRequest) {
       }, { headers: responseHeaders });
     }
 
-    // Fetch fresh metrics
-    const metrics = await getCompanyMetrics('GME');
+    // Fetch fresh metrics and SEC identity profile
+    const [metrics, secProfile] = await Promise.all([
+      getCompanyMetrics('GME'),
+      getSECCompanyProfile(),
+    ]);
 
     if (metrics) {
       const companyInfo: CompanyInfo = {
         ...STATIC_INFO,
+        name: secProfile.name,
+        symbol: secProfile.symbol,
+        exchange: secProfile.exchange,
+        industry: secProfile.industry,
+        headquarters: secProfile.headquarters,
         marketCap: metrics.marketCap,
         marketCapFormatted: metrics.marketCapFormatted,
         peRatio: metrics.peRatio,
@@ -77,8 +122,8 @@ export async function GET(request: NextRequest) {
         avgVolume: metrics.avgVolume,
         beta: metrics.beta,
         sharesOutstanding: metrics.sharesOutstanding,
-        floatShares: null, // Not available from Finnhub basic metrics
-        dataSource: metrics.source,
+        floatShares: null,
+        dataSource: secProfile.dataSource,
       };
 
       // Cache the result
@@ -103,6 +148,7 @@ export async function GET(request: NextRequest) {
     // Return static info with null metrics (not fake 0 values)
     const fallbackInfo: CompanyInfo = {
       ...STATIC_INFO,
+      ...secProfile,
       marketCap: null,
       marketCapFormatted: 'N/A',
       peRatio: null,
@@ -114,12 +160,12 @@ export async function GET(request: NextRequest) {
       beta: null,
       sharesOutstanding: null,
       floatShares: null,
-      dataSource: 'static',
+      dataSource: secProfile.dataSource,
     };
 
     return NextResponse.json({
       ...fallbackInfo,
-      message: 'Unable to fetch live metrics. Add FINNHUB_API_KEY to enable real-time data.',
+      message: 'Unable to fetch live public-market metrics from the configured free sources.',
     }, { headers: responseHeaders });
 
   } catch (error) {

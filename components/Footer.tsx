@@ -8,11 +8,11 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">About This Dashboard</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Real-time GameStop (GME) financial data dashboard sourced directly from official exchanges,
-              regulatory filings, and verified financial data providers.
+              GameStop (GME) financial data dashboard sourced from free public market,
+              regulatory filing, and investor relations endpoints.
             </p>
             <div className="text-xs text-gray-500 dark:text-gray-500">
-              <p>Data sources: Yahoo Finance, SEC EDGAR, FINRA</p>
+              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR, FINRA, GameStop IR</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>
@@ -25,8 +25,8 @@ export default function Footer() {
                 and should not be considered as financial advice.
               </p>
               <p>
-                <strong className="text-gray-700 dark:text-gray-300">Data Accuracy:</strong> All data is sourced directly from official financial institutions
-                and regulatory bodies. Real-time data may have minor delays.
+                <strong className="text-gray-700 dark:text-gray-300">Data Accuracy:</strong> Data is sourced from public financial, company,
+                and regulatory endpoints. Real-time data may have minor delays.
               </p>
               <p>
                 <strong className="text-gray-700 dark:text-gray-300">Investment Risk:</strong> Stock trading involves substantial risk of loss.
@@ -130,7 +130,7 @@ export default function Footer() {
                 a <a href="https://nytemode.com" target="_blank" rel="noopener noreferrer" className="text-gme-red hover:underline">NYTEMODE</a> project
               </p>
               <p className="mt-1 text-xs text-gray-400 dark:text-gray-600">
-                This is not an official GameStop product. Data provided by third-party APIs.
+                This is not an official GameStop product. Data provided by public third-party and regulatory sources.
               </p>
             </div>
             <div className="flex space-x-6">

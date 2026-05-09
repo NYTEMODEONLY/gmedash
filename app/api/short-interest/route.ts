@@ -10,85 +10,78 @@ interface ShortInterestData {
   shortInterest: number;
   daysToCover: number;
   sharesShort?: number;
+  averageDailyVolume?: number;
+  changePercent?: number;
+  revisionFlag?: string | null;
   source: string;
 }
 
-// Finnhub doesn't have short interest in free tier, but we can try
-async function getFinnhubShortInterest(): Promise<ShortInterestData | null> {
-  const apiKey = process.env.FINNHUB_API_KEY;
-  if (!apiKey) return null;
-
-  try {
-    // Finnhub basic metrics might have some short data
-    const response = await axios.get('https://finnhub.io/api/v1/stock/metric', {
-      params: {
-        symbol: 'GME',
-        metric: 'all',
-        token: apiKey,
-      },
-      timeout: 8000,
-    });
-
-    const metric = response.data?.metric;
-    if (metric) {
-      // Check for short interest related fields
-      const shortPercentOfFloat = metric.shortPercentOutstanding || null;
-
-      if (shortPercentOfFloat !== null) {
-        return {
-          date: new Date().toISOString().split('T')[0],
-          shortInterest: parseFloat((shortPercentOfFloat * 100).toFixed(2)),
-          daysToCover: metric.shortRatio || 0,
-          sharesShort: metric.sharesShort || undefined,
-          source: 'finnhub',
-        };
-      }
-    }
-
-    return null;
-  } catch (error: any) {
-    console.log('Finnhub short interest not available:', error?.message);
-    return null;
-  }
+interface FinraPartitionResponse {
+  availablePartitions?: Array<{ partitions: string[] }>;
 }
 
-// Try Yahoo Finance as backup (often blocked)
-async function getYahooShortInterest(): Promise<ShortInterestData | null> {
-  try {
-    const response = await axios.get(
-      'https://query1.finance.yahoo.com/v10/finance/quoteSummary/GME?modules=defaultKeyStatistics',
-      {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          Accept: 'application/json',
-          Referer: 'https://finance.yahoo.com/',
-        },
-        timeout: 8000,
-      }
-    );
+const FINRA_BASE = 'https://api.finra.org';
 
-    const keyStats = response.data?.quoteSummary?.result?.[0]?.defaultKeyStatistics;
-
-    if (keyStats) {
-      const shortPercentOfFloat = keyStats.shortPercentOfFloat?.raw;
-      const shortRatio = keyStats.shortRatio?.raw;
-
-      if (shortPercentOfFloat !== undefined) {
-        return {
-          date: new Date().toISOString().split('T')[0],
-          shortInterest: parseFloat((shortPercentOfFloat * 100).toFixed(2)),
-          daysToCover: shortRatio || 0,
-          sharesShort: keyStats.sharesShort?.raw,
-          source: 'yahoo',
-        };
-      }
+async function getLatestFinraPartitions(dataset: string, limit: number): Promise<string[]> {
+  const response = await axios.get<FinraPartitionResponse>(
+    `${FINRA_BASE}/partitions/group/otcmarket/name/${dataset}`,
+    {
+      timeout: 10000,
+      headers: { Accept: 'application/json' },
     }
+  );
 
-    return null;
-  } catch (error: any) {
-    console.log('Yahoo short interest not available:', error?.message);
-    return null;
+  return (response.data.availablePartitions || [])
+    .map((item) => item.partitions?.[0])
+    .filter((date): date is string => Boolean(date))
+    .slice(0, limit);
+}
+
+async function queryFinraDataset<T>(dataset: string, payload: Record<string, unknown>): Promise<T[]> {
+  const response = await axios.post<T[]>(
+    `${FINRA_BASE}/data/group/otcmarket/name/${dataset}`,
+    payload,
+    {
+      timeout: 10000,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  return Array.isArray(response.data) ? response.data : [];
+}
+
+async function getFinraShortInterest(symbol: string = 'GME'): Promise<ShortInterestData[]> {
+  const partitions = await getLatestFinraPartitions('consolidatedShortInterest', 12);
+  const rows: ShortInterestData[] = [];
+
+  for (const settlementDate of partitions) {
+    const data = await queryFinraDataset<any>('consolidatedShortInterest', {
+      limit: 1,
+      compareFilters: [
+        { fieldName: 'symbolCode', fieldValue: symbol, compareType: 'equal' },
+        { fieldName: 'settlementDate', fieldValue: settlementDate, compareType: 'equal' },
+      ],
+    });
+
+    const row = data[0];
+    if (row?.currentShortPositionQuantity) {
+      rows.push({
+        date: row.settlementDate,
+        shortInterest: Number(row.currentShortPositionQuantity),
+        daysToCover: Number(row.daysToCoverQuantity || 0),
+        sharesShort: Number(row.currentShortPositionQuantity),
+        averageDailyVolume: Number(row.averageDailyVolumeQuantity || 0),
+        changePercent: Number(row.changePercent || 0),
+        revisionFlag: row.revisionFlag || null,
+        source: 'FINRA Consolidated Short Interest',
+      });
+    }
   }
+
+  return rows.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 export async function GET() {
@@ -103,21 +96,15 @@ export async function GET() {
       });
     }
 
-    // Try Finnhub first
-    let shortData = await getFinnhubShortInterest();
+    const shortData = await getFinraShortInterest('GME');
 
-    // Try Yahoo as fallback
-    if (!shortData) {
-      shortData = await getYahooShortInterest();
-    }
-
-    if (shortData) {
+    if (shortData.length > 0) {
       // Cache the result
-      cache.set(CACHE_KEYS.SHORT_INTEREST, [shortData], CACHE_TTL.SHORT_INTEREST);
+      cache.set(CACHE_KEYS.SHORT_INTEREST, shortData, CACHE_TTL.SHORT_INTEREST);
 
       return NextResponse.json({
-        data: [shortData],
-        source: shortData.source,
+        data: shortData,
+        source: 'FINRA Consolidated Short Interest',
         cacheAge: 0,
       });
     }
@@ -137,7 +124,7 @@ export async function GET() {
     return NextResponse.json({
       data: [],
       available: false,
-      message: 'Short interest data requires premium API access. This data is typically published bi-monthly by FINRA.',
+      message: 'FINRA did not return current GME short interest data.',
       source: 'none',
     });
   } catch (error) {

@@ -60,6 +60,7 @@ export interface StockQuote {
   low: number;
   volume: string;
   previousClose: number;
+  source?: string;
 }
 
 export interface HistoricalData {
@@ -75,6 +76,11 @@ export interface ShortInterest {
   date: string;
   shortInterest: number;
   daysToCover: number;
+  sharesShort?: number;
+  averageDailyVolume?: number;
+  changePercent?: number;
+  revisionFlag?: string | null;
+  source?: string;
 }
 
 export interface NewsArticle {

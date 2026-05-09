@@ -32,16 +32,16 @@ export default function RyanCohenTwitter() {
         </a>
       </div>
 
-      {/* Premium Feature Message */}
+      {/* External Source Message */}
       <div className="text-center py-8">
         <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 010 5.656l-1.414 1.414a4 4 0 01-5.657-5.657l1.414-1.414m7.657 3.657l1.414-1.414a4 4 0 00-5.657-5.657l-1.414 1.414" />
         </svg>
-        <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-white">Premium Feature</h3>
+        <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-white">Official X Profile</h3>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-          Live tweet feeds require X/Twitter API access which involves ongoing costs.
+          The dashboard avoids paid X API dependencies. Open the profile directly for the current posts.
         </p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4">
           <a
             href={profileUrl}
             target="_blank"
@@ -53,18 +53,6 @@ export default function RyanCohenTwitter() {
             </svg>
             View on X
           </a>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Consider{' '}
-            <a
-              href="https://github.com/NYTEMODEONLY/gmedash"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gme-red hover:underline"
-            >
-              sponsoring the developer
-            </a>
-            {' '}to help cover premium API costs.
-          </p>
         </div>
       </div>
 

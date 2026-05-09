@@ -140,10 +140,14 @@ export default function PriceChart({ data, isLoading, onPeriodChange, selectedPe
             <YAxis
               stroke={axisColor}
               fontSize={12}
+              width={64}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value}`}
-              domain={['dataMin - 1', 'dataMax + 1']}
+              tickFormatter={(value) => `$${Number(value).toFixed(2)}`}
+              domain={[
+                (dataMin: number) => Math.max(0, Math.floor((dataMin - 1) * 100) / 100),
+                (dataMax: number) => Math.ceil((dataMax + 1) * 100) / 100,
+              ]}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend

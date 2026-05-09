@@ -17,11 +17,11 @@ cp env.example .env.local
 The `.env.local` file is optional since no API keys are needed.
 
 #### Data Sources (All Free):
-- **Yahoo Finance API**: Real-time stock data (no key required)
+- **Stooq + Yahoo Finance**: Real-time stock and historical chart data (no key required)
 - **Google News + Bing News RSS**: Public news feeds (IR excluded)
 - **SEC EDGAR**: Official SEC filings (no key required)
 - **GameStop IR Feed**: Official press releases from investor relations
-- **Short Interest (Premium)**: Finnhub API key optional, Yahoo fallback when available
+- **FINRA**: Public consolidated short-interest data (no key required)
 
 ### 3. Run the Application
 ```bash
@@ -35,7 +35,7 @@ Open http://localhost:3000 in your browser.
 - **Header**: Title, live indicator, refresh button
 - **Stock Info Card**: Current GME price and OHLCV data
 - **Price Chart**: Interactive historical price chart (1M/3M/6M/1Y)
-- **Short Interest Chart**: Short interest percentage over time
+- **Short Interest Chart**: FINRA shares-short and days-to-cover history
 - **Volume Chart**: Trading volume analysis
 - **News Section**: Latest GameStop and GME news
 - **SEC Filings**: Recent SEC filings table
@@ -56,8 +56,7 @@ Open http://localhost:3000 in your browser.
 
 1. Push to GitHub
 2. Connect to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+3. Deploy. No environment variables are required.
 
 ## 📄 Full Documentation
 

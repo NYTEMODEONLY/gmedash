@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       data: [],
       source: 'none',
-      message: 'Unable to fetch historical data. Add FINNHUB_API_KEY to enable real-time data.',
+      message: 'Unable to fetch historical data from the configured free public source.',
       count: 0,
     }, { headers: responseHeaders });
 

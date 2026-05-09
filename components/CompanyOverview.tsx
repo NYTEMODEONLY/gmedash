@@ -11,10 +11,10 @@ interface CompanyInfo {
   industry: string;
   marketCap: number | null;
   marketCapFormatted: string;
-  employees: number;
-  headquarters: string;
-  ceo: string;
-  founded: string;
+  employees: number | null;
+  headquarters: string | null;
+  ceo: string | null;
+  founded: string | null;
   website: string;
   description: string;
   peRatio: number | null;
@@ -166,21 +166,23 @@ export default function CompanyOverview() {
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">CEO</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.ceo}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.ceo || 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">Headquarters</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.headquarters}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.headquarters || 'N/A'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">Founded</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.founded}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.founded || 'N/A'}</span>
           </div>
         </div>
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">Employees</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">~{companyInfo.employees.toLocaleString()}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              {companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A'}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">Industry</span>

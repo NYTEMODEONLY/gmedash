@@ -30,13 +30,13 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 ### Data Sources & Cache TTLs
 | Source | Purpose | Cache |
 |--------|---------|-------|
-| Yahoo Finance | Stock quotes, historical data | 30s (market open) / 5m (closed) |
+| Stooq / Yahoo Finance | Stock quotes and historical data | 30s (market open) / 5m (closed) |
 | Google News RSS | News aggregation (IR excluded) | 5 min |
 | Bing News RSS | News aggregation (secondary, IR excluded) | 5 min |
 | GameStop IR Feed | Press releases (company announcements only) | 5 min |
 | SEC EDGAR | SEC filings (10-K, 10-Q, 8-K) | 10 min |
-| Finnhub / Yahoo | Short interest (premium, optional) | 24 hours |
-| Finnhub (optional) | Company metrics | 1 hour |
+| FINRA | Consolidated short interest | 24 hours |
+| Yahoo Finance | Company metrics where available | 1 hour |
 
 ### Theming System
 - Uses React Context (`lib/ThemeContext.tsx`)
@@ -44,10 +44,10 @@ Client Components → lib/api.ts → /app/api/* routes → External APIs
 - Persists to localStorage as `gme-theme`
 - Uses Tailwind's `dark:` class strategy
 
-### Premium Features (require paid APIs)
-- Short Interest Data - requires Finnhub/ORTEX
-- Ryan Cohen Twitter Feed - requires X API ($100/mo)
-- Options Flow - requires CBOE/Unusual Whales
+### Free-source policy
+- Do not add paid API requirements.
+- If a live public source is unavailable, show an empty or unavailable state instead of estimates or mock records.
+- Ryan Cohen's X panel links to the official profile rather than using a paid X API dependency.
 
 ## Key Patterns
 
@@ -72,8 +72,7 @@ export default function Component({ data, isLoading }: Props) { ... }
 
 ## Environment Variables
 
-Optional - all features work without them, but these enable premium data:
-- `FINNHUB_API_KEY` - Enables company metrics (Market Cap, P/E, EPS, Beta) and short interest when available
+No environment variables are required for the dashboard's current data sources.
 
 ## Tech Stack
 

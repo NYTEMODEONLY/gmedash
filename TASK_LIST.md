@@ -24,8 +24,8 @@
 - [x] Loading and Error components
 
 ## API Integration
-- [x] Alpha Vantage integration (stock price & historical data)
-- [x] Finnhub integration (shorting data)
+- [x] Free public stock quote and historical data integration
+- [x] FINRA short-interest integration
 - [x] News RSS integration (Google/Bing)
 - [x] SEC-API integration (filings)
 
@@ -44,7 +44,7 @@
 
 ## Documentation
 - [x] README.md with setup instructions
-- [x] API key setup instructions
+- [x] No-key setup instructions
 - [x] Deployment guide for Vercel
 
 ## Testing & Deployment
@@ -54,10 +54,10 @@
 - [x] Prepare for Vercel deployment
 
 ## Free API Update
-- [x] Replace Alpha Vantage with Yahoo Finance API
+- [x] Replace Alpha Vantage with free public stock data
 - [x] Replace NewsAPI with Google/Bing RSS
 - [x] Replace SEC-API with SEC EDGAR database
-- [x] Short interest uses premium sources (Finnhub/Yahoo fallback)
+- [x] Short interest uses FINRA public data
 - [x] Update all documentation
 - [x] Test application with free APIs
 - [x] Verify no API keys required for core features

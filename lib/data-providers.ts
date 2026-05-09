@@ -11,7 +11,7 @@ export interface StockQuote {
   low: number;
   volume: string;
   previousClose: number;
-  source: 'finnhub' | 'yahoo' | 'cache';
+  source: 'stooq' | 'yahoo' | 'cache';
 }
 
 // Unified company metrics format
@@ -26,7 +26,7 @@ export interface CompanyMetrics {
   avgVolume: number | null;
   sharesOutstanding: number | null;
   dividendYield: number | null;
-  source: 'finnhub' | 'yahoo' | 'cache';
+  source: 'yahoo' | 'cache';
 }
 
 // Unified historical data format
@@ -72,135 +72,52 @@ export function formatMarketCap(value: number | null): string {
 }
 
 // ============================================
-// FINNHUB PROVIDER
+// FREE PUBLIC QUOTE PROVIDER
 // ============================================
 
-const FINNHUB_BASE = 'https://finnhub.io/api/v1';
-
-function getFinnhubApiKey(): string | null {
-  return process.env.FINNHUB_API_KEY || null;
-}
-
-export async function finnhubGetQuote(symbol: string = 'GME'): Promise<StockQuote | null> {
-  const apiKey = getFinnhubApiKey();
-  if (!apiKey) {
-    console.log('Finnhub: No API key configured');
-    return null;
-  }
-
+export async function stooqGetQuote(symbol: string = 'GME'): Promise<StockQuote | null> {
   try {
-    const response = await axios.get(`${FINNHUB_BASE}/quote`, {
-      params: { symbol, token: apiKey },
+    const stooqSymbol = `${symbol.toLowerCase()}.us`;
+    const response = await axios.get('https://stooq.com/q/l/', {
+      params: {
+        s: stooqSymbol,
+        f: 'sd2t2ohlcv',
+        h: '',
+        e: 'csv',
+      },
       timeout: 8000,
+      responseType: 'text',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
+      },
     });
 
-    const data = response.data;
+    const lines = String(response.data).trim().split(/\r?\n/);
+    if (lines.length < 2) return null;
 
-    // Finnhub returns: c (current), d (change), dp (percent change), h (high), l (low), o (open), pc (previous close)
-    if (data && typeof data.c === 'number' && data.c > 0) {
-      updateProviderHealth('finnhub', true);
-      return {
-        symbol,
-        price: data.c,
-        change: data.d || 0,
-        changePercent: `${(data.dp || 0).toFixed(2)}%`,
-        open: data.o || 0,
-        high: data.h || 0,
-        low: data.l || 0,
-        volume: '0', // Finnhub quote doesn't include volume, need separate call
-        previousClose: data.pc || 0,
-        source: 'finnhub',
-      };
-    }
+    const [csvSymbol, date, time, open, high, low, close, volume] = lines[1].split(',');
+    const price = Number(close);
+    if (!csvSymbol || !date || !time || !Number.isFinite(price) || price <= 0) return null;
 
-    return null;
+    const yahooQuote = await yahooGetQuote(symbol);
+    const previousClose = yahooQuote?.previousClose || price;
+    const change = price - previousClose;
+
+    return {
+      symbol,
+      price,
+      change,
+      changePercent: previousClose > 0 ? `${((change / previousClose) * 100).toFixed(2)}%` : '0.00%',
+      open: Number(open) || 0,
+      high: Number(high) || 0,
+      low: Number(low) || 0,
+      volume: String(Number(volume) || 0),
+      previousClose,
+      source: 'stooq',
+    };
   } catch (error: any) {
-    console.error('Finnhub quote error:', error?.message || error);
-    updateProviderHealth('finnhub', false);
+    console.error('Stooq quote error:', error?.message || error);
     return null;
-  }
-}
-
-export async function finnhubGetMetrics(symbol: string = 'GME'): Promise<CompanyMetrics | null> {
-  const apiKey = getFinnhubApiKey();
-  if (!apiKey) {
-    console.log('Finnhub: No API key configured');
-    return null;
-  }
-
-  try {
-    const response = await axios.get(`${FINNHUB_BASE}/stock/metric`, {
-      params: { symbol, metric: 'all', token: apiKey },
-      timeout: 8000,
-    });
-
-    const data = response.data;
-    const metric = data?.metric;
-
-    if (metric) {
-      updateProviderHealth('finnhub', true);
-      const marketCap = metric.marketCapitalization ? metric.marketCapitalization * 1e6 : null;
-
-      return {
-        marketCap,
-        marketCapFormatted: formatMarketCap(marketCap),
-        peRatio: metric.peBasicExclExtraTTM || metric.peTTM || null,
-        eps: metric.epsBasicExclExtraItemsTTM || metric.epsTTM || null,
-        beta: metric.beta || null,
-        fiftyTwoWeekHigh: metric['52WeekHigh'] || null,
-        fiftyTwoWeekLow: metric['52WeekLow'] || null,
-        avgVolume: metric['10DayAverageTradingVolume'] ? metric['10DayAverageTradingVolume'] * 1e6 : null,
-        sharesOutstanding: metric.sharesOutstanding ? metric.sharesOutstanding * 1e6 : null,
-        dividendYield: metric.dividendYieldIndicatedAnnual || null,
-        source: 'finnhub',
-      };
-    }
-
-    return null;
-  } catch (error: any) {
-    console.error('Finnhub metrics error:', error?.message || error);
-    updateProviderHealth('finnhub', false);
-    return null;
-  }
-}
-
-export async function finnhubGetCandles(
-  symbol: string = 'GME',
-  resolution: string = 'D',
-  from: number,
-  to: number
-): Promise<HistoricalDataPoint[]> {
-  const apiKey = getFinnhubApiKey();
-  if (!apiKey) {
-    console.log('Finnhub: No API key configured');
-    return [];
-  }
-
-  try {
-    const response = await axios.get(`${FINNHUB_BASE}/stock/candle`, {
-      params: { symbol, resolution, from, to, token: apiKey },
-      timeout: 10000,
-    });
-
-    const data = response.data;
-
-    if (data && data.s === 'ok' && data.t && data.t.length > 0) {
-      updateProviderHealth('finnhub', true);
-      return data.t.map((timestamp: number, i: number) => ({
-        date: new Date(timestamp * 1000).toISOString().split('T')[0],
-        open: data.o[i] || 0,
-        high: data.h[i] || 0,
-        low: data.l[i] || 0,
-        close: data.c[i] || 0,
-        volume: data.v[i] || 0,
-      }));
-    }
-
-    return [];
-  } catch (error: any) {
-    console.error('Finnhub candles error:', error?.message || error);
-    updateProviderHealth('finnhub', false);
-    return [];
   }
 }
 
@@ -486,23 +403,17 @@ export async function yahooGetFullMetrics(symbol: string = 'GME'): Promise<Compa
         }
       }
 
-      // Calculate market cap if we have price and can estimate shares
-      // GME has approximately 446.5 million shares outstanding as of recent filings
-      const ESTIMATED_SHARES = 446500000;
-      const price = meta.regularMarketPrice;
-      const estimatedMarketCap = price ? price * ESTIMATED_SHARES : null;
-
       updateProviderHealth('yahoo', true);
       return {
-        marketCap: estimatedMarketCap,
-        marketCapFormatted: formatMarketCap(estimatedMarketCap),
+        marketCap: null,
+        marketCapFormatted: 'N/A',
         peRatio: null, // Can't calculate without EPS
         eps: null,
         beta: null,
         fiftyTwoWeekHigh,
         fiftyTwoWeekLow,
         avgVolume,
-        sharesOutstanding: ESTIMATED_SHARES,
+        sharesOutstanding: null,
         dividendYield: null,
         source: 'yahoo',
       };
@@ -521,15 +432,9 @@ export async function yahooGetFullMetrics(symbol: string = 'GME'): Promise<Compa
 // ============================================
 
 export async function getStockQuote(symbol: string = 'GME'): Promise<StockQuote | null> {
-  // Try Finnhub first
-  const finnhubQuote = await finnhubGetQuote(symbol);
-  if (finnhubQuote) {
-    // Get volume from Yahoo since Finnhub quote doesn't include it
-    const yahooQuote = await yahooGetQuote(symbol);
-    if (yahooQuote) {
-      finnhubQuote.volume = yahooQuote.volume;
-    }
-    return finnhubQuote;
+  const stooqQuote = await stooqGetQuote(symbol);
+  if (stooqQuote) {
+    return stooqQuote;
   }
 
   // Fallback to Yahoo
@@ -542,21 +447,6 @@ export async function getStockQuote(symbol: string = 'GME'): Promise<StockQuote 
 }
 
 export async function getCompanyMetrics(symbol: string = 'GME'): Promise<CompanyMetrics | null> {
-  // Try Finnhub first
-  const finnhubMetrics = await finnhubGetMetrics(symbol);
-  if (finnhubMetrics && finnhubMetrics.marketCap !== null) {
-    // Supplement with Yahoo 52-week data if missing
-    if (!finnhubMetrics.fiftyTwoWeekHigh || !finnhubMetrics.fiftyTwoWeekLow) {
-      const yahooData = await yahooGetMetricsFromChart(symbol);
-      if (yahooData) {
-        finnhubMetrics.fiftyTwoWeekHigh = finnhubMetrics.fiftyTwoWeekHigh || yahooData.fiftyTwoWeekHigh || null;
-        finnhubMetrics.fiftyTwoWeekLow = finnhubMetrics.fiftyTwoWeekLow || yahooData.fiftyTwoWeekLow || null;
-      }
-    }
-    return finnhubMetrics;
-  }
-
-  // Fallback: Try to get full data from Yahoo quoteSummary
   const yahooFullMetrics = await yahooGetFullMetrics(symbol);
   if (yahooFullMetrics) {
     return yahooFullMetrics;
@@ -587,27 +477,6 @@ export async function getHistoricalData(
   symbol: string = 'GME',
   period: string = '1Y'
 ): Promise<{ data: HistoricalDataPoint[]; source: string }> {
-  // Map period to Finnhub timestamps
-  const now = Math.floor(Date.now() / 1000);
-  const periodMap: Record<string, number> = {
-    '1W': 7 * 24 * 60 * 60,
-    '1M': 30 * 24 * 60 * 60,
-    '3M': 90 * 24 * 60 * 60,
-    '6M': 180 * 24 * 60 * 60,
-    '1Y': 365 * 24 * 60 * 60,
-    '5Y': 5 * 365 * 24 * 60 * 60,
-  };
-
-  const seconds = periodMap[period] || periodMap['1Y'];
-  const from = now - seconds;
-
-  // Try Finnhub first
-  const finnhubData = await finnhubGetCandles(symbol, 'D', from, now);
-  if (finnhubData.length > 0) {
-    return { data: finnhubData, source: 'finnhub' };
-  }
-
-  // Fallback to Yahoo
   const yahooRangeMap: Record<string, string> = {
     '1W': '5d',
     '1M': '1mo',

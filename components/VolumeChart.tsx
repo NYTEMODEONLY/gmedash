@@ -138,6 +138,7 @@ export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
             <YAxis
               stroke={axisColor}
               fontSize={12}
+              width={52}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}

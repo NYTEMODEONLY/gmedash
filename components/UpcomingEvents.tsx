@@ -169,11 +169,6 @@ export default function UpcomingEvents() {
                     {formatDistanceToNow(parseISO(event.date), { addSuffix: true })}
                   </span>
                 </div>
-                {event.source === 'Estimated' && (
-                  <span className="inline-block mt-2 text-xs text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded">
-                    Date is estimated
-                  </span>
-                )}
               </div>
             </div>
           ))}
@@ -191,7 +186,7 @@ export default function UpcomingEvents() {
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Source: Yahoo Finance, SEC EDGAR</span>
+          <span>Sources: Yahoo Finance chart metadata, GameStop IR</span>
           <a
             href="https://news.gamestop.com"
             target="_blank"

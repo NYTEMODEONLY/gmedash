@@ -193,26 +193,14 @@ export async function GET() {
     };
 
     if (uniqueArticles.length === 0) {
-      return NextResponse.json([{
-        title: 'Visit Yahoo Finance for Latest GME News',
-        description: 'Click to view the latest GameStop news and updates on Yahoo Finance.',
-        url: 'https://finance.yahoo.com/quote/GME/news',
-        publishedAt: new Date().toISOString(),
-        source: { name: 'Yahoo Finance' },
-      }], { headers });
+      return NextResponse.json([], { headers });
     }
 
     return NextResponse.json(uniqueArticles.slice(0, 15), { headers });
 
   } catch (error) {
     console.error('News API error:', error);
-    return NextResponse.json([{
-      title: 'Visit Yahoo Finance for Latest GME News',
-      description: 'Click to view the latest GameStop news and updates on Yahoo Finance.',
-      url: 'https://finance.yahoo.com/quote/GME/news',
-      publishedAt: new Date().toISOString(),
-      source: { name: 'Yahoo Finance' },
-    }], {
+    return NextResponse.json([], {
       headers: { 'Cache-Control': 'no-cache' },
     });
   }
