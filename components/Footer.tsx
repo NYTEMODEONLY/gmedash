@@ -12,7 +12,7 @@ export default function Footer() {
               regulatory filing, and investor relations endpoints.
             </p>
             <div className="text-xs text-gray-500 dark:text-gray-500">
-              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR, FINRA, GameStop IR, Google/Bing News RSS, Jina/X, Wikipedia, Coinbase</p>
+              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR/companyfacts/ownership, FINRA, GameStop IR, Google/Bing News RSS, Jina/X, Wikipedia, Coinbase</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>

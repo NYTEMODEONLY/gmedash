@@ -27,6 +27,8 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 - **Key Statistics** - Market cap, P/E ratio, EPS, dividend yield
 - **Live Company Facts** - CEO and employee range from the latest SEC 10-K; founded year from Wikipedia's public summary API
 - **Investor Snapshot** - Balance sheet liquidity, debt, net income, store footprint, segment/product mix, shareholder registration, and Bitcoin/capital-allocation disclosures
+- **Turnaround Progress** - Year-over-year SEC annual filing trend for revenue, gross margin, net income, liquidity, debt, stores, DRS/registered shares, and shares outstanding
+- **Insider Transactions** - SEC Form 3/4/5 ownership transactions for board, officer, and Section 16 buys, sells, awards, and dispositions
 - **Quick Links** - Direct links to the source filing, Yahoo Finance, SEC EDGAR, Wikipedia, TradingView, and investor relations
 
 ### News & Updates
@@ -55,6 +57,8 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | **Volume Chart** | End-of-day historical volume | Yahoo Finance GME history page |
 | **Company Overview** | SEC identity, CEO, employees, headquarters, market metrics, founded year | SEC 10-K archive filing, SEC EDGAR company page, Yahoo Finance key statistics, Wikipedia page |
 | **Investor Snapshot** | Liquidity, debt, FY results, stores, product mix, shareholder base, DRS/DSPP context, Bitcoin disclosures | Latest GameStop SEC 10-K archive filing, SEC EDGAR company page, Coinbase BTC spot page |
+| **Turnaround Progress** | Year-over-year revenue, gross margin, net income, liquidity, debt, stores, registered shares, record holders, and shares outstanding | SEC companyfacts XBRL API and exact SEC 10-K archive filing links |
+| **Insider Transactions** | Recent Form 3/4/5 board, officer, and Section 16 transactions with buy/sell code summaries | Exact SEC ownership filing links and SEC EDGAR ownership page |
 | **Short Interest** | Live reported short-position history | FINRA Consolidated Short Interest page |
 | **Ryan Cohen Posts** | Free public feed when available, with official post links | Official X profile/post links, Nitter RSS mirror URL, Jina AI public X snapshot fallback URL |
 | **Press Releases** | Official GameStop announcements | Exact GameStop IR release links and GameStop IR news releases page |
@@ -94,6 +98,8 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | Press Releases | GameStop Investor Relations (IR feed) | Free | Active |
 | Company Info | SEC submissions, SEC 10-K, Yahoo Finance, Wikipedia summary API | Free | Active |
 | Investor Snapshot | SEC 10-K, Coinbase BTC spot | Free | Active |
+| Turnaround Progress | SEC companyfacts XBRL API, SEC 10-K archive filings | Free | Active |
+| Insider Transactions | SEC Forms 3/4/5 ownership filings | Free | Active |
 | Upcoming Events | Confirmed Yahoo Finance metadata and GameStop IR links | Free | Active |
 | Short Interest | FINRA public API | Free | Active |
 | Ryan Cohen Posts | Nitter RSS mirror, Jina AI public X snapshot, X profile links | Free | Active |
@@ -166,6 +172,8 @@ gmedash/
 │   │   ├── press-releases/ # Press releases
 │   │   ├── company-info/   # Company metrics
 │   │   ├── investor-snapshot/ # SEC-backed investor facts
+│   │   ├── turnaround/     # SEC year-over-year turnaround metrics
+│   │   ├── insider-transactions/ # SEC ownership transactions
 │   │   ├── events/         # Upcoming events
 │   │   ├── short-interest/ # FINRA short interest
 │   │   ├── twitter/        # External X profile fallback
@@ -178,6 +186,8 @@ gmedash/
 │   ├── StockInfoCard.tsx   # Live stock card
 │   ├── CompanyOverview.tsx # Company information
 │   ├── InvestorSnapshot.tsx# SEC-backed investor facts
+│   ├── TurnaroundProgress.tsx # SEC annual trend dashboard
+│   ├── InsiderTransactions.tsx# SEC Form 3/4/5 transactions
 │   ├── PriceChart.tsx      # Price history chart
 │   ├── VolumeChart.tsx     # Volume chart
 │   ├── ShortingChart.tsx   # FINRA short interest

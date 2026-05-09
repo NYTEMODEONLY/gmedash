@@ -13,6 +13,8 @@ import RyanCohenTwitter from '@/components/RyanCohenTwitter';
 import PressReleases from '@/components/PressReleases';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import InvestorSnapshot from '@/components/InvestorSnapshot';
+import TurnaroundProgress from '@/components/TurnaroundProgress';
+import InsiderTransactions from '@/components/InsiderTransactions';
 import Footer from '@/components/Footer';
 import {
   getStockQuote,
@@ -240,6 +242,14 @@ export default function Dashboard() {
 
         <div className="mb-8">
           <InvestorSnapshot />
+        </div>
+
+        <div className="mb-8">
+          <TurnaroundProgress />
+        </div>
+
+        <div className="mb-8">
+          <InsiderTransactions />
         </div>
 
         {/* Stock Info and Price Chart Row */}

@@ -32,6 +32,8 @@
 - [x] News RSS integration (Google/Bing)
 - [x] SEC EDGAR integration (filings)
 - [x] SEC 10-K investor snapshot integration
+- [x] SEC annual turnaround progress integration
+- [x] SEC Form 3/4/5 insider transaction integration
 - [x] Free Ryan Cohen public-post fallback integration
 
 ## Styling & Responsiveness
