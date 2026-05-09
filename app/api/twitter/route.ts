@@ -232,10 +232,12 @@ export async function GET(request: NextRequest) {
     // Try Nitter RSS first
     let tweets = await fetchFromNitterRSS();
     let source = 'Free Nitter RSS mirror of public X posts';
+    let sourceUrl = `https://nitter.net/${RYAN_COHEN_HANDLE}/rss`;
 
     if (tweets.length === 0) {
       tweets = await fetchFromJinaXProfile();
       source = 'Free Jina AI public X profile snapshot';
+      sourceUrl = `https://r.jina.ai/http://x.com/${RYAN_COHEN_HANDLE}`;
     }
 
     if (tweets.length === 0) {
@@ -256,6 +258,7 @@ export async function GET(request: NextRequest) {
       profileUrl: `https://x.com/${RYAN_COHEN_HANDLE}`,
       handle: `@${RYAN_COHEN_HANDLE}`,
       source,
+      sourceUrl,
       lastUpdated: new Date().toISOString(),
     }, { headers: responseHeaders });
 

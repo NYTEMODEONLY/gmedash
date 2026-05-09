@@ -174,7 +174,17 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Source: GameStop Investor Relations</span>
+          <span>
+            Source:{' '}
+            <a
+              href="https://news.gamestop.com/news-releases-0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gme-red hover:text-gme-red-dark font-medium transition-colors"
+            >
+              GameStop Investor Relations
+            </a>
+          </span>
           <span>Auto-updates every 5 min</span>
         </div>
       </div>

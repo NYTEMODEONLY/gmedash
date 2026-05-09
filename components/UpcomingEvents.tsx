@@ -10,6 +10,7 @@ interface UpcomingEvent {
   type: 'earnings' | 'dividend' | 'meeting' | 'filing' | 'other';
   description: string;
   source?: string;
+  url?: string;
 }
 
 interface EventsResponse {
@@ -148,8 +149,11 @@ export default function UpcomingEvents() {
       {events.length > 0 ? (
         <div className="space-y-4">
           {events.map((event, index) => (
-            <div
+            <a
               key={index}
+              href={event.url || 'https://news.gamestop.com/events-and-presentations'}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
             >
               {getEventIcon(event.type)}
@@ -170,7 +174,7 @@ export default function UpcomingEvents() {
                   </span>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       ) : (
@@ -186,7 +190,26 @@ export default function UpcomingEvents() {
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span>Sources: Yahoo Finance chart metadata, GameStop IR</span>
+          <span>
+            Sources:{' '}
+            <a
+              href="https://finance.yahoo.com/quote/GME"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors"
+            >
+              Yahoo Finance chart metadata
+            </a>
+            {', '}
+            <a
+              href="https://news.gamestop.com/events-and-presentations"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium transition-colors"
+            >
+              GameStop IR
+            </a>
+          </span>
           <a
             href="https://news.gamestop.com"
             target="_blank"

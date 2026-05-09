@@ -177,7 +177,16 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
           <span className="font-medium">Data Points:</span> {chartData.length}
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Source: FINRA Consolidated Short Interest. This is reported short position data, not daily short-sale volume and not a float percentage.
+          Source:{' '}
+          <a
+            href="https://www.finra.org/finra-data/browse-catalog/equity-short-interest/data"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+          >
+            FINRA Consolidated Short Interest
+          </a>
+          . This is reported short position data, not daily short-sale volume and not a float percentage.
         </div>
       </div>
     </div>

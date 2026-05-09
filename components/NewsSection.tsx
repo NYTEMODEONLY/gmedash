@@ -97,7 +97,25 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
       <div className="mt-4 p-3 bg-gray-50 dark:bg-gme-dark-200 rounded-lg transition-colors">
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            <span className="font-medium">Sources:</span> Google News, Bing News (IR excluded)
+            <span className="font-medium">Sources:</span>{' '}
+            <a
+              href="https://news.google.com/search?q=GameStop%20OR%20GME%20stock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              Google News
+            </a>
+            {', '}
+            <a
+              href="https://www.bing.com/news/search?q=GameStop%20GME%20stock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              Bing News
+            </a>
+            {' '}(IR excluded)
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
             Auto-refresh: 5 min

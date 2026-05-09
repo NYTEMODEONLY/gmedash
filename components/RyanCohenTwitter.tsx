@@ -17,6 +17,7 @@ interface TwitterResponse {
   profileUrl: string;
   handle: string;
   source?: string;
+  sourceUrl?: string;
   message?: string;
   lastUpdated?: string;
 }
@@ -118,7 +119,17 @@ export default function RyanCohenTwitter() {
 
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-400">
-          <span>{feed?.source || 'Free Nitter RSS mirror of public X posts'}</span>
+          <span>
+            Source:{' '}
+            <a
+              href={feed?.sourceUrl || 'https://nitter.net/ryancohen/rss'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+            >
+              {feed?.source || 'Free Nitter RSS mirror of public X posts'}
+            </a>
+          </span>
           <a
             href={profileUrl}
             target="_blank"

@@ -47,6 +47,46 @@ export default function InvestorSnapshot() {
     fetchSnapshot();
   }, [fetchSnapshot]);
 
+  const secSourceUrl = snapshot?.filingUrl || 'https://www.sec.gov/edgar/browse/?CIK=0001326380';
+  const coinbaseBtcUrl = 'https://www.coinbase.com/price/bitcoin';
+
+  const renderSectionSource = (section: SnapshotSection) => {
+    if (section.title === 'Capital Allocation') {
+      return (
+        <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+          <a
+            href={secSourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gme-red dark:hover:text-gme-red transition-colors"
+          >
+            SEC 10-K
+          </a>
+          {' / '}
+          <a
+            href={coinbaseBtcUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gme-red dark:hover:text-gme-red transition-colors"
+          >
+            Coinbase BTC
+          </a>
+        </span>
+      );
+    }
+
+    return (
+      <a
+        href={secSourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-[11px] text-gray-500 dark:text-gray-400 hover:text-gme-red dark:hover:text-gme-red font-medium transition-colors"
+      >
+        {section.source}
+      </a>
+    );
+  };
+
   return (
     <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
@@ -93,7 +133,7 @@ export default function InvestorSnapshot() {
             <div key={section.title} className="rounded-lg border border-gray-100 dark:border-gme-dark-300 bg-gray-50 dark:bg-gme-dark-200 p-4">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{section.title}</h3>
-                <span className="text-[11px] text-gray-500 dark:text-gray-400">{section.source}</span>
+                {renderSectionSource(section)}
               </div>
               <div className="space-y-4">
                 {section.metrics.map((metric) => (
@@ -124,7 +164,7 @@ export default function InvestorSnapshot() {
           <span>
             All company facts are sourced from the latest GameStop SEC 10-K unless noted. BTC spot context:{' '}
             <a
-              href="https://www.coinbase.com/price/bitcoin"
+              href={coinbaseBtcUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
