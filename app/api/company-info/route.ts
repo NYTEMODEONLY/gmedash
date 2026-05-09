@@ -61,6 +61,12 @@ async function getSECCompanyProfile() {
     const headquarters = business?.city && business?.stateOrCountry
       ? `${business.city}, ${business.stateOrCountry}`
       : null;
+    const filings = data?.filings?.recent;
+    const annualReportIndex = filings?.form?.findIndex((form: string) => form === '10-K') ?? -1;
+    const annualReportUrl = annualReportIndex >= 0 && filings?.accessionNumber?.[annualReportIndex] && filings?.primaryDocument?.[annualReportIndex]
+      ? `https://www.sec.gov/Archives/edgar/data/1326380/${filings.accessionNumber[annualReportIndex].replace(/-/g, '')}/${filings.primaryDocument[annualReportIndex]}`
+      : null;
+    const leadership = annualReportUrl ? await getLeadershipFromSECAnnualReport(annualReportUrl) : null;
 
     return {
       name: data?.name || STATIC_INFO.name,
@@ -68,7 +74,8 @@ async function getSECCompanyProfile() {
       exchange: data?.exchanges?.[0] || STATIC_INFO.exchange,
       industry: data?.sicDescription || STATIC_INFO.industry,
       headquarters,
-      dataSource: 'sec/yahoo',
+      ceo: leadership?.ceo || null,
+      dataSource: leadership?.ceo ? 'sec/yahoo/sec-10k' : 'sec/yahoo',
     };
   } catch (error) {
     console.error('SEC company profile error:', error);
@@ -78,8 +85,44 @@ async function getSECCompanyProfile() {
       exchange: STATIC_INFO.exchange,
       industry: STATIC_INFO.industry,
       headquarters: null,
+      ceo: null,
       dataSource: 'yahoo',
     };
+  }
+}
+
+function decodeSECText(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/g, ' ')
+    .replace(/&#8217;|&rsquo;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function getLeadershipFromSECAnnualReport(url: string): Promise<{ ceo: string | null } | null> {
+  try {
+    const response = await axios.get(url, {
+      timeout: 10000,
+      responseType: 'text',
+      headers: {
+        'User-Agent': 'GMEDASH-SEC-Reader/1.0 contact@example.com',
+        Accept: 'text/html,application/xhtml+xml',
+      },
+    });
+
+    const text = decodeSECText(String(response.data));
+    const ceoMatch = text.match(/Chief Executive Officer,\s*([A-Z][A-Za-z .'-]+?)(?:,|\sand\s|\.|\s+as of)/i)
+      || text.match(/([A-Z][A-Za-z .'-]+?),\s*(?:the Company's\s*)?Chairman(?:\s+of the Board)?\s+and\s+Chief Executive Officer/i);
+
+    return {
+      ceo: ceoMatch?.[1]?.trim() || null,
+    };
+  } catch (error) {
+    console.error('SEC annual report leadership error:', error);
+    return null;
   }
 }
 
@@ -112,6 +155,7 @@ export async function GET(request: NextRequest) {
         exchange: secProfile.exchange,
         industry: secProfile.industry,
         headquarters: secProfile.headquarters,
+        ceo: secProfile.ceo || STATIC_INFO.ceo,
         marketCap: metrics.marketCap,
         marketCapFormatted: metrics.marketCapFormatted,
         peRatio: metrics.peRatio,
@@ -149,6 +193,7 @@ export async function GET(request: NextRequest) {
     const fallbackInfo: CompanyInfo = {
       ...STATIC_INFO,
       ...secProfile,
+      ceo: secProfile.ceo || STATIC_INFO.ceo,
       marketCap: null,
       marketCapFormatted: 'N/A',
       peRatio: null,

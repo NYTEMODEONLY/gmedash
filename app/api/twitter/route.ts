@@ -9,6 +9,7 @@ interface Tweet {
   text: string;
   createdAt: string;
   url: string;
+  source?: string;
   metrics?: {
     likes: number;
     retweets: number;
@@ -100,6 +101,18 @@ const parseTweetsFromNitter = (html: string): Tweet[] => {
   return tweets;
 };
 
+const decodeHtml = (value: string): string => value
+  .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/&nbsp;/g, ' ')
+  .replace(/&amp;/g, '&')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;|&apos;/g, "'")
+  .replace(/\s+/g, ' ')
+  .trim();
+
 // Fallback: Use RSS feed from Nitter
 const fetchFromNitterRSS = async (): Promise<Tweet[]> => {
   const tweets: Tweet[] = [];
@@ -127,17 +140,19 @@ const fetchFromNitterRSS = async (): Promise<Tweet[]> => {
         const pubDateMatch = itemContent.match(/<pubDate[^>]*>(.*?)<\/pubDate>/i);
         const descMatch = itemContent.match(/<description[^>]*>([\s\S]*?)<\/description>/i);
 
-        const title = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') : '';
-        const description = descMatch ? descMatch[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').replace(/<[^>]+>/g, '') : '';
-        const link = linkMatch ? linkMatch[1].replace(/nitter\.[^/]+/, 'twitter.com') : '';
+        const title = titleMatch ? decodeHtml(titleMatch[1]) : '';
+        const description = descMatch ? decodeHtml(descMatch[1]) : '';
+        const link = linkMatch ? decodeHtml(linkMatch[1]).replace(/https?:\/\/nitter\.[^/]+/, 'https://x.com').replace(/#m$/, '') : '';
         const pubDate = pubDateMatch ? pubDateMatch[1] : '';
 
         if (title || description) {
+          const id = link.match(/status\/(\d+)/)?.[1] || String(Date.now() + count);
           tweets.push({
-            id: link.split('/').pop() || String(Date.now() + count),
-            text: (description || title).trim().substring(0, 500),
+            id,
+            text: (title || description).trim().substring(0, 500),
             createdAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
-            url: link.includes('twitter.com') ? link : `https://twitter.com/${RYAN_COHEN_HANDLE}`,
+            url: link.includes('x.com') ? link : `https://x.com/${RYAN_COHEN_HANDLE}`,
+            source: `${instance.replace('https://', '')} RSS mirror`,
           });
           count++;
         }
@@ -162,6 +177,10 @@ const fetchRecentTweetsViaSearch = async (): Promise<Tweet[]> => {
 };
 
 export async function GET(request: NextRequest) {
+  const responseHeaders = {
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=120',
+  };
+
   try {
     // Try Nitter RSS first
     let tweets = await fetchFromNitterRSS();
@@ -170,10 +189,10 @@ export async function GET(request: NextRequest) {
       // Return a message directing users to check Twitter directly
       return NextResponse.json({
         tweets: [],
-        message: 'Unable to fetch tweets automatically. Please visit Twitter directly.',
-        profileUrl: `https://twitter.com/${RYAN_COHEN_HANDLE}`,
+        message: 'Unable to fetch Ryan Cohen posts from the free RSS mirror right now. Open X directly for the live profile.',
+        profileUrl: `https://x.com/${RYAN_COHEN_HANDLE}`,
         handle: `@${RYAN_COHEN_HANDLE}`,
-      });
+      }, { headers: responseHeaders });
     }
 
     // Sort by date (newest first)
@@ -181,17 +200,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       tweets: tweets.slice(0, 10),
-      profileUrl: `https://twitter.com/${RYAN_COHEN_HANDLE}`,
+      profileUrl: `https://x.com/${RYAN_COHEN_HANDLE}`,
       handle: `@${RYAN_COHEN_HANDLE}`,
-    });
+      source: 'Free Nitter RSS mirror of public X posts',
+      lastUpdated: new Date().toISOString(),
+    }, { headers: responseHeaders });
 
   } catch (error) {
     console.error('Twitter API error:', error);
     return NextResponse.json({
       tweets: [],
-      message: 'Unable to fetch tweets. Please visit Twitter directly.',
-      profileUrl: `https://twitter.com/${RYAN_COHEN_HANDLE}`,
+      message: 'Unable to fetch tweets. Please visit X directly.',
+      profileUrl: `https://x.com/${RYAN_COHEN_HANDLE}`,
       handle: `@${RYAN_COHEN_HANDLE}`,
-    }, { status: 200 }); // Return 200 with empty tweets so UI can handle gracefully
+    }, { status: 200, headers: responseHeaders }); // Return 200 with empty tweets so UI can handle gracefully
   }
 }

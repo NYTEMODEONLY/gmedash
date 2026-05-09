@@ -29,17 +29,17 @@ export async function GET(request: NextRequest) {
         const forms = recent.form || [];
         const filingDates = recent.filingDate || [];
         const accessionNumbers = recent.accessionNumber || [];
-        const descriptions = recent.description || [];
+        const descriptions = recent.primaryDocDescription || recent.description || [];
 
         for (let i = 0; i < Math.min(forms.length, 50); i++) {
           const formType = forms[i];
 
-          // Focus on key filing types (handle both short and long form names, plus amendments)
-          if (isRelevantFilingType(formType)) {
+          // Show the latest live EDGAR submissions instead of hiding newer filing classes.
+          if (formType && filingDates[i] && accessionNumbers[i]) {
             allFilings.push({
               formType,
               filingDate: filingDates[i],
-              description: descriptions[i] || getFilingDescription(formType),
+              description: descriptions[i] && descriptions[i] !== formType ? descriptions[i] : getFilingDescription(formType),
               url: `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionNumbers[i].replace(/-/g, '')}/${accessionNumbers[i]}-index.htm`,
               companyName: data.name || 'GameStop Corp.',
             });
@@ -72,31 +72,13 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to check if a form type is relevant for display
-const isRelevantFilingType = (formType: string): boolean => {
-  // Exact matches for common forms
-  const exactMatches = ['10-K', '10-Q', '8-K', 'DEF 14A', '4', '3', '5'];
-  if (exactMatches.includes(formType)) return true;
-
-  // Normalize form type for pattern matching (uppercase, no extra spaces)
-  const normalized = formType.toUpperCase().trim();
-
-  // Schedule 13D/13G filings (including amendments)
-  // SEC uses both "SC 13D" and "SCHEDULE 13D" formats
-  if (normalized.includes('13D') || normalized.includes('13G')) return true;
-
-  // 10-K and 10-Q amendments
-  if (normalized.startsWith('10-K') || normalized.startsWith('10-Q')) return true;
-
-  // 8-K amendments
-  if (normalized.startsWith('8-K')) return true;
-
-  return false;
-};
-
 // Helper function to get filing descriptions
 const getFilingDescription = (formType: string): string => {
   const normalized = formType.toUpperCase().trim();
+
+  if (normalized === '425') return 'Prospectus / communications filed under Rule 425';
+  if (normalized === '144') return 'Notice of proposed sale of securities';
+  if (normalized.includes('DEFA14A')) return 'Additional definitive proxy soliciting materials';
 
   // Check for specific patterns
   if (normalized === '4') return 'Insider Trading Report - Changes in beneficial ownership';
