@@ -169,6 +169,53 @@ const fetchFromNitterRSS = async (): Promise<Tweet[]> => {
   return tweets;
 };
 
+const parseJinaDate = (label: string): string => {
+  const now = new Date();
+  const hasYear = /\b\d{4}\b/.test(label);
+  const parsed = new Date(hasYear ? label : `${label}, ${now.getFullYear()}`);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString();
+  }
+  return now.toISOString();
+};
+
+const fetchFromJinaXProfile = async (): Promise<Tweet[]> => {
+  try {
+    const response = await axios.get(`https://r.jina.ai/http://x.com/${RYAN_COHEN_HANDLE}`, {
+      timeout: 10000,
+      responseType: 'text',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
+        Accept: 'text/markdown,text/plain',
+      },
+    });
+
+    const lines = String(response.data).split(/\r?\n/).map((line) => line.trim());
+    const tweets: Tweet[] = [];
+
+    for (let i = 0; i < lines.length && tweets.length < 10; i++) {
+      const match = lines[i].match(/^\[([A-Za-z]{3,9}\s+\d{1,2}(?:,\s+\d{4})?)\]\(https?:\/\/x\.com\/ryancohen\/status\/(\d+)\)$/i);
+      if (!match) continue;
+
+      const textLine = lines.slice(i + 1).find((line) => line && !line.startsWith('[') && line !== '·');
+      if (!textLine) continue;
+
+      tweets.push({
+        id: match[2],
+        text: decodeHtml(textLine).substring(0, 500),
+        createdAt: parseJinaDate(match[1]),
+        url: `https://x.com/${RYAN_COHEN_HANDLE}/status/${match[2]}`,
+        source: 'Jina AI public X snapshot',
+      });
+    }
+
+    return tweets;
+  } catch (error) {
+    console.log('Jina X profile fallback failed:', error);
+    return [];
+  }
+};
+
 // Alternative: Use Twitter embed approach
 const fetchRecentTweetsViaSearch = async (): Promise<Tweet[]> => {
   // Since we can't access Twitter API directly without keys,
@@ -184,6 +231,12 @@ export async function GET(request: NextRequest) {
   try {
     // Try Nitter RSS first
     let tweets = await fetchFromNitterRSS();
+    let source = 'Free Nitter RSS mirror of public X posts';
+
+    if (tweets.length === 0) {
+      tweets = await fetchFromJinaXProfile();
+      source = 'Free Jina AI public X profile snapshot';
+    }
 
     if (tweets.length === 0) {
       // Return a message directing users to check Twitter directly
@@ -202,7 +255,7 @@ export async function GET(request: NextRequest) {
       tweets: tweets.slice(0, 10),
       profileUrl: `https://x.com/${RYAN_COHEN_HANDLE}`,
       handle: `@${RYAN_COHEN_HANDLE}`,
-      source: 'Free Nitter RSS mirror of public X posts',
+      source,
       lastUpdated: new Date().toISOString(),
     }, { headers: responseHeaders });
 
