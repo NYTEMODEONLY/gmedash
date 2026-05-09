@@ -145,7 +145,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gme-dark-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-sm text-gray-500 dark:text-gray-500 mb-4 md:mb-0">
-              <p>&copy; {new Date().getFullYear()} GME Dashboard. Built with Next.js and Tailwind CSS.</p>
+              <p>&copy; {new Date().getFullYear()} GME Dashboard.</p>
               <p className="mt-1">
                 a <a href="https://nytemode.com" target="_blank" rel="noopener noreferrer" className="text-gme-red hover:underline">NYTEMODE</a> project
               </p>
