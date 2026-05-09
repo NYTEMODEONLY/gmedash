@@ -12,6 +12,7 @@ import SECFilings from '@/components/SECFilings';
 import RyanCohenTwitter from '@/components/RyanCohenTwitter';
 import PressReleases from '@/components/PressReleases';
 import UpcomingEvents from '@/components/UpcomingEvents';
+import InvestorSnapshot from '@/components/InvestorSnapshot';
 import Footer from '@/components/Footer';
 import {
   getStockQuote,
@@ -235,6 +236,10 @@ export default function Dashboard() {
         {/* Company Overview - Full Width */}
         <div className="mb-8">
           <CompanyOverview />
+        </div>
+
+        <div className="mb-8">
+          <InvestorSnapshot />
         </div>
 
         {/* Stock Info and Price Chart Row */}
