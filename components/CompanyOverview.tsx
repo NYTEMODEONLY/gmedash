@@ -12,6 +12,7 @@ interface CompanyInfo {
   marketCap: number | null;
   marketCapFormatted: string;
   employees: number | null;
+  employeesText?: string | null;
   headquarters: string | null;
   ceo: string | null;
   founded: string | null;
@@ -180,8 +181,8 @@ export default function CompanyOverview() {
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-sm text-gray-500 dark:text-gray-400">Employees</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A'}
+            <span className="text-sm font-medium text-gray-900 dark:text-white text-right">
+              {companyInfo.employeesText || (companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A')}
             </span>
           </div>
           <div className="flex justify-between">

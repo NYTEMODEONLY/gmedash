@@ -15,6 +15,7 @@ interface CompanyInfo {
   marketCap: number | null;
   marketCapFormatted: string;
   employees: number | null;
+  employeesText?: string | null;
   headquarters: string | null;
   ceo: string | null;
   founded: string | null;
@@ -39,6 +40,7 @@ const STATIC_INFO = {
   sector: 'Consumer Cyclical',
   industry: 'Specialty Retail',
   employees: null,
+  employeesText: null,
   headquarters: null,
   ceo: null,
   founded: null,
@@ -66,7 +68,10 @@ async function getSECCompanyProfile() {
     const annualReportUrl = annualReportIndex >= 0 && filings?.accessionNumber?.[annualReportIndex] && filings?.primaryDocument?.[annualReportIndex]
       ? `https://www.sec.gov/Archives/edgar/data/1326380/${filings.accessionNumber[annualReportIndex].replace(/-/g, '')}/${filings.primaryDocument[annualReportIndex]}`
       : null;
-    const leadership = annualReportUrl ? await getLeadershipFromSECAnnualReport(annualReportUrl) : null;
+    const [annualReportFacts, founded] = await Promise.all([
+      annualReportUrl ? getFactsFromSECAnnualReport(annualReportUrl) : null,
+      getFoundedFromWikipedia(),
+    ]);
 
     return {
       name: data?.name || STATIC_INFO.name,
@@ -74,8 +79,15 @@ async function getSECCompanyProfile() {
       exchange: data?.exchanges?.[0] || STATIC_INFO.exchange,
       industry: data?.sicDescription || STATIC_INFO.industry,
       headquarters,
-      ceo: leadership?.ceo || null,
-      dataSource: leadership?.ceo ? 'sec/yahoo/sec-10k' : 'sec/yahoo',
+      ceo: annualReportFacts?.ceo || null,
+      employeesText: annualReportFacts?.employeesText || null,
+      founded,
+      dataSource: [
+        'sec',
+        'yahoo',
+        annualReportFacts?.ceo || annualReportFacts?.employeesText ? 'sec-10k' : null,
+        founded ? 'wikipedia' : null,
+      ].filter(Boolean).join('/'),
     };
   } catch (error) {
     console.error('SEC company profile error:', error);
@@ -86,6 +98,8 @@ async function getSECCompanyProfile() {
       industry: STATIC_INFO.industry,
       headquarters: null,
       ceo: null,
+      employeesText: null,
+      founded: null,
       dataSource: 'yahoo',
     };
   }
@@ -102,7 +116,7 @@ function decodeSECText(value: string): string {
     .trim();
 }
 
-async function getLeadershipFromSECAnnualReport(url: string): Promise<{ ceo: string | null } | null> {
+async function getFactsFromSECAnnualReport(url: string): Promise<{ ceo: string | null; employeesText: string | null } | null> {
   try {
     const response = await axios.get(url, {
       timeout: 10000,
@@ -116,12 +130,35 @@ async function getLeadershipFromSECAnnualReport(url: string): Promise<{ ceo: str
     const text = decodeSECText(String(response.data));
     const ceoMatch = text.match(/Chief Executive Officer,\s*([A-Z][A-Za-z .'-]+?)(?:,|\sand\s|\.|\s+as of)/i)
       || text.match(/([A-Z][A-Za-z .'-]+?),\s*(?:the Company's\s*)?Chairman(?:\s+of the Board)?\s+and\s+Chief Executive Officer/i);
+    const employeeMatch = text.match(/approximately\s+([\d,]+)\s+full-time[\s\S]{0,120}?between\s+([\d,]+)\s+and\s+([\d,]+)\s+part-time/i);
 
     return {
       ceo: ceoMatch?.[1]?.trim() || null,
+      employeesText: employeeMatch
+        ? `${Number(employeeMatch[1].replace(/,/g, '')).toLocaleString()} full-time; ${Number(employeeMatch[2].replace(/,/g, '')).toLocaleString()}-${Number(employeeMatch[3].replace(/,/g, '')).toLocaleString()} part-time`
+        : null,
     };
   } catch (error) {
-    console.error('SEC annual report leadership error:', error);
+    console.error('SEC annual report facts error:', error);
+    return null;
+  }
+}
+
+async function getFoundedFromWikipedia(): Promise<string | null> {
+  try {
+    const response = await axios.get('https://en.wikipedia.org/api/rest_v1/page/summary/GameStop', {
+      timeout: 8000,
+      headers: {
+        'User-Agent': 'GMEDASH/1.0',
+        Accept: 'application/json',
+      },
+    });
+
+    const extract = response.data?.extract || '';
+    const foundedMatch = extract.match(/founded\s+in\s+[^.]*?(\d{4})/i);
+    return foundedMatch?.[1] || null;
+  } catch (error) {
+    console.error('Wikipedia founded date error:', error);
     return null;
   }
 }
@@ -156,6 +193,8 @@ export async function GET(request: NextRequest) {
         industry: secProfile.industry,
         headquarters: secProfile.headquarters,
         ceo: secProfile.ceo || STATIC_INFO.ceo,
+        employeesText: secProfile.employeesText || STATIC_INFO.employeesText,
+        founded: secProfile.founded || STATIC_INFO.founded,
         marketCap: metrics.marketCap,
         marketCapFormatted: metrics.marketCapFormatted,
         peRatio: metrics.peRatio,
@@ -194,6 +233,8 @@ export async function GET(request: NextRequest) {
       ...STATIC_INFO,
       ...secProfile,
       ceo: secProfile.ceo || STATIC_INFO.ceo,
+      employeesText: secProfile.employeesText || STATIC_INFO.employeesText,
+      founded: secProfile.founded || STATIC_INFO.founded,
       marketCap: null,
       marketCapFormatted: 'N/A',
       peRatio: null,
