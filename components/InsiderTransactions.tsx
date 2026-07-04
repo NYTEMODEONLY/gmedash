@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface InsiderTransaction {
   id: string;
@@ -124,9 +126,16 @@ export default function InsiderTransactions() {
   }
 
   const summary = data.summary;
+  const sectionId = 'insider-stock-transactions';
+  const summaryCards = [
+    { label: 'Open-Market Buys', value: summary?.openMarketBuys || 0, detail: `${numberText(summary?.openMarketBuyShares)} shares`, className: 'text-stock-green' },
+    { label: 'Buy Value', value: money(summary?.openMarketBuyValue), detail: 'Code P only', rawValue: summary?.openMarketBuyValue },
+    { label: 'Open-Market Sales', value: summary?.openMarketSales || 0, detail: `${numberText(summary?.openMarketSaleShares)} shares`, className: 'text-stock-red' },
+    { label: 'Sale Value', value: money(summary?.openMarketSaleValue), detail: 'Code S only', rawValue: summary?.openMarketSaleValue },
+  ];
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Insider Stock Transactions</h2>
@@ -134,37 +143,40 @@ export default function InsiderTransactions() {
             Board, officer, and Section 16 ownership filings showing reported buys, sells, awards, and dispositions
           </p>
         </div>
-        <a
-          href={data.sourceUrl || 'https://www.sec.gov/edgar/browse/?CIK=0001326380&owner=include'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
-        >
-          SEC Ownership
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls id={sectionId} title="Insider Stock Transactions" data={data} />
+          <a
+            href={data.sourceUrl || 'https://www.sec.gov/edgar/browse/?CIK=0001326380&owner=include'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
+          >
+            SEC Ownership
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Open-Market Buys</div>
-          <div className="mt-1 text-xl font-semibold text-stock-green">{summary?.openMarketBuys || 0}</div>
-          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{numberText(summary?.openMarketBuyShares)} shares</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Buy Value</div>
-          <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{money(summary?.openMarketBuyValue)}</div>
-          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Code P only</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Open-Market Sales</div>
-          <div className="mt-1 text-xl font-semibold text-stock-red">{summary?.openMarketSales || 0}</div>
-          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{numberText(summary?.openMarketSaleShares)} shares</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Sale Value</div>
-          <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{money(summary?.openMarketSaleValue)}</div>
-          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">Code S only</div>
-        </div>
+        {summaryCards.map((card) => {
+          const cardId = createAnchorId(sectionId, card.label);
+          return (
+            <div key={card.label} id={cardId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{card.label}</div>
+                  <div className={`mt-1 text-xl font-semibold ${card.className || 'text-gray-900 dark:text-white'}`}>{card.value}</div>
+                </div>
+                <ExportShareControls
+                  id={cardId}
+                  title={`Insider Stock Transactions: ${card.label}`}
+                  data={{ label: card.label, value: card.value, detail: card.detail, rawValue: card.rawValue, source: data.sourceUrl }}
+                  compact
+                />
+              </div>
+              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{card.detail}</div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="overflow-x-auto">
@@ -179,8 +191,10 @@ export default function InsiderTransactions() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gme-dark-300">
-            {data.transactions.slice(0, 12).map((transaction) => (
-              <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
+            {data.transactions.slice(0, 12).map((transaction) => {
+              const transactionId = createAnchorId(sectionId, transaction.id || transaction.transactionDate, transaction.reporter);
+              return (
+              <tr key={transaction.id} id={transactionId} className="scroll-mt-24 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   <a href={transaction.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-gme-red hover:text-gme-red-dark font-medium">
                     {format(parseISO(transaction.transactionDate), 'MMM dd, yyyy')}
@@ -196,9 +210,15 @@ export default function InsiderTransactions() {
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{numberText(transaction.shares)}</td>
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{price(transaction.price)}</td>
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{money(transaction.value)}</td>
-                <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{numberText(transaction.sharesOwnedAfter)}</td>
+                <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{numberText(transaction.sharesOwnedAfter)}</span>
+                    <ExportShareControls id={transactionId} title={`Insider Transaction: ${transaction.reporter}`} data={transaction} compact />
+                  </div>
+                </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

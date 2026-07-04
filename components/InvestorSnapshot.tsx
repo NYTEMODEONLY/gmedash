@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface SnapshotMetric {
   label: string;
@@ -49,6 +51,7 @@ export default function InvestorSnapshot() {
 
   const secSourceUrl = snapshot?.filingUrl || 'https://www.sec.gov/edgar/browse/?CIK=0001326380';
   const coinbaseBtcUrl = 'https://www.coinbase.com/price/bitcoin';
+  const sectionId = 'investor-snapshot';
 
   const renderSectionSource = (section: SnapshotSection) => {
     if (section.title === 'Capital Allocation') {
@@ -88,7 +91,7 @@ export default function InvestorSnapshot() {
   };
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Investor Snapshot</h2>
@@ -96,19 +99,22 @@ export default function InvestorSnapshot() {
             Balance sheet, business mix, shareholder base, and capital allocation
           </p>
         </div>
-        {snapshot?.filingUrl && (
-          <a
-            href={snapshot.filingUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
-          >
-            Source Filing
-            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls id={sectionId} title="Investor Snapshot" data={snapshot || { sections: [] }} />
+          {snapshot?.filingUrl && (
+            <a
+              href={snapshot.filingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
+            >
+              Source Filing
+              <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -130,21 +136,40 @@ export default function InvestorSnapshot() {
       ) : snapshot?.sections?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {snapshot.sections.map((section) => (
-            <div key={section.title} className="rounded-lg border border-gray-100 dark:border-gme-dark-300 bg-gray-50 dark:bg-gme-dark-200 p-4">
+            <div key={section.title} id={createAnchorId(sectionId, section.title)} className="scroll-mt-24 rounded-lg border border-gray-100 dark:border-gme-dark-300 bg-gray-50 dark:bg-gme-dark-200 p-4">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{section.title}</h3>
-                {renderSectionSource(section)}
+                <div className="flex flex-col items-end gap-1">
+                  {renderSectionSource(section)}
+                  <ExportShareControls
+                    id={createAnchorId(sectionId, section.title)}
+                    title={`Investor Snapshot: ${section.title}`}
+                    data={{ ...section, filingUrl: secSourceUrl, asOf: snapshot.asOf }}
+                    compact
+                  />
+                </div>
               </div>
               <div className="space-y-4">
-                {section.metrics.map((metric) => (
-                  <div key={`${section.title}-${metric.label}`}>
+                {section.metrics.map((metric) => {
+                  const metricId = createAnchorId(sectionId, section.title, metric.label);
+                  return (
+                  <div key={`${section.title}-${metric.label}`} id={metricId} className="scroll-mt-24">
                     <div className="text-xs text-gray-500 dark:text-gray-400">{metric.label}</div>
-                    <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-white break-words">{metric.value}</div>
+                    <div className="mt-1 flex items-start justify-between gap-2">
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white break-words">{metric.value}</div>
+                      <ExportShareControls
+                        id={metricId}
+                        title={`Investor Snapshot: ${section.title} - ${metric.label}`}
+                        data={{ section: section.title, source: section.source, filingUrl: secSourceUrl, asOf: snapshot.asOf, ...metric }}
+                        compact
+                      />
+                    </div>
                     {metric.detail && (
                       <div className="mt-1 text-xs leading-snug text-gray-500 dark:text-gray-400">{metric.detail}</div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

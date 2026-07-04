@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { StockQuote } from '@/lib/api';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface ExtendedStockQuote extends StockQuote {
   source?: string;
@@ -118,11 +120,18 @@ export default function StockInfoCard({ stockData, isLoading, isLiveMode = true 
   // Calculate day range percentage
   const dayRange = stockData.high - stockData.low;
   const currentPosition = dayRange > 0 ? ((stockData.price - stockData.low) / dayRange) * 100 : 50;
+  const sectionId = 'stock-info';
+  const statCards = [
+    { label: 'Open', value: `$${stockData.open.toFixed(2)}`, rawValue: stockData.open },
+    { label: 'Prev Close', value: `$${stockData.previousClose.toFixed(2)}`, rawValue: stockData.previousClose },
+    { label: 'Day High', value: `$${stockData.high.toFixed(2)}`, rawValue: stockData.high, className: 'text-stock-green' },
+    { label: 'Day Low', value: `$${stockData.low.toFixed(2)}`, rawValue: stockData.low, className: 'text-stock-red' },
+  ];
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 h-full border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{stockData.symbol}</h2>
@@ -130,18 +139,29 @@ export default function StockInfoCard({ stockData, isLoading, isLiveMode = true 
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">GameStop Corp.</p>
         </div>
-        <div className={`px-3 py-1.5 rounded-lg text-sm font-semibold border ${changeBgColor} ${changeColor}`}>
-          {isPositive ? '+' : ''}{stockData.changePercent}
+        <div className="flex flex-col items-end gap-2">
+          <ExportShareControls id={sectionId} title="Stock Info" data={stockData} compact />
+          <div id={createAnchorId(sectionId, 'change-percent')} className={`scroll-mt-24 px-3 py-1.5 rounded-lg text-sm font-semibold border ${changeBgColor} ${changeColor}`}>
+            {isPositive ? '+' : ''}{stockData.changePercent}
+          </div>
         </div>
       </div>
 
       {/* Price */}
-      <div className={`mb-6 p-4 rounded-lg transition-colors ${
+      <div id={createAnchorId(sectionId, 'current-price')} className={`scroll-mt-24 mb-6 p-4 rounded-lg transition-colors ${
         priceFlash === 'up' ? 'bg-stock-green/20' :
         priceFlash === 'down' ? 'bg-stock-red/20' : 'bg-gray-50 dark:bg-gme-dark-200'
       }`}>
-        <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
-          ${stockData.price.toFixed(2)}
+        <div className="flex items-start justify-between gap-3">
+          <div className="text-4xl font-bold text-gray-900 dark:text-white mb-1">
+            ${stockData.price.toFixed(2)}
+          </div>
+          <ExportShareControls
+            id={createAnchorId(sectionId, 'current-price')}
+            title="GME Current Price"
+            data={{ symbol: stockData.symbol, price: stockData.price, change: stockData.change, changePercent: stockData.changePercent, source: sourceLabel }}
+            compact
+          />
         </div>
         <div className={`text-lg font-medium ${changeColor} flex items-center gap-2`}>
           {isPositive ? (
@@ -177,31 +197,42 @@ export default function StockInfoCard({ stockData, isLoading, isLiveMode = true 
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Open</div>
-          <div className="text-sm font-semibold text-gray-900 dark:text-white">${stockData.open.toFixed(2)}</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Prev Close</div>
-          <div className="text-sm font-semibold text-gray-900 dark:text-white">${stockData.previousClose.toFixed(2)}</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Day High</div>
-          <div className="text-sm font-semibold text-stock-green">${stockData.high.toFixed(2)}</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Day Low</div>
-          <div className="text-sm font-semibold text-stock-red">${stockData.low.toFixed(2)}</div>
-        </div>
+        {statCards.map((stat) => {
+          const statId = createAnchorId(sectionId, stat.label);
+          return (
+            <div key={stat.label} id={statId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{stat.label}</div>
+                  <div className={`text-sm font-semibold ${stat.className || 'text-gray-900 dark:text-white'}`}>{stat.value}</div>
+                </div>
+                <ExportShareControls
+                  id={statId}
+                  title={`Stock Info: ${stat.label}`}
+                  data={{ symbol: stockData.symbol, label: stat.label, value: stat.value, rawValue: stat.rawValue, source: sourceLabel }}
+                  compact
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Volume */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
+      <div id={createAnchorId(sectionId, 'volume')} className="scroll-mt-24 mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500 dark:text-gray-400">Volume</span>
-          <span className="text-sm font-semibold text-gray-900 dark:text-white">
-            {parseInt(stockData.volume).toLocaleString()}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+              {parseInt(stockData.volume).toLocaleString()}
+            </span>
+            <ExportShareControls
+              id={createAnchorId(sectionId, 'volume')}
+              title="Stock Info: Volume"
+              data={{ symbol: stockData.symbol, label: 'Volume', value: stockData.volume, source: sourceLabel }}
+              compact
+            />
+          </div>
         </div>
       </div>
 

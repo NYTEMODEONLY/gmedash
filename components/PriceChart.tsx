@@ -14,6 +14,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { HistoricalData, HistoricalDataResponse } from '@/lib/api';
 import { useTheme } from '@/lib/ThemeContext';
+import ExportShareControls from '@/components/ExportShareControls';
 
 interface PriceChartProps {
   data: HistoricalData[];
@@ -117,25 +118,33 @@ export default function PriceChart({ data, isLoading, onPeriodChange, selectedPe
     : metadata?.source === 'cache'
       ? `Cached ${metadata.cacheAge ?? 0}s ago`
       : 'Historical data (end of day)';
+  const sectionId = 'historical-price-chart';
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
-      <div className="flex justify-between items-center mb-6">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Historical Price Chart</h2>
-        <div className="flex space-x-1">
-          {periods.map((period) => (
-            <button
-              key={period.value}
-              onClick={() => onPeriodChange(period.value)}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                selectedPeriod === period.value
-                  ? 'bg-gme-red text-white'
-                  : 'bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400'
-              }`}
-            >
-              {period.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls
+            id={sectionId}
+            title={`Historical Price Chart ${selectedPeriod}`}
+            data={{ selectedPeriod, metadata, data }}
+          />
+          <div className="flex space-x-1">
+            {periods.map((period) => (
+              <button
+                key={period.value}
+                onClick={() => onPeriodChange(period.value)}
+                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                  selectedPeriod === period.value
+                    ? 'bg-gme-red text-white'
+                    : 'bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400'
+                }`}
+              >
+                {period.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

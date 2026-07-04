@@ -14,6 +14,8 @@ import {
 import { format, parseISO } from 'date-fns';
 import { ShortInterest } from '@/lib/api';
 import { useTheme } from '@/lib/ThemeContext';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface ShortingChartProps {
   data: ShortInterest[];
@@ -106,24 +108,53 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
 
   const latestData = data[data.length - 1];
   const avgSharesShort = data.reduce((sum, item) => sum + item.shortInterest, 0) / data.length;
+  const sectionId = 'finra-short-interest';
+  const summaryCards = [
+    {
+      label: 'Shares Short',
+      value: `${(latestData.shortInterest / 1_000_000).toFixed(2)}M`,
+      rawValue: latestData.shortInterest,
+      className: 'text-red-700 dark:text-stock-red',
+      wrapperClassName: 'bg-red-50 dark:bg-stock-red/10',
+      labelClassName: 'text-red-600 dark:text-stock-red',
+    },
+    {
+      label: 'Days to Cover',
+      value: latestData.daysToCover.toFixed(1),
+      rawValue: latestData.daysToCover,
+      className: 'text-blue-700 dark:text-blue-300',
+      wrapperClassName: 'bg-blue-50 dark:bg-blue-500/10',
+      labelClassName: 'text-blue-600 dark:text-blue-400',
+    },
+  ];
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">FINRA Short Interest</h2>
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">FINRA Short Interest</h2>
+          <ExportShareControls id={sectionId} title="FINRA Short Interest" data={data} />
+        </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="bg-red-50 dark:bg-stock-red/10 p-3 rounded-lg transition-colors">
-            <div className="text-red-600 dark:text-stock-red font-medium">Shares Short</div>
-            <div className="text-2xl font-bold text-red-700 dark:text-stock-red">
-              {(latestData.shortInterest / 1_000_000).toFixed(2)}M
-            </div>
-          </div>
-          <div className="bg-blue-50 dark:bg-blue-500/10 p-3 rounded-lg transition-colors">
-            <div className="text-blue-600 dark:text-blue-400 font-medium">Days to Cover</div>
-            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-              {latestData.daysToCover.toFixed(1)}
-            </div>
-          </div>
+          {summaryCards.map((card) => {
+            const cardId = createAnchorId(sectionId, card.label);
+            return (
+              <div key={card.label} id={cardId} className={`scroll-mt-24 p-3 rounded-lg transition-colors ${card.wrapperClassName}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className={`${card.labelClassName} font-medium`}>{card.label}</div>
+                    <div className={`text-2xl font-bold ${card.className}`}>{card.value}</div>
+                  </div>
+                  <ExportShareControls
+                    id={cardId}
+                    title={`FINRA Short Interest: ${card.label}`}
+                    data={{ date: latestData.date, label: card.label, value: card.value, rawValue: card.rawValue, source: latestData.source || 'FINRA' }}
+                    compact
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

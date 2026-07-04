@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface CompanyInfo {
   name: string;
@@ -85,10 +87,26 @@ export default function CompanyOverview() {
     return null;
   }
 
+  const sectionId = 'company-overview';
+  const metricCards = [
+    { label: 'Market Cap', value: companyInfo.marketCapFormatted, rawValue: companyInfo.marketCap },
+    { label: 'P/E Ratio', value: companyInfo.peRatio ? companyInfo.peRatio.toFixed(2) : 'N/A', rawValue: companyInfo.peRatio },
+    { label: 'EPS', value: companyInfo.eps ? `$${companyInfo.eps.toFixed(2)}` : 'N/A', rawValue: companyInfo.eps },
+    { label: 'Avg Volume', value: companyInfo.avgVolume ? formatNumber(companyInfo.avgVolume) : 'N/A', rawValue: companyInfo.avgVolume },
+  ];
+  const details = [
+    { label: 'CEO', value: companyInfo.ceo || 'N/A' },
+    { label: 'Headquarters', value: companyInfo.headquarters || 'N/A' },
+    { label: 'Founded', value: companyInfo.founded || 'N/A' },
+    { label: 'Employees', value: companyInfo.employeesText || (companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A'), rawValue: companyInfo.employees },
+    { label: 'Industry', value: companyInfo.industry },
+    { label: 'Beta', value: companyInfo.beta ? companyInfo.beta.toFixed(2) : 'N/A', rawValue: companyInfo.beta },
+  ];
+
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-4">
         <div className="flex items-center space-x-4">
           <div className="w-14 h-14 bg-gradient-to-br from-gme-red to-gme-red-dark rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">GME</span>
@@ -102,17 +120,20 @@ export default function CompanyOverview() {
             </div>
           </div>
         </div>
-        <a
-          href={companyInfo.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"
-        >
-          Website
-          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls id={sectionId} title="Company Overview" data={companyInfo} />
+          <a
+            href={companyInfo.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"
+          >
+            Website
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
       </div>
 
       {/* Description */}
@@ -122,28 +143,25 @@ export default function CompanyOverview() {
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Market Cap</div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">{companyInfo.marketCapFormatted}</div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">P/E Ratio</div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {companyInfo.peRatio ? companyInfo.peRatio.toFixed(2) : 'N/A'}
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {companyInfo.eps ? `$${companyInfo.eps.toFixed(2)}` : 'N/A'}
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Volume</div>
-          <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {companyInfo.avgVolume ? formatNumber(companyInfo.avgVolume) : 'N/A'}
-          </div>
-        </div>
+        {metricCards.map((metric) => {
+          const metricId = createAnchorId(sectionId, metric.label);
+          return (
+            <div key={metric.label} id={metricId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{metric.label}</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{metric.value}</div>
+                </div>
+                <ExportShareControls
+                  id={metricId}
+                  title={`Company Overview: ${metric.label}`}
+                  data={{ label: metric.label, value: metric.value, rawValue: metric.rawValue, source: companyInfo.dataSource }}
+                  compact
+                />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* 52-Week Range */}
@@ -166,38 +184,27 @@ export default function CompanyOverview() {
 
       {/* Additional Info */}
       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">CEO</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.ceo || 'N/A'}</span>
+        {[details.slice(0, 3), details.slice(3)].map((detailGroup, groupIndex) => (
+          <div key={groupIndex} className="space-y-3">
+            {detailGroup.map((detail) => {
+              const detailId = createAnchorId(sectionId, detail.label);
+              return (
+                <div key={detail.label} id={detailId} className="scroll-mt-24 flex items-start justify-between gap-3">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{detail.label}</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white text-right">{detail.value}</span>
+                    <ExportShareControls
+                      id={detailId}
+                      title={`Company Overview: ${detail.label}`}
+                      data={{ label: detail.label, value: detail.value, rawValue: detail.rawValue, source: companyInfo.dataSource }}
+                      compact
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Headquarters</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.headquarters || 'N/A'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Founded</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.founded || 'N/A'}</span>
-          </div>
-        </div>
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Employees</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white text-right">
-              {companyInfo.employeesText || (companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A')}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Industry</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">{companyInfo.industry}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500 dark:text-gray-400">Beta</span>
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {companyInfo.beta ? companyInfo.beta.toFixed(2) : 'N/A'}
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Shares Info */}

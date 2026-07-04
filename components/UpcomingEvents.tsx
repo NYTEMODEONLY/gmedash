@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import axios from 'axios';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface UpcomingEvent {
   title: string;
@@ -101,6 +103,7 @@ export default function UpcomingEvents() {
     if (event.source === 'Yahoo Finance') return 'https://finance.yahoo.com/quote/GME';
     return 'https://news.gamestop.com/events-and-presentations';
   };
+  const sectionId = 'upcoming-events';
 
   if (isLoading) {
     return (
@@ -124,9 +127,9 @@ export default function UpcomingEvents() {
   }
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,37 +141,43 @@ export default function UpcomingEvents() {
             <p className="text-sm text-gray-500 dark:text-gray-400">Key dates for investors</p>
           </div>
         </div>
-        <a
-          href="https://news.gamestop.com/events-and-presentations"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 transition-colors"
-        >
-          IR Calendar
-          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls id={sectionId} title="Upcoming Events" data={events} />
+          <a
+            href="https://news.gamestop.com/events-and-presentations"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 transition-colors"
+          >
+            IR Calendar
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
       </div>
 
       {/* Events List */}
       {events.length > 0 ? (
         <div className="space-y-4">
-          {events.map((event, index) => (
-            <a
+          {events.map((event, index) => {
+            const eventId = createAnchorId(sectionId, event.date, event.title, index);
+            return (
+            <article
               key={index}
-              href={getEventUrl(event)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
+              id={eventId}
+              className="scroll-mt-24 flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
             >
               {getEventIcon(event.type)}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">{event.title}</h3>
-                  <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getEventBadgeColor(event.type)}`}>
-                    {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getEventBadgeColor(event.type)}`}>
+                      {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                    </span>
+                    <ExportShareControls id={eventId} title={`Upcoming Event: ${event.title}`} data={event} compact />
+                  </div>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{event.description}</p>
                 <div className="flex items-center justify-between text-xs">
@@ -180,9 +189,13 @@ export default function UpcomingEvents() {
                     {formatDistanceToNow(parseISO(event.date), { addSuffix: true })}
                   </span>
                 </div>
+                <a href={getEventUrl(event)} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors">
+                  Open source
+                </a>
               </div>
-            </a>
-          ))}
+            </article>
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-8">

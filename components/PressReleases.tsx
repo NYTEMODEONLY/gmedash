@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface PressRelease {
   title: string;
@@ -80,6 +82,7 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
         return 'bg-gray-100 dark:bg-gme-dark-300 text-gray-800 dark:text-gray-300';
     }
   };
+  const sectionId = 'press-releases';
 
   if (isLoading) {
     return (
@@ -128,9 +131,9 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
   }
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-gme-red to-gme-red-dark rounded-lg flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,46 +145,55 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
             <p className="text-sm text-gray-500 dark:text-gray-400">{releases.length} releases</p>
           </div>
         </div>
-        <a
-          href="https://news.gamestop.com/news-releases-0"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
-        >
-          View All
-          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExportShareControls id={sectionId} title="Press Releases" data={releases} />
+          <a
+            href="https://news.gamestop.com/news-releases-0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-gme-red/10 text-gme-red hover:bg-gme-red/20 transition-colors"
+          >
+            View All
+            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
       </div>
 
       {/* Press Releases List */}
       <div className="space-y-4">
-        {releases.slice(0, 6).map((release, index) => (
-          <a
+        {releases.slice(0, 6).map((release, index) => {
+          const releaseId = createAnchorId(sectionId, release.date, index);
+          return (
+          <article
             key={index}
-            href={release.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all"
+            id={releaseId}
+            className="scroll-mt-24 border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all"
           >
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 flex-1 mr-2">
-                {release.title}
+                <a href={release.url} target="_blank" rel="noopener noreferrer" className="hover:text-gme-red transition-colors">
+                  {release.title}
+                </a>
               </h3>
-              <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0 ${getSourceColor(release.source)}`}>
-                {release.source}
-              </span>
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getSourceColor(release.source)}`}>
+                  {release.source}
+                </span>
+                <ExportShareControls id={releaseId} title={`Press Release: ${release.title}`} data={release} compact />
+              </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
               {release.description}
             </p>
             <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>{format(parseISO(release.date), 'MMM dd, yyyy')}</span>
-              <span className="text-gme-red font-medium">Read more</span>
+              <a href={release.url} target="_blank" rel="noopener noreferrer" className="text-gme-red font-medium hover:text-gme-red-dark transition-colors">Read more</a>
             </div>
-          </a>
-        ))}
+          </article>
+          );
+        })}
       </div>
 
       {/* Footer */}

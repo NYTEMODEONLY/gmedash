@@ -14,6 +14,8 @@ import {
 import { format, parseISO } from 'date-fns';
 import { HistoricalData, HistoricalDataResponse } from '@/lib/api';
 import { useTheme } from '@/lib/ThemeContext';
+import ExportShareControls from '@/components/ExportShareControls';
+import { createAnchorId } from '@/lib/export-share';
 
 interface VolumeChartProps {
   data: HistoricalData[];
@@ -110,30 +112,61 @@ export default function VolumeChart({ data, isLoading, metadata }: VolumeChartPr
     : metadata?.source === 'cache'
       ? `Cached ${metadata.cacheAge ?? 0}s ago`
       : 'Updates with price data';
+  const sectionId = 'trading-volume';
+  const summaryCards = [
+    {
+      label: 'Latest Volume',
+      value: `${(latestVolume / 1000000).toFixed(1)}M`,
+      rawValue: latestVolume,
+      wrapperClassName: 'bg-blue-50 dark:bg-blue-500/10',
+      labelClassName: 'text-blue-600 dark:text-blue-400',
+      valueClassName: 'text-blue-700 dark:text-blue-300',
+    },
+    {
+      label: 'Average Volume',
+      value: `${(avgVolume / 1000000).toFixed(1)}M`,
+      rawValue: avgVolume,
+      wrapperClassName: 'bg-green-50 dark:bg-stock-green/10',
+      labelClassName: 'text-green-600 dark:text-stock-green',
+      valueClassName: 'text-green-700 dark:text-stock-green',
+    },
+    {
+      label: 'Max Volume',
+      value: `${(maxVolume / 1000000).toFixed(1)}M`,
+      rawValue: maxVolume,
+      wrapperClassName: 'bg-purple-50 dark:bg-purple-500/10',
+      labelClassName: 'text-purple-600 dark:text-purple-400',
+      valueClassName: 'text-purple-700 dark:text-purple-300',
+    },
+  ];
 
   return (
-    <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
+    <div id={sectionId} className="scroll-mt-24 bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Trading Volume</h2>
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Trading Volume</h2>
+          <ExportShareControls id={sectionId} title="Trading Volume" data={{ metadata, data }} />
+        </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
-          <div className="bg-blue-50 dark:bg-blue-500/10 p-3 rounded-lg transition-colors">
-            <div className="text-blue-600 dark:text-blue-400 font-medium">Latest Volume</div>
-            <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
-              {(latestVolume / 1000000).toFixed(1)}M
-            </div>
-          </div>
-          <div className="bg-green-50 dark:bg-stock-green/10 p-3 rounded-lg transition-colors">
-            <div className="text-green-600 dark:text-stock-green font-medium">Average Volume</div>
-            <div className="text-xl font-bold text-green-700 dark:text-stock-green">
-              {(avgVolume / 1000000).toFixed(1)}M
-            </div>
-          </div>
-          <div className="bg-purple-50 dark:bg-purple-500/10 p-3 rounded-lg transition-colors">
-            <div className="text-purple-600 dark:text-purple-400 font-medium">Max Volume</div>
-            <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-              {(maxVolume / 1000000).toFixed(1)}M
-            </div>
-          </div>
+          {summaryCards.map((card) => {
+            const cardId = createAnchorId(sectionId, card.label);
+            return (
+              <div key={card.label} id={cardId} className={`scroll-mt-24 p-3 rounded-lg transition-colors ${card.wrapperClassName}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className={`${card.labelClassName} font-medium`}>{card.label}</div>
+                    <div className={`text-xl font-bold ${card.valueClassName}`}>{card.value}</div>
+                  </div>
+                  <ExportShareControls
+                    id={cardId}
+                    title={`Trading Volume: ${card.label}`}
+                    data={{ label: card.label, value: card.value, rawValue: card.rawValue, source: sourceName }}
+                    compact
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
