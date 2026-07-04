@@ -35,7 +35,7 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 - **Latest News** - Aggregated GME news from Google News & Bing News RSS (IR excluded)
 - **Press Releases** - Official GameStop investor relations announcements (IR feed)
 - **SEC Filings** - Latest EDGAR submissions from SEC, including newer forms such as 425 and 144
-- **Upcoming Events** - Confirmed GameStop IR event feed and Yahoo Finance metadata only
+- **GameStop IR Site Watch** - 10-minute scan of the official GameStop Investor Relations homepage for new, removed, or notable linked pages such as special topic sections
 
 ### User Experience
 - **Dark/Light Mode** - Full theme support with smooth transitions
@@ -63,7 +63,7 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | **Press Releases** | Official GameStop announcements from the IR feed | Exact GameStop IR release links and GameStop IR news releases page |
 | **News** | Third-party GME news excluding official IR releases | Original article URLs, Google News GME search, Bing News GME search |
 | **SEC Filings** | Latest EDGAR filings with filing links | Exact SEC archive filing links and SEC EDGAR company page |
-| **Upcoming Events** | Confirmed events only; no estimates if sources are empty | GameStop IR events page and Yahoo Finance quote/chart metadata page |
+| **GameStop IR Site Watch** | 10-minute scan of the official GameStop Investor Relations homepage for new, removed, or notable linked pages | GameStop Investor Relations homepage and exact linked IR pages |
 | **Footer Source Registry** | Project-level source directory | GameStop, GameStop IR, SEC EDGAR, Yahoo Finance, FINRA, Coinbase, WhyDRS, DRSGME, GitHub |
 | **Options** | Not shown as a core card until a reliable free public source is wired; API returns an unavailable state | N/A |
 
@@ -99,7 +99,7 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | Investor Snapshot | SEC 10-K, Coinbase BTC spot | Free | Active |
 | Turnaround Progress | SEC companyfacts XBRL API, SEC 10-K archive filings | Free | Active |
 | Insider Transactions | SEC Forms 3/4/5 ownership filings | Free | Active |
-| Upcoming Events | Confirmed Yahoo Finance metadata and GameStop IR links | Free | Active |
+| GameStop IR Site Watch | Official GameStop Investor Relations homepage links | Free | Active |
 | Short Interest | FINRA public API | Free | Active |
 | Options Flow | No reliable free source configured; unavailable response only | Free | Disabled |
 
@@ -173,7 +173,7 @@ gmedash/
 │   │   ├── investor-snapshot/ # SEC-backed investor facts
 │   │   ├── turnaround/     # SEC year-over-year turnaround metrics
 │   │   ├── insider-transactions/ # SEC ownership transactions
-│   │   ├── events/         # Upcoming events
+│   │   ├── investor-site-changes/ # GameStop IR homepage change monitor
 │   │   ├── short-interest/ # FINRA short interest
 │   │   └── options-flow/   # Unavailable response until a reliable free source exists
 │   ├── globals.css         # Global styles & theme
@@ -192,7 +192,7 @@ gmedash/
 │   ├── NewsSection.tsx     # News articles
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases
-│   ├── UpcomingEvents.tsx  # Events calendar
+│   ├── InvestorSiteChanges.tsx # GameStop IR homepage change monitor
 │   └── Footer.tsx          # Footer
 ├── lib/
 │   ├── api.ts              # API client

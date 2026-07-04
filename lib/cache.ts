@@ -70,6 +70,7 @@ export const CACHE_TTL = {
   SHORT_INTEREST: 24 * 60 * 60 * 1000, // 24 hours
   NEWS: 5 * 60 * 1000,            // 5 minutes
   SEC_FILINGS: 10 * 60 * 1000,    // 10 minutes
+  INVESTOR_SITE_CHANGES: 10 * 60 * 1000, // 10 minutes
 };
 
 // Cache keys
@@ -78,4 +79,5 @@ export const CACHE_KEYS = {
   COMPANY_INFO: 'company_info_GME',
   HISTORICAL: (period: string) => `historical_GME_${period}`,
   SHORT_INTEREST: 'short_interest_GME',
+  INVESTOR_SITE_CHANGES: 'investor_site_changes',
 };

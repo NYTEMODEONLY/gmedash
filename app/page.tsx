@@ -10,7 +10,7 @@ import VolumeChart from '@/components/VolumeChart';
 import NewsSection from '@/components/NewsSection';
 import SECFilings from '@/components/SECFilings';
 import PressReleases from '@/components/PressReleases';
-import UpcomingEvents from '@/components/UpcomingEvents';
+import InvestorSiteChanges from '@/components/InvestorSiteChanges';
 import InvestorSnapshot from '@/components/InvestorSnapshot';
 import TurnaroundProgress from '@/components/TurnaroundProgress';
 import InsiderTransactions from '@/components/InsiderTransactions';
@@ -296,18 +296,18 @@ export default function Dashboard() {
           <PressReleases autoRefresh={isLiveMode} />
         </div>
 
-        {/* Upcoming Events Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-1">
-            <UpcomingEvents />
-          </div>
-          <div className="lg:col-span-2">
-            <NewsSection
-              news={newsData}
-              isLoading={isLoadingNews}
-              isLiveMode={isLiveMode}
-            />
-          </div>
+        {/* Investor Relations Site Watch */}
+        <div className="mb-8">
+          <InvestorSiteChanges autoRefresh={isLiveMode} />
+        </div>
+
+        {/* News */}
+        <div className="mb-8">
+          <NewsSection
+            news={newsData}
+            isLoading={isLoadingNews}
+            isLiveMode={isLiveMode}
+          />
         </div>
 
         {/* SEC Filings - Full Width */}
