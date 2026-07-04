@@ -1,7 +1,6 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import Link from 'next/link';
 import { FeedbackSubmitResponse, FeedbackType, submitFeedback } from '@/lib/api';
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
@@ -174,7 +173,7 @@ export default function FeedbackForm() {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="flex">
             <button
               type="submit"
               disabled={submitState === 'submitting'}
@@ -182,12 +181,6 @@ export default function FeedbackForm() {
             >
               {submitState === 'submitting' ? 'Submitting...' : 'Submit Feedback'}
             </button>
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-lg border border-gray-200 dark:border-gme-dark-300 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-gme-red/40 hover:text-gme-red transition-colors"
-            >
-              Back to Dashboard
-            </Link>
           </div>
         </form>
       </section>

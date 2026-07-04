@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import FeedbackForm from '@/components/FeedbackForm';
 import Footer from '@/components/Footer';
+import Header from '@/components/Header';
 
 export const metadata: Metadata = {
   title: 'Feedback and Data Requests',
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export default function FeedbackPage() {
   return (
     <div className="min-h-screen bg-gme-light-100 dark:bg-gme-dark transition-colors duration-200">
+      <Header homeHref="/" homeLabel="HOME" />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <FeedbackForm />
       </main>
