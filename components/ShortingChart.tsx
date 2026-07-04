@@ -15,7 +15,6 @@ import { format, parseISO } from 'date-fns';
 import { ShortInterest } from '@/lib/api';
 import { useTheme } from '@/lib/ThemeContext';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface ShortingChartProps {
   data: ShortInterest[];
@@ -113,7 +112,6 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
     {
       label: 'Shares Short',
       value: `${(latestData.shortInterest / 1_000_000).toFixed(2)}M`,
-      rawValue: latestData.shortInterest,
       className: 'text-red-700 dark:text-stock-red',
       wrapperClassName: 'bg-red-50 dark:bg-stock-red/10',
       labelClassName: 'text-red-600 dark:text-stock-red',
@@ -121,7 +119,6 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
     {
       label: 'Days to Cover',
       value: latestData.daysToCover.toFixed(1),
-      rawValue: latestData.daysToCover,
       className: 'text-blue-700 dark:text-blue-300',
       wrapperClassName: 'bg-blue-50 dark:bg-blue-500/10',
       labelClassName: 'text-blue-600 dark:text-blue-400',
@@ -136,25 +133,12 @@ export default function ShortingChart({ data, isLoading }: ShortingChartProps) {
           <ExportShareControls id={sectionId} title="FINRA Short Interest" data={data} />
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
-          {summaryCards.map((card) => {
-            const cardId = createAnchorId(sectionId, card.label);
-            return (
-              <div key={card.label} id={cardId} className={`scroll-mt-24 p-3 rounded-lg transition-colors ${card.wrapperClassName}`}>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className={`${card.labelClassName} font-medium`}>{card.label}</div>
-                    <div className={`text-2xl font-bold ${card.className}`}>{card.value}</div>
-                  </div>
-                  <ExportShareControls
-                    id={cardId}
-                    title={`FINRA Short Interest: ${card.label}`}
-                    data={{ date: latestData.date, label: card.label, value: card.value, rawValue: card.rawValue, source: latestData.source || 'FINRA' }}
-                    compact
-                  />
-                </div>
+          {summaryCards.map((card) => (
+              <div key={card.label} className={`p-3 rounded-lg transition-colors ${card.wrapperClassName}`}>
+                <div className={`${card.labelClassName} font-medium`}>{card.label}</div>
+                <div className={`text-2xl font-bold ${card.className}`}>{card.value}</div>
               </div>
-            );
-          })}
+          ))}
         </div>
       </div>
 

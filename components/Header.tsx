@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useTheme } from '@/lib/ThemeContext';
-import ExportShareControls from '@/components/ExportShareControls';
-import { ExportData } from '@/lib/export-share';
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -12,7 +10,6 @@ interface HeaderProps {
   isLoading: boolean;
   isLiveMode?: boolean;
   onToggleLiveMode?: () => void;
-  dashboardExport?: ExportData;
 }
 
 type MarketStatus = 'pre-market' | 'open' | 'after-hours' | 'closed';
@@ -69,7 +66,7 @@ const getMarketStatus = (): { status: MarketStatus; label: string; color: string
   }
 };
 
-export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode = true, onToggleLiveMode, dashboardExport }: HeaderProps) {
+export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode = true, onToggleLiveMode }: HeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [marketStatus, setMarketStatus] = useState(getMarketStatus());
   const [currentETTime, setCurrentETTime] = useState(() =>
@@ -140,16 +137,6 @@ export default function Header({ onRefresh, lastUpdated, isLoading, isLiveMode =
               <div className="text-xs text-gray-500 dark:text-gray-400 hidden md:block">
                 Updated: {format(lastUpdated, 'HH:mm:ss')}
               </div>
-            )}
-
-            {dashboardExport !== undefined && (
-              <ExportShareControls
-                id="dashboard"
-                title="GameStop Dashboard"
-                data={dashboardExport}
-                compact
-                className="hidden sm:flex"
-              />
             )}
 
             {/* Theme Toggle - Animated */}

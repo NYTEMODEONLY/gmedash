@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '@/components/Header';
 import StockInfoCard from '@/components/StockInfoCard';
 import CompanyOverview from '@/components/CompanyOverview';
@@ -209,28 +209,6 @@ export default function Dashboard() {
     setIsLiveMode(prev => !prev);
   }, []);
 
-  const dashboardExport = useMemo(() => ({
-    stockData,
-    historicalData,
-    historicalMeta,
-    shortingData,
-    newsData,
-    secFilings,
-    selectedPeriod,
-    lastUpdated: lastUpdated?.toISOString() || null,
-    isLiveMode,
-  }), [
-    stockData,
-    historicalData,
-    historicalMeta,
-    shortingData,
-    newsData,
-    secFilings,
-    selectedPeriod,
-    lastUpdated,
-    isLiveMode,
-  ]);
-
   return (
     <div className="min-h-screen bg-gme-light-100 dark:bg-gme-dark transition-colors duration-200">
       <Header
@@ -239,7 +217,6 @@ export default function Dashboard() {
         isLoading={isLoading}
         isLiveMode={isLiveMode}
         onToggleLiveMode={toggleLiveMode}
-        dashboardExport={dashboardExport}
       />
 
       <main id="dashboard" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

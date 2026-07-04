@@ -3,7 +3,6 @@
 import { format, parseISO } from 'date-fns';
 import { SECFiling } from '@/lib/api';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface SECFilingsProps {
   filings: SECFiling[];
@@ -90,10 +89,8 @@ export default function SECFilings({ filings, isLoading }: SECFilingsProps) {
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gme-dark-100 divide-y divide-gray-200 dark:divide-gme-dark-300">
-            {filings.slice(0, 10).map((filing, index) => {
-              const filingId = createAnchorId(sectionId, filing.filingDate, filing.formType, index);
-              return (
-              <tr key={index} id={filingId} className="scroll-mt-24 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
+            {filings.slice(0, 10).map((filing, index) => (
+              <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   {format(parseISO(filing.filingDate), 'MMM dd, yyyy')}
                 </td>
@@ -108,25 +105,21 @@ export default function SECFilings({ filings, isLoading }: SECFilingsProps) {
                   </div>
                 </td>
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    {filing.url !== '#' ? (
-                      <a
-                        href={filing.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-gme-red hover:text-gme-red-dark font-medium transition-colors"
-                      >
-                        View
-                      </a>
-                    ) : (
-                      <span className="text-gray-400 dark:text-gray-500">N/A</span>
-                    )}
-                    <ExportShareControls id={filingId} title={`SEC Filing: ${filing.formType} ${filing.filingDate}`} data={filing} compact />
-                  </div>
+                  {filing.url !== '#' ? (
+                    <a
+                      href={filing.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gme-red hover:text-gme-red-dark font-medium transition-colors"
+                    >
+                      View
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 dark:text-gray-500">N/A</span>
+                  )}
                 </td>
               </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
       </div>

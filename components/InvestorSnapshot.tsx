@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface SnapshotMetric {
   label: string;
@@ -136,40 +135,21 @@ export default function InvestorSnapshot() {
       ) : snapshot?.sections?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {snapshot.sections.map((section) => (
-            <div key={section.title} id={createAnchorId(sectionId, section.title)} className="scroll-mt-24 rounded-lg border border-gray-100 dark:border-gme-dark-300 bg-gray-50 dark:bg-gme-dark-200 p-4">
+            <div key={section.title} className="rounded-lg border border-gray-100 dark:border-gme-dark-300 bg-gray-50 dark:bg-gme-dark-200 p-4">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{section.title}</h3>
-                <div className="flex flex-col items-end gap-1">
-                  {renderSectionSource(section)}
-                  <ExportShareControls
-                    id={createAnchorId(sectionId, section.title)}
-                    title={`Investor Snapshot: ${section.title}`}
-                    data={{ ...section, filingUrl: secSourceUrl, asOf: snapshot.asOf }}
-                    compact
-                  />
-                </div>
+                {renderSectionSource(section)}
               </div>
               <div className="space-y-4">
-                {section.metrics.map((metric) => {
-                  const metricId = createAnchorId(sectionId, section.title, metric.label);
-                  return (
-                  <div key={`${section.title}-${metric.label}`} id={metricId} className="scroll-mt-24">
+                {section.metrics.map((metric) => (
+                  <div key={`${section.title}-${metric.label}`}>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{metric.label}</div>
-                    <div className="mt-1 flex items-start justify-between gap-2">
-                      <div className="text-lg font-semibold text-gray-900 dark:text-white break-words">{metric.value}</div>
-                      <ExportShareControls
-                        id={metricId}
-                        title={`Investor Snapshot: ${section.title} - ${metric.label}`}
-                        data={{ section: section.title, source: section.source, filingUrl: secSourceUrl, asOf: snapshot.asOf, ...metric }}
-                        compact
-                      />
-                    </div>
+                    <div className="mt-1 text-lg font-semibold text-gray-900 dark:text-white break-words">{metric.value}</div>
                     {metric.detail && (
                       <div className="mt-1 text-xs leading-snug text-gray-500 dark:text-gray-400">{metric.detail}</div>
                     )}
                   </div>
-                  );
-                })}
+                ))}
               </div>
             </div>
           ))}

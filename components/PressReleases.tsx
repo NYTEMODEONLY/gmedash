@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { format, parseISO } from 'date-fns';
 import axios from 'axios';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface PressRelease {
   title: string;
@@ -163,13 +162,10 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
 
       {/* Press Releases List */}
       <div className="space-y-4">
-        {releases.slice(0, 6).map((release, index) => {
-          const releaseId = createAnchorId(sectionId, release.date, index);
-          return (
+        {releases.slice(0, 6).map((release, index) => (
           <article
             key={index}
-            id={releaseId}
-            className="scroll-mt-24 border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all"
+            className="border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all"
           >
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 flex-1 mr-2">
@@ -177,12 +173,9 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
                   {release.title}
                 </a>
               </h3>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getSourceColor(release.source)}`}>
-                  {release.source}
-                </span>
-                <ExportShareControls id={releaseId} title={`Press Release: ${release.title}`} data={release} compact />
-              </div>
+              <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0 ${getSourceColor(release.source)}`}>
+                {release.source}
+              </span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
               {release.description}
@@ -192,8 +185,7 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
               <a href={release.url} target="_blank" rel="noopener noreferrer" className="text-gme-red font-medium hover:text-gme-red-dark transition-colors">Read more</a>
             </div>
           </article>
-          );
-        })}
+        ))}
       </div>
 
       {/* Footer */}

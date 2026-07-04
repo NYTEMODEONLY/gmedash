@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface CompanyInfo {
   name: string;
@@ -89,18 +88,18 @@ export default function CompanyOverview() {
 
   const sectionId = 'company-overview';
   const metricCards = [
-    { label: 'Market Cap', value: companyInfo.marketCapFormatted, rawValue: companyInfo.marketCap },
-    { label: 'P/E Ratio', value: companyInfo.peRatio ? companyInfo.peRatio.toFixed(2) : 'N/A', rawValue: companyInfo.peRatio },
-    { label: 'EPS', value: companyInfo.eps ? `$${companyInfo.eps.toFixed(2)}` : 'N/A', rawValue: companyInfo.eps },
-    { label: 'Avg Volume', value: companyInfo.avgVolume ? formatNumber(companyInfo.avgVolume) : 'N/A', rawValue: companyInfo.avgVolume },
+    { label: 'Market Cap', value: companyInfo.marketCapFormatted },
+    { label: 'P/E Ratio', value: companyInfo.peRatio ? companyInfo.peRatio.toFixed(2) : 'N/A' },
+    { label: 'EPS', value: companyInfo.eps ? `$${companyInfo.eps.toFixed(2)}` : 'N/A' },
+    { label: 'Avg Volume', value: companyInfo.avgVolume ? formatNumber(companyInfo.avgVolume) : 'N/A' },
   ];
   const details = [
     { label: 'CEO', value: companyInfo.ceo || 'N/A' },
     { label: 'Headquarters', value: companyInfo.headquarters || 'N/A' },
     { label: 'Founded', value: companyInfo.founded || 'N/A' },
-    { label: 'Employees', value: companyInfo.employeesText || (companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A'), rawValue: companyInfo.employees },
+    { label: 'Employees', value: companyInfo.employeesText || (companyInfo.employees ? companyInfo.employees.toLocaleString() : 'N/A') },
     { label: 'Industry', value: companyInfo.industry },
-    { label: 'Beta', value: companyInfo.beta ? companyInfo.beta.toFixed(2) : 'N/A', rawValue: companyInfo.beta },
+    { label: 'Beta', value: companyInfo.beta ? companyInfo.beta.toFixed(2) : 'N/A' },
   ];
 
   return (
@@ -143,25 +142,12 @@ export default function CompanyOverview() {
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {metricCards.map((metric) => {
-          const metricId = createAnchorId(sectionId, metric.label);
-          return (
-            <div key={metric.label} id={metricId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{metric.label}</div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{metric.value}</div>
-                </div>
-                <ExportShareControls
-                  id={metricId}
-                  title={`Company Overview: ${metric.label}`}
-                  data={{ label: metric.label, value: metric.value, rawValue: metric.rawValue, source: companyInfo.dataSource }}
-                  compact
-                />
-              </div>
+        {metricCards.map((metric) => (
+            <div key={metric.label} className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-3 transition-colors">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{metric.label}</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-white">{metric.value}</div>
             </div>
-          );
-        })}
+        ))}
       </div>
 
       {/* 52-Week Range */}
@@ -186,23 +172,12 @@ export default function CompanyOverview() {
       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         {[details.slice(0, 3), details.slice(3)].map((detailGroup, groupIndex) => (
           <div key={groupIndex} className="space-y-3">
-            {detailGroup.map((detail) => {
-              const detailId = createAnchorId(sectionId, detail.label);
-              return (
-                <div key={detail.label} id={detailId} className="scroll-mt-24 flex items-start justify-between gap-3">
+            {detailGroup.map((detail) => (
+                <div key={detail.label} className="flex items-start justify-between gap-3">
                   <span className="text-sm text-gray-500 dark:text-gray-400">{detail.label}</span>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white text-right">{detail.value}</span>
-                    <ExportShareControls
-                      id={detailId}
-                      title={`Company Overview: ${detail.label}`}
-                      data={{ label: detail.label, value: detail.value, rawValue: detail.rawValue, source: companyInfo.dataSource }}
-                      compact
-                    />
-                  </div>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white text-right">{detail.value}</span>
                 </div>
-              );
-            })}
+            ))}
           </div>
         ))}
       </div>

@@ -3,7 +3,6 @@
 import { format, parseISO } from 'date-fns';
 import { NewsArticle } from '@/lib/api';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface NewsSectionProps {
   news: NewsArticle[];
@@ -68,10 +67,8 @@ export default function NewsSection({ news, isLoading, isLiveMode = true }: News
       </div>
 
       <div className="space-y-4">
-        {news.slice(0, 8).map((article, index) => {
-          const articleId = createAnchorId(sectionId, article.source.name, article.publishedAt, index);
-          return (
-          <article key={index} id={articleId} className="scroll-mt-24 border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all">
+        {news.slice(0, 8).map((article, index) => (
+          <article key={index} className="border border-gray-200 dark:border-gme-dark-300 rounded-lg p-4 hover:shadow-md hover:border-gme-red/30 dark:hover:border-gme-red/50 transition-all">
             <div className="flex justify-between items-start gap-3 mb-2">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">
                 <a
@@ -83,12 +80,9 @@ export default function NewsSection({ news, isLoading, isLiveMode = true }: News
                   {article.title}
                 </a>
               </h3>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  {format(parseISO(article.publishedAt), 'MMM dd')}
-                </span>
-                <ExportShareControls id={articleId} title={`News: ${article.title}`} data={article} compact />
-              </div>
+              <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                {format(parseISO(article.publishedAt), 'MMM dd')}
+              </span>
             </div>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
@@ -104,8 +98,7 @@ export default function NewsSection({ news, isLoading, isLiveMode = true }: News
               </span>
             </div>
           </article>
-          );
-        })}
+        ))}
       </div>
 
       {news.length > 8 && (

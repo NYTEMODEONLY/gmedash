@@ -14,7 +14,6 @@ import {
   YAxis,
 } from 'recharts';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface TurnaroundYear {
   fiscalYearEnd: string;
@@ -146,26 +145,13 @@ export default function TurnaroundProgress() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {data.highlights.map((highlight) => {
-          const highlightId = createAnchorId(sectionId, highlight.label);
-          return (
-          <div key={highlight.label} id={highlightId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{highlight.label}</div>
-                <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{highlight.value}</div>
-              </div>
-              <ExportShareControls
-                id={highlightId}
-                title={`Turnaround Progress: ${highlight.label}`}
-                data={{ ...highlight, sourceUrl: data.sourceUrl, latestFilingUrl: latest.filingUrl }}
-                compact
-              />
-            </div>
+        {data.highlights.map((highlight) => (
+          <div key={highlight.label} className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
+            <div className="text-xs text-gray-500 dark:text-gray-400">{highlight.label}</div>
+            <div className="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{highlight.value}</div>
             <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-snug">{highlight.detail}</div>
           </div>
-          );
-        })}
+        ))}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -210,10 +196,8 @@ export default function TurnaroundProgress() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gme-dark-300">
-            {data.years.map((year) => {
-              const yearId = createAnchorId(sectionId, year.fiscalYearEnd);
-              return (
-              <tr key={year.fiscalYearEnd} id={yearId} className="scroll-mt-24 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
+            {data.years.map((year) => (
+              <tr key={year.fiscalYearEnd} className="hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
                 <td className="px-3 py-3 text-sm">
                   <a href={year.filingUrl} target="_blank" rel="noopener noreferrer" className="text-gme-red hover:text-gme-red-dark font-medium">
                     {year.fiscalYearEnd}
@@ -225,20 +209,9 @@ export default function TurnaroundProgress() {
                 <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">{money(year.liquidity)}</td>
                 <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">{money(year.totalDebt)}</td>
                 <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">{compactNumber(year.stores)}</td>
-                <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">
-                  <div className="flex items-center justify-between gap-2">
-                    <span>{compactNumber(year.registeredShares)}</span>
-                    <ExportShareControls
-                      id={yearId}
-                      title={`Turnaround Progress: ${year.fiscalYearEnd}`}
-                      data={year}
-                      compact
-                    />
-                  </div>
-                </td>
+                <td className="px-3 py-3 text-sm text-gray-900 dark:text-white">{compactNumber(year.registeredShares)}</td>
               </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
       </div>

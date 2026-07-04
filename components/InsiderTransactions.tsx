@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface InsiderTransaction {
   id: string;
@@ -129,9 +128,9 @@ export default function InsiderTransactions() {
   const sectionId = 'insider-stock-transactions';
   const summaryCards = [
     { label: 'Open-Market Buys', value: summary?.openMarketBuys || 0, detail: `${numberText(summary?.openMarketBuyShares)} shares`, className: 'text-stock-green' },
-    { label: 'Buy Value', value: money(summary?.openMarketBuyValue), detail: 'Code P only', rawValue: summary?.openMarketBuyValue },
+    { label: 'Buy Value', value: money(summary?.openMarketBuyValue), detail: 'Code P only' },
     { label: 'Open-Market Sales', value: summary?.openMarketSales || 0, detail: `${numberText(summary?.openMarketSaleShares)} shares`, className: 'text-stock-red' },
-    { label: 'Sale Value', value: money(summary?.openMarketSaleValue), detail: 'Code S only', rawValue: summary?.openMarketSaleValue },
+    { label: 'Sale Value', value: money(summary?.openMarketSaleValue), detail: 'Code S only' },
   ];
 
   return (
@@ -157,26 +156,13 @@ export default function InsiderTransactions() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {summaryCards.map((card) => {
-          const cardId = createAnchorId(sectionId, card.label);
-          return (
-            <div key={card.label} id={cardId} className="scroll-mt-24 bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{card.label}</div>
-                  <div className={`mt-1 text-xl font-semibold ${card.className || 'text-gray-900 dark:text-white'}`}>{card.value}</div>
-                </div>
-                <ExportShareControls
-                  id={cardId}
-                  title={`Insider Stock Transactions: ${card.label}`}
-                  data={{ label: card.label, value: card.value, detail: card.detail, rawValue: card.rawValue, source: data.sourceUrl }}
-                  compact
-                />
-              </div>
+        {summaryCards.map((card) => (
+            <div key={card.label} className="bg-gray-50 dark:bg-gme-dark-200 rounded-lg p-4">
+              <div className="text-xs text-gray-500 dark:text-gray-400">{card.label}</div>
+              <div className={`mt-1 text-xl font-semibold ${card.className || 'text-gray-900 dark:text-white'}`}>{card.value}</div>
               <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">{card.detail}</div>
             </div>
-          );
-        })}
+        ))}
       </div>
 
       <div className="overflow-x-auto">
@@ -191,10 +177,8 @@ export default function InsiderTransactions() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gme-dark-300">
-            {data.transactions.slice(0, 12).map((transaction) => {
-              const transactionId = createAnchorId(sectionId, transaction.id || transaction.transactionDate, transaction.reporter);
-              return (
-              <tr key={transaction.id} id={transactionId} className="scroll-mt-24 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
+            {data.transactions.slice(0, 12).map((transaction) => (
+              <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-colors">
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                   <a href={transaction.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-gme-red hover:text-gme-red-dark font-medium">
                     {format(parseISO(transaction.transactionDate), 'MMM dd, yyyy')}
@@ -210,15 +194,9 @@ export default function InsiderTransactions() {
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{numberText(transaction.shares)}</td>
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{price(transaction.price)}</td>
                 <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{money(transaction.value)}</td>
-                <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">
-                  <div className="flex items-center justify-between gap-2">
-                    <span>{numberText(transaction.sharesOwnedAfter)}</span>
-                    <ExportShareControls id={transactionId} title={`Insider Transaction: ${transaction.reporter}`} data={transaction} compact />
-                  </div>
-                </td>
+                <td className="px-3 py-4 text-sm text-gray-900 dark:text-white">{numberText(transaction.sharesOwnedAfter)}</td>
               </tr>
-              );
-            })}
+            ))}
           </tbody>
         </table>
       </div>

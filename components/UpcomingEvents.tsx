@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import axios from 'axios';
 import ExportShareControls from '@/components/ExportShareControls';
-import { createAnchorId } from '@/lib/export-share';
 
 interface UpcomingEvent {
   title: string;
@@ -160,24 +159,18 @@ export default function UpcomingEvents() {
       {/* Events List */}
       {events.length > 0 ? (
         <div className="space-y-4">
-          {events.map((event, index) => {
-            const eventId = createAnchorId(sectionId, event.date, event.title, index);
-            return (
+          {events.map((event, index) => (
             <article
               key={index}
-              id={eventId}
-              className="scroll-mt-24 flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
+              className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
             >
               {getEventIcon(event.type)}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white">{event.title}</h3>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getEventBadgeColor(event.type)}`}>
-                      {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
-                    </span>
-                    <ExportShareControls id={eventId} title={`Upcoming Event: ${event.title}`} data={event} compact />
-                  </div>
+                  <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${getEventBadgeColor(event.type)}`}>
+                    {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{event.description}</p>
                 <div className="flex items-center justify-between text-xs">
@@ -194,8 +187,7 @@ export default function UpcomingEvents() {
                 </a>
               </div>
             </article>
-            );
-          })}
+          ))}
         </div>
       ) : (
         <div className="text-center py-8">
