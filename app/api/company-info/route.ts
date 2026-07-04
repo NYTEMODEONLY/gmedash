@@ -191,6 +191,11 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (metrics) {
+      const metricSource = [secProfile.dataSource, metrics.source]
+        .flatMap((source) => String(source || '').split('/'))
+        .filter(Boolean)
+        .filter((source, index, sources) => sources.indexOf(source) === index)
+        .join('/');
       const companyInfo: CompanyInfo = {
         ...STATIC_INFO,
         name: secProfile.name,
@@ -214,7 +219,7 @@ export async function GET(request: NextRequest) {
         beta: metrics.beta,
         sharesOutstanding: metrics.sharesOutstanding,
         floatShares: null,
-        dataSource: secProfile.dataSource,
+        dataSource: metricSource || secProfile.dataSource,
       };
 
       // Cache the result
