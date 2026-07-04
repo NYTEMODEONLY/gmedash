@@ -80,6 +80,16 @@ export default function Footer() {
               </li>
               <li>
                 <a
+                  href="https://powerpacks.gamestop.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gme-red transition-colors"
+                >
+                  GameStop Power Packs
+                </a>
+              </li>
+              <li>
+                <a
                   href="https://www.finra.org/finra-data/browse-catalog/equity-short-interest/data"
                   target="_blank"
                   rel="noopener noreferrer"
