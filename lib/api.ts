@@ -115,6 +115,43 @@ export interface SECFiling {
   companyName: string;
 }
 
+export type FeedbackType = 'data-request' | 'data-accuracy' | 'bug' | 'general';
+
+export interface FeedbackSubmission {
+  type: FeedbackType;
+  area?: string;
+  pageUrl?: string;
+  message: string;
+  website?: string;
+}
+
+export interface FeedbackSubmitResponse {
+  ok?: boolean;
+  error?: string;
+  configured?: boolean;
+  submittedAt?: string;
+  issueUrl?: string;
+  issueNumber?: number;
+}
+
+export const submitFeedback = async (submission: FeedbackSubmission): Promise<FeedbackSubmitResponse> => {
+  try {
+    const response = await axios.post<FeedbackSubmitResponse>('/api/feedback', submission, {
+      timeout: 15000,
+    });
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data) {
+      return error.response.data as FeedbackSubmitResponse;
+    }
+
+    return {
+      error: 'Unable to submit feedback right now.',
+    };
+  }
+};
+
 // Enhanced real-time stock quote using Next.js API route
 export const getStockQuote = async (symbol: string = 'GME'): Promise<StockQuote | null> => {
   try {

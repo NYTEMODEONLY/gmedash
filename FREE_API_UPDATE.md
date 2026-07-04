@@ -17,6 +17,7 @@ The GameStop Dashboard uses free public data sources only. No API keys, paid fee
 | Insider transactions | SEC Forms 3/4/5 ownership filings | Exact SEC ownership filing links |
 | Short interest | FINRA consolidated short-interest page/API | Reported short-interest cycles |
 | GameStop IR site watch | Official GameStop Investor Relations homepage links | 10-minute scan for new, removed, or notable linked IR pages |
+| Feedback and data requests | GitHub Issues via server-side token | Optional public feedback loop; anonymous submissions are timestamped and triaged in the repo |
 | Options flow | None configured | API returns an unavailable state until a reliable free public source exists |
 
 ## Removed Sources

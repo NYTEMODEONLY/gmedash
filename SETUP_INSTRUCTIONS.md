@@ -8,13 +8,22 @@ npm install
 ```
 
 ### 2. Set Up Environment Variables (Optional)
-This application uses completely free APIs - no API keys required!
+Core market, filing, news, and investor-relations data uses completely free public APIs - no API keys required.
 
 ```bash
 cp env.example .env.local
 ```
 
-The `.env.local` file is optional since no API keys are needed.
+The `.env.local` file is optional for dashboard data.
+
+To enable anonymous feedback submissions into GitHub Issues, add:
+
+```bash
+GITHUB_FEEDBACK_TOKEN=github_pat_or_fine_grained_token
+GITHUB_FEEDBACK_REPO=NYTEMODEONLY/gmedash
+```
+
+Use a fine-grained GitHub token scoped to this repository with Issues read/write access. Do not expose this token with a `NEXT_PUBLIC_` prefix.
 
 #### Data Sources (All Free):
 - **Yahoo Finance chart API**: Real-time stock quote and historical chart data (no key required)
@@ -26,6 +35,7 @@ The `.env.local` file is optional since no API keys are needed.
 - **Wikipedia Summary API**: Founded year reference
 - **Coinbase Public Price API**: BTC spot context for SEC-disclosed Bitcoin collateral
 - **Options flow**: Returns an unavailable state until a reliable free public source exists
+- **Feedback submissions**: Optional GitHub Issues write path for anonymous visitor requests and accuracy reports
 
 ### 3. Run the Application
 ```bash
@@ -47,6 +57,7 @@ Open http://localhost:3000 in your browser.
 - **Press Releases**: Official GameStop IR release feed
 - **SEC Filings**: Recent SEC filings table
 - **Footer**: Disclaimers and links
+- **Feedback page**: Anonymous data requests and accuracy reports stored as GitHub Issues when configured
 
 ## 🔧 Features
 
@@ -57,6 +68,7 @@ Open http://localhost:3000 in your browser.
 - ✅ Time period selection
 - ✅ Data refresh functionality
 - ✅ User-facing source links for core data sections
+- ✅ Anonymous feedback and data request loop via GitHub Issues
 - ✅ TypeScript support
 - ✅ Tailwind CSS styling
 
@@ -64,7 +76,8 @@ Open http://localhost:3000 in your browser.
 
 1. Push to GitHub
 2. Connect to Vercel
-3. Deploy. No environment variables are required.
+3. Deploy. No environment variables are required for dashboard data.
+4. Optional: set `GITHUB_FEEDBACK_TOKEN` and `GITHUB_FEEDBACK_REPO` in Vercel Project Environment Variables to enable public feedback submissions.
 
 ## 📄 Full Documentation
 

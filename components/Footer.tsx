@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-gray-50 dark:bg-gme-dark-100 border-t border-gray-200 dark:border-gme-dark-300 mt-8 transition-colors duration-200">
@@ -87,6 +89,14 @@ export default function Footer() {
                 >
                   GameStop Power Packs
                 </a>
+              </li>
+              <li>
+                <Link
+                  href="/feedback"
+                  className="hover:text-gme-red transition-colors"
+                >
+                  Feedback & Data Requests
+                </Link>
               </li>
               <li>
                 <a

@@ -42,6 +42,7 @@ A comprehensive, real-time dashboard for GameStop (GME) investors. View live sto
 - **Responsive Design** - Optimized for desktop, tablet, and mobile
 - **Accessibility** - Focus states, reduced motion support, high contrast mode
 - **Live Mode Toggle** - Switch between live updates and manual refresh
+- **Anonymous Feedback Loop** - Public form for data requests and accuracy reports stored as GitHub Issues for triage
 
 ---
 
@@ -64,6 +65,7 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | **News** | Third-party GME news excluding official IR releases | Original article URLs, Google News GME search, Bing News GME search |
 | **SEC Filings** | Latest EDGAR filings with filing links | Exact SEC archive filing links and SEC EDGAR company page |
 | **GameStop IR Site Watch** | 10-minute scan of the official GameStop Investor Relations homepage for new, removed, or notable linked pages | GameStop Investor Relations homepage and exact linked IR pages |
+| **Feedback & Data Requests** | Anonymous, timestamped visitor submissions for data requests and accuracy reports | GitHub Issues in the project repository when `GITHUB_FEEDBACK_TOKEN` is configured |
 | **Footer Source Registry** | Project-level source directory | GameStop, GameStop IR, SEC EDGAR, Yahoo Finance, FINRA, Coinbase, WhyDRS, DRSGME, GitHub |
 | **Options** | Not shown as a core card until a reliable free public source is wired; API returns an unavailable state | N/A |
 
@@ -130,7 +132,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
-No environment variables are required. The dashboard works out of the box with free public sources.
+No environment variables are required for market, filing, news, or investor-relations data. The dashboard works out of the box with free public sources.
+
+Anonymous feedback storage is optional. To save public visitor submissions as GitHub Issues, configure:
+
+```bash
+GITHUB_FEEDBACK_TOKEN=github_pat_or_fine_grained_token
+GITHUB_FEEDBACK_REPO=NYTEMODEONLY/gmedash
+```
+
+Use a fine-grained GitHub token scoped to this repository with Issues read/write access. Keep the token server-side only, such as in Vercel Project Environment Variables.
 
 ---
 
@@ -174,6 +185,7 @@ gmedash/
 │   │   ├── turnaround/     # SEC year-over-year turnaround metrics
 │   │   ├── insider-transactions/ # SEC ownership transactions
 │   │   ├── investor-site-changes/ # GameStop IR homepage change monitor
+│   │   ├── feedback/      # Anonymous feedback to GitHub Issues
 │   │   ├── short-interest/ # FINRA short interest
 │   │   └── options-flow/   # Unavailable response until a reliable free source exists
 │   ├── globals.css         # Global styles & theme
@@ -193,6 +205,7 @@ gmedash/
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases
 │   ├── InvestorSiteChanges.tsx # GameStop IR homepage change monitor
+│   ├── FeedbackForm.tsx   # Anonymous feedback submission form
 │   └── Footer.tsx          # Footer
 ├── lib/
 │   ├── api.ts              # API client
