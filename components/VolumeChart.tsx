@@ -12,15 +12,16 @@ import {
   Legend,
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
-import { HistoricalData } from '@/lib/api';
+import { HistoricalData, HistoricalDataResponse } from '@/lib/api';
 import { useTheme } from '@/lib/ThemeContext';
 
 interface VolumeChartProps {
   data: HistoricalData[];
   isLoading: boolean;
+  metadata?: HistoricalDataResponse | null;
 }
 
-export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
+export default function VolumeChart({ data, isLoading, metadata }: VolumeChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
@@ -75,7 +76,17 @@ export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Volume Data</h3>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Unable to fetch volume data</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {metadata?.message || metadata?.error || 'Unable to fetch volume data'}
+          </p>
+          <a
+            href="https://finance.yahoo.com/quote/GME/history"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+          >
+            Open Yahoo Finance history
+          </a>
         </div>
       </div>
     );
@@ -89,6 +100,16 @@ export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
   const gridColor = isDark ? '#222222' : '#f0f0f0';
   const axisColor = isDark ? '#888888' : '#6b7280';
   const barColor = isDark ? '#8b5cf6' : '#8b5cf6';
+  const sourceName = metadata?.source === 'cache'
+    ? `Cached from ${metadata.originalSource === 'yahoo' ? 'Yahoo Finance' : metadata?.originalSource || 'source'}`
+    : metadata?.source === 'yahoo'
+      ? 'Yahoo Finance'
+      : 'Yahoo Finance';
+  const freshnessLabel = metadata?.stale
+    ? 'Stale cached volume data'
+    : metadata?.source === 'cache'
+      ? `Cached ${metadata.cacheAge ?? 0}s ago`
+      : 'Updates with price data';
 
   return (
     <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
@@ -176,10 +197,10 @@ export default function VolumeChart({ data, isLoading }: VolumeChartProps) {
               rel="noopener noreferrer"
               className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors"
             >
-              Yahoo Finance
+              {sourceName}
             </a>
           </span>
-          <span>Updates with price data</span>
+          <span>{freshnessLabel}</span>
         </div>
       </div>
     </div>

@@ -11,11 +11,20 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const symbol = searchParams.get('symbol') || 'GME';
+  const symbol = (searchParams.get('symbol') || 'GME').toUpperCase();
   const period = searchParams.get('period') || '1Y';
   const responseHeaders = {
     'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
   };
+
+  if (symbol !== 'GME') {
+    return NextResponse.json({
+      data: [],
+      source: 'none',
+      error: 'This dashboard is scoped to GME only.',
+      count: 0,
+    }, { status: 400, headers: responseHeaders });
+  }
 
   const cacheKey = CACHE_KEYS.HISTORICAL(period);
 

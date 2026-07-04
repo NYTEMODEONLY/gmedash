@@ -12,6 +12,14 @@ interface PressRelease {
   source: string;
 }
 
+interface PressReleaseUnavailable {
+  data: PressRelease[];
+  available: false;
+  source: string;
+  sourceUrl: string;
+  message: string;
+}
+
 interface Q4PressRelease {
   Headline: string;
   LinkToDetailPage: string;
@@ -50,20 +58,33 @@ const fetchIRPressReleases = async (): Promise<PressRelease[]> => {
 
   const items = response.data?.GetPressReleaseListResult || [];
 
-  return items.map((item) => {
-    const description =
-      item.ShortDescription?.trim() ||
-      item.Subheadline?.trim() ||
-      'GameStop press release';
+  return items
+    .map((item) => {
+      const title = item.Headline?.trim();
+      const detailPath = item.LinkToDetailPage?.trim();
+      const description =
+        item.ShortDescription?.trim() ||
+        item.Subheadline?.trim() ||
+        'Official GameStop investor relations press release';
 
-    return {
-      title: item.Headline.trim(),
-      date: parsePressReleaseDate(item.PressReleaseDate),
-      url: new URL(item.LinkToDetailPage, IR_BASE_URL).toString(),
-      description,
-      source: 'GameStop IR',
-    };
-  });
+      if (!title || !detailPath || !item.PressReleaseDate) {
+        return null;
+      }
+
+      const url = new URL(detailPath, IR_BASE_URL).toString();
+      if (!url.startsWith(`${IR_BASE_URL}/news-releases/`)) {
+        return null;
+      }
+
+      return {
+        title,
+        date: parsePressReleaseDate(item.PressReleaseDate),
+        url,
+        description,
+        source: 'GameStop IR',
+      };
+    })
+    .filter((item): item is PressRelease => Boolean(item));
 };
 
 export async function GET() {
@@ -75,12 +96,34 @@ export async function GET() {
     };
 
     if (releases.length === 0) {
-      return NextResponse.json({ error: 'No press releases available' }, { status: 503, headers });
+      const unavailable: PressReleaseUnavailable = {
+        data: [],
+        available: false,
+        source: 'GameStop IR',
+        sourceUrl: 'https://news.gamestop.com/news-releases-0',
+        message: 'The official GameStop IR feed returned no validated press releases.',
+      };
+
+      return NextResponse.json(unavailable, { status: 200, headers });
     }
 
     return NextResponse.json(releases.slice(0, 10), { headers });
   } catch (error) {
     console.error('Press Releases API error:', error);
-    return NextResponse.json({ error: 'Failed to fetch press releases' }, { status: 500 });
+    return NextResponse.json(
+      {
+        data: [],
+        available: false,
+        source: 'GameStop IR',
+        sourceUrl: 'https://news.gamestop.com/news-releases-0',
+        message: 'Unable to fetch the official GameStop IR press release feed.',
+      },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=60',
+        },
+      }
+    );
   }
 }

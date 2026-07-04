@@ -17,15 +17,15 @@ cp env.example .env.local
 The `.env.local` file is optional since no API keys are needed.
 
 #### Data Sources (All Free):
-- **Stooq + Yahoo Finance**: Real-time stock and historical chart data (no key required)
+- **Yahoo Finance chart API**: Real-time stock quote and historical chart data (no key required)
 - **Google News + Bing News RSS**: Public news feeds (IR excluded)
 - **SEC EDGAR**: Official SEC filings (no key required)
 - **SEC 10-K**: Company facts and investor snapshot metrics
-- **GameStop IR Feed**: Official press releases from investor relations
+- **GameStop IR Feed**: Official press releases from investor relations with real article links
 - **FINRA**: Public consolidated short-interest data (no key required)
 - **Wikipedia Summary API**: Founded year reference
 - **Coinbase Public Price API**: BTC spot context for SEC-disclosed Bitcoin collateral
-- **Nitter RSS / Jina AI public X snapshot**: Free Ryan Cohen public post fallback
+- **Options flow**: Returns an unavailable state until a reliable free public source exists
 
 ### 3. Run the Application
 ```bash
@@ -44,6 +44,7 @@ Open http://localhost:3000 in your browser.
 - **Short Interest Chart**: FINRA shares-short and days-to-cover history
 - **Volume Chart**: Trading volume analysis
 - **News Section**: Latest GameStop and GME news
+- **Press Releases**: Official GameStop IR release feed
 - **SEC Filings**: Recent SEC filings table
 - **Footer**: Disclaimers and links
 

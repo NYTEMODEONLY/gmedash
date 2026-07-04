@@ -9,7 +9,6 @@ import ShortingChart from '@/components/ShortingChart';
 import VolumeChart from '@/components/VolumeChart';
 import NewsSection from '@/components/NewsSection';
 import SECFilings from '@/components/SECFilings';
-import RyanCohenTwitter from '@/components/RyanCohenTwitter';
 import PressReleases from '@/components/PressReleases';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import InvestorSnapshot from '@/components/InvestorSnapshot';
@@ -25,6 +24,7 @@ import {
   createPriceStream,
   StockQuote,
   HistoricalData,
+  HistoricalDataResponse,
   ShortInterest,
   NewsArticle,
   SECFiling,
@@ -34,6 +34,7 @@ export default function Dashboard() {
   // State for all data
   const [stockData, setStockData] = useState<StockQuote | null>(null);
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
+  const [historicalMeta, setHistoricalMeta] = useState<HistoricalDataResponse | null>(null);
   const [shortingData, setShortingData] = useState<ShortInterest[]>([]);
   const [newsData, setNewsData] = useState<NewsArticle[]>([]);
   const [secFilings, setSecFilings] = useState<SECFiling[]>([]);
@@ -87,7 +88,8 @@ export default function Dashboard() {
     setIsLoadingStock(false);
 
     if (historicalResult.status === 'fulfilled') {
-      setHistoricalData(historicalResult.value);
+      setHistoricalData(historicalResult.value.data);
+      setHistoricalMeta(historicalResult.value);
     } else {
       hadError = true;
     }
@@ -187,7 +189,8 @@ export default function Dashboard() {
 
     try {
       const historical = await getHistoricalData('GME', period);
-      setHistoricalData(historical);
+      setHistoricalData(historical.data);
+      setHistoricalMeta(historical);
     } catch (err) {
       console.error('Error fetching historical data:', err);
       setError('Failed to fetch historical data.');
@@ -259,6 +262,7 @@ export default function Dashboard() {
             <StockInfoCard
               stockData={stockData}
               isLoading={isLoadingStock}
+              isLiveMode={isLiveMode}
             />
           </div>
 
@@ -269,6 +273,7 @@ export default function Dashboard() {
               isLoading={isLoadingHistorical}
               onPeriodChange={handlePeriodChange}
               selectedPeriod={selectedPeriod}
+              metadata={historicalMeta}
             />
           </div>
         </div>
@@ -282,12 +287,12 @@ export default function Dashboard() {
           <VolumeChart
             data={historicalData}
             isLoading={isLoadingHistorical}
+            metadata={historicalMeta}
           />
         </div>
 
-        {/* Ryan Cohen Twitter and Press Releases Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <RyanCohenTwitter />
+        {/* Press Releases */}
+        <div className="mb-8">
           <PressReleases autoRefresh={isLiveMode} />
         </div>
 
@@ -300,6 +305,7 @@ export default function Dashboard() {
             <NewsSection
               news={newsData}
               isLoading={isLoadingNews}
+              isLiveMode={isLiveMode}
             />
           </div>
         </div>

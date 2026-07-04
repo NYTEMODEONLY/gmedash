@@ -1,170 +1,48 @@
-# Free API Update - Complete
+# Free Public Data Source Contract
 
-## 🎉 Successfully Updated to 100% Free APIs!
+The GameStop Dashboard uses free public data sources only. No API keys, paid feeds, mirror scraping, or mock finance records are required for the current dashboard.
 
-The GameStop Dashboard has been updated so dashboard data uses free public APIs and data sources. **No API keys are required.**
+## Current Source Map
 
-## ✅ Changes Made
+| Data Type | Source | Reliability Policy |
+|-----------|--------|--------------------|
+| Stock quote | Yahoo Finance chart API | Live quote endpoint with 30 second market-hours cache and 5 minute closed-market cache |
+| Historical prices and volume | Yahoo Finance chart API | End-of-day chart data with source metadata in chart cards |
+| News | Google News RSS and Bing News RSS | Aggregated third-party articles, excluding official IR releases |
+| Press releases | Official GameStop Investor Relations feed | Validated GameStop IR release URLs only |
+| SEC filings | SEC EDGAR submissions and archives | Official filing links |
+| Company facts | SEC submissions, latest 10-K, Yahoo Finance chart metadata, Wikipedia summary API | Filing facts take precedence; unavailable metrics stay blank |
+| Investor snapshot | Latest SEC 10-K plus Coinbase public BTC spot context | SEC facts are filing-dated; BTC price is contextual only |
+| Turnaround progress | SEC companyfacts XBRL API and exact 10-K filings | Filing-backed annual metrics |
+| Insider transactions | SEC Forms 3/4/5 ownership filings | Exact SEC ownership filing links |
+| Short interest | FINRA consolidated short-interest page/API | Reported short-interest cycles |
+| Upcoming events | Confirmed GameStop IR links and Yahoo Finance metadata | No estimated events |
+| Options flow | None configured | API returns an unavailable state until a reliable free public source exists |
 
-### 1. **Stock Data** - Stooq + Yahoo Finance (Free)
-- **Before**: Alpha Vantage API (required API key, rate limited)
-- **After**: Stooq quote CSV with Yahoo Finance chart fallback (no key required)
-- **Features**: Real-time stock prices, historical data, OHLCV data
+## Removed Sources
 
-### 2. **News** - Google News + Bing News RSS (Free)
-- **Before**: NewsAPI (required API key, 1,000 requests/day limit)
-- **After**: Google News + Bing News RSS feeds (no key required, no limits)
-- **Features**: Latest GameStop and GME related news, automatically filtered (IR excluded)
+- Stooq quote CSV was removed from the live quote path because the former quote endpoint returned 404 for GME.
+- Ryan Cohen/X widgets and `/api/twitter` were removed because the project does not currently have proper X API access.
+- Nitter/Jina public X mirrors are not used. Do not re-add mirror scraping without a clear source, attribution, reliability, and compliance review.
+- MarketWatch is not presented as an in-app data source because no dashboard data is currently fetched from it.
 
-### 3. **Press Releases** - GameStop Investor Relations Feed (Free)
-- **Before**: Mixed Google News + SEC EDGAR items
-- **After**: Official GameStop IR feed (company announcements only)
-- **Features**: Press releases pulled directly from investor.gamestop.com
+## Accuracy Policy
 
-### 4. **SEC Filings** - SEC EDGAR Database (Free)
-- **Before**: SEC-API (required API key, 1,000 requests/month limit)
-- **After**: Official SEC EDGAR database (no key required, public data)
-- **Features**: Official SEC filings (10-K, 10-Q, 8-K)
+- Every core dashboard section should expose a user-facing source link or item-level source link.
+- SEC-backed facts must link to the relevant SEC filing or EDGAR page.
+- Market-backed facts must link to Yahoo Finance or another active market source page.
+- News and press releases must link to the original article or official GameStop IR release.
+- The app should show an empty or unavailable state when a public source cannot confirm a value.
+- The app must not invent data, backfill mock records, or silently replace missing live values with estimates.
 
-### 5. **Short Interest Data** - FINRA Public API (Free)
-- **Before**: Finnhub API (required API key, rate limited)
-- **After**: FINRA Consolidated Short Interest API (no key required)
-- **Features**: Shares short, days to cover, average daily volume, and change from previous reporting cycle
+## Implementation Notes
 
-### 6. **Company Facts + Investor Snapshot** - SEC 10-K + Public Reference APIs (Free)
-- **Before**: Some company facts depended on removed static fallbacks or incomplete finance profiles
-- **After**: CEO, employee range, store footprint, registered-holder data, liquidity, debt, net income, product mix, segment mix, and Bitcoin disclosures are sourced from SEC filings and public endpoints
-- **Features**: Direct source links in the dashboard for SEC 10-K, SEC EDGAR, Yahoo Finance, Wikipedia, Coinbase BTC spot, and official profile/feed pages
+- `getStockQuote()` uses the app `/api/stock` route backed by Yahoo Finance chart data.
+- `getHistoricalData()` uses the app `/api/historical` route backed by Yahoo Finance chart data.
+- `/api/press-releases` validates official GameStop IR feed records and returns real IR article URLs.
+- `/api/options-flow` intentionally returns an unavailable response rather than scraped, blocked, paid, or estimated records.
+- `/api/twitter` and the Ryan Cohen UI widget have been removed until proper X API access exists.
 
-### 7. **Ryan Cohen Posts** - Free Public Fallbacks (Free)
-- **Before**: Paid X API was intentionally avoided, so the card could only link to X
-- **After**: The card attempts a free Nitter RSS feed and falls back to Jina AI's public X snapshot, while preserving official X post/profile links
-- **Features**: Recent public posts where reachable from free sources, with a clear fallback state if mirrors are blocked
+## Deployment
 
-## 🚀 Benefits of Free APIs
-
-### ✅ **No API Keys Required for Core Features**
-- Zero setup complexity for the main dashboard
-- No registration needed for stock/news/filings/press releases
-- No paid API branches are required
-
-### ✅ **No Rate Limits (Core Features)**
-- Yahoo Finance: No limits for basic usage
-- SEC EDGAR: No limits for public data
-- IR Feed + RSS: Public endpoints
-
-### ✅ **Always Available**
-- No API quotas to worry about
-- No monthly limits
-- No credit card required
-
-### ✅ **Reliable Data Sources**
-- Yahoo Finance: Industry standard for stock data
-- SEC EDGAR: Official government database
-- GameStop IR: Official company announcements
-
-## 📊 Data Quality
-
-| Data Type | Source | Quality | Reliability |
-|-----------|--------|---------|-------------|
-| Stock Prices | Stooq + Yahoo Finance | Good | High |
-| Historical Data | Yahoo Finance | Excellent | Very High |
-| News | Google News + Bing News RSS | Good | High |
-| SEC Filings | SEC EDGAR | Excellent | Very High |
-| Press Releases | GameStop IR Feed | Excellent | Very High |
-| Short Interest | FINRA | Excellent | Very High |
-| Company Facts | SEC 10-K + SEC submissions + Wikipedia | Excellent for filing facts | High |
-| Investor Snapshot | SEC 10-K + Coinbase BTC spot | Excellent for filing facts | High |
-| Ryan Cohen Posts | Nitter/Jina public X snapshot | Good | Medium |
-
-## Source-Link and Accuracy Policy
-
-- Every core dashboard section exposes a user-facing source link or item-level source link.
-- SEC-backed facts link to the relevant SEC filing or EDGAR page.
-- Market-backed facts link to Stooq or Yahoo Finance public source pages.
-- News, press releases, SEC filings, and X/Ryan items link to the original article, release, filing, or post.
-- The app does not claim third-party feeds are infallible in real time. It presents data as live from the cited free source, with unavailable states when a source cannot confirm a value.
-
-## 🔧 Technical Implementation
-
-### API Functions Updated:
-- `getStockQuote()` - Now uses Stooq with Yahoo fallback
-- `getHistoricalData()` - Now uses Yahoo Finance
-- `getNews()` - Now uses Google News + Bing News RSS
-- `getSECFilings()` - Now uses SEC EDGAR
-- `getShortInterest()` - Uses FINRA public data
-- `/api/company-info` - Uses SEC submissions, latest 10-K, Yahoo metrics, and Wikipedia summary API
-- `/api/investor-snapshot` - Uses latest SEC 10-K plus Coinbase public BTC spot context
-- `/api/twitter` - Uses Nitter RSS with Jina public X snapshot fallback
-
-### Error Handling:
-- Graceful fallbacks for all APIs
-- Empty unavailable states when external APIs fail
-- Comprehensive error messages
-
-### Performance:
-- Faster loading (no API key validation)
-- No rate limit delays
-- No local mock data generation
-
-## 📱 User Experience
-
-### Before (Paid APIs):
-1. Sign up for 4 different services
-2. Get API keys from each service
-3. Configure environment variables
-4. Deal with rate limits and quotas
-5. Risk of API key expiration
-
-### After (Core Free APIs):
-1. Clone the repository
-2. Run `npm install`
-3. Run `npm run dev`
-4. Done!
-
-## 🚀 Deployment
-
-### Vercel Deployment:
-- **Before**: Required environment variables setup
-- **After**: Deploy directly from GitHub, no configuration needed
-
-### Other Platforms:
-- Works on any platform that supports Next.js
-- No environment variables required
-- No API key management
-
-## 📄 Updated Documentation
-
-### Files Updated:
-- `README.md` - Updated setup instructions
-- `SETUP_INSTRUCTIONS.md` - Simplified setup process
-- `env.example` - Removed API key requirements
-- `components/Footer.tsx` - Updated data sources
-- `lib/api.ts` - Complete API rewrite
-
-### Key Changes:
-- Removed all API key requirements
-- Updated data source descriptions
-- Simplified troubleshooting section
-- Added free API benefits
-
-## 🎯 Result
-
-The GameStop Dashboard is now:
-- ✅ **100% Free** - No paid APIs or services
-- ✅ **Zero Setup** - No API keys or registration
-- ✅ **Always Available** - No rate limits or quotas
-- ✅ **Production Ready** - Deploy anywhere immediately
-- ✅ **User Friendly** - Works out of the box
-- ✅ **Source Linked** - End users can click through to public backing sources
-
-## 🚀 Next Steps
-
-1. **Deploy to Vercel**: Push to GitHub and deploy instantly
-2. **Customize**: Modify for other stocks by changing the symbol
-3. **Extend**: Add more free data sources as needed
-4. **Share**: Perfect for demos, portfolios, and learning
-
----
-
-**The application is now completely free and ready to use!** 🎉 
+The project is deployable from GitHub to Vercel without environment variables. Production data quality depends on the public source endpoints above being reachable from Vercel.

@@ -11,7 +11,7 @@ export interface StockQuote {
   low: number;
   volume: string;
   previousClose: number;
-  source: 'stooq' | 'yahoo' | 'cache';
+  source: 'yahoo' | 'cache';
 }
 
 // Unified company metrics format
@@ -47,7 +47,6 @@ interface ProviderHealth {
 }
 
 const providerHealth: Record<string, ProviderHealth> = {
-  finnhub: { lastSuccess: null, lastError: null, consecutiveErrors: 0 },
   yahoo: { lastSuccess: null, lastError: null, consecutiveErrors: 0 },
 };
 
@@ -72,57 +71,7 @@ export function formatMarketCap(value: number | null): string {
 }
 
 // ============================================
-// FREE PUBLIC QUOTE PROVIDER
-// ============================================
-
-export async function stooqGetQuote(symbol: string = 'GME'): Promise<StockQuote | null> {
-  try {
-    const stooqSymbol = `${symbol.toLowerCase()}.us`;
-    const response = await axios.get('https://stooq.com/q/l/', {
-      params: {
-        s: stooqSymbol,
-        f: 'sd2t2ohlcv',
-        h: '',
-        e: 'csv',
-      },
-      timeout: 8000,
-      responseType: 'text',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GMEDASH/1.0)',
-      },
-    });
-
-    const lines = String(response.data).trim().split(/\r?\n/);
-    if (lines.length < 2) return null;
-
-    const [csvSymbol, date, time, open, high, low, close, volume] = lines[1].split(',');
-    const price = Number(close);
-    if (!csvSymbol || !date || !time || !Number.isFinite(price) || price <= 0) return null;
-
-    const yahooQuote = await yahooGetQuote(symbol);
-    const previousClose = yahooQuote?.previousClose || price;
-    const change = price - previousClose;
-
-    return {
-      symbol,
-      price,
-      change,
-      changePercent: previousClose > 0 ? `${((change / previousClose) * 100).toFixed(2)}%` : '0.00%',
-      open: Number(open) || 0,
-      high: Number(high) || 0,
-      low: Number(low) || 0,
-      volume: String(Number(volume) || 0),
-      previousClose,
-      source: 'stooq',
-    };
-  } catch (error: any) {
-    console.error('Stooq quote error:', error?.message || error);
-    return null;
-  }
-}
-
-// ============================================
-// YAHOO FINANCE PROVIDER (FALLBACK)
+// YAHOO FINANCE PROVIDER
 // ============================================
 
 const YAHOO_BASE = 'https://query1.finance.yahoo.com/v8/finance';
@@ -267,112 +216,8 @@ export async function yahooGetMetricsFromChart(symbol: string = 'GME'): Promise<
   }
 }
 
-// Cache for Yahoo crumb (needed for authenticated API calls)
-let yahooCrumb: string | null = null;
-let yahooCookies: string | null = null;
-let yahooCrumbTime: number = 0;
-const CRUMB_TTL = 30 * 60 * 1000; // 30 minutes
-
-async function getYahooCrumb(): Promise<{ crumb: string; cookies: string } | null> {
-  // Return cached crumb if still valid
-  if (yahooCrumb && yahooCookies && Date.now() - yahooCrumbTime < CRUMB_TTL) {
-    return { crumb: yahooCrumb, cookies: yahooCookies };
-  }
-
-  try {
-    // Step 1: Get cookies from the main page
-    const pageResponse = await axios.get('https://finance.yahoo.com/quote/GME', {
-      timeout: 10000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      maxRedirects: 5,
-    });
-
-    const cookies = pageResponse.headers['set-cookie']?.map((c: string) => c.split(';')[0]).join('; ') || '';
-
-    // Step 2: Get crumb from the crumb endpoint
-    const crumbResponse = await axios.get('https://query1.finance.yahoo.com/v1/test/getcrumb', {
-      timeout: 5000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Cookie': cookies,
-      },
-    });
-
-    const crumb = crumbResponse.data;
-    if (crumb && typeof crumb === 'string') {
-      yahooCrumb = crumb;
-      yahooCookies = cookies;
-      yahooCrumbTime = Date.now();
-      return { crumb, cookies };
-    }
-
-    return null;
-  } catch (error: any) {
-    console.error('Failed to get Yahoo crumb:', error?.message || error);
-    return null;
-  }
-}
-
 export async function yahooGetFullMetrics(symbol: string = 'GME'): Promise<CompanyMetrics | null> {
   try {
-    // Get crumb for authenticated API access
-    const auth = await getYahooCrumb();
-
-    if (auth) {
-      // Use the quoteSummary endpoint with crumb
-      const response = await axios.get(
-        `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}`,
-        {
-          params: {
-            modules: 'summaryDetail,defaultKeyStatistics,financialData,price',
-            crumb: auth.crumb,
-          },
-          timeout: 10000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Cookie': auth.cookies,
-          },
-        }
-      );
-
-      const result = response.data?.quoteSummary?.result?.[0];
-      if (result) {
-        const summaryDetail = result.summaryDetail || {};
-        const keyStats = result.defaultKeyStatistics || {};
-        const financialData = result.financialData || {};
-        const price = result.price || {};
-
-        const marketCap = price.marketCap?.raw || summaryDetail.marketCap?.raw || null;
-        const peRatio = summaryDetail.trailingPE?.raw || keyStats.trailingPE?.raw || null;
-        const eps = keyStats.trailingEps?.raw || financialData.trailingEps?.raw || null;
-        const beta = summaryDetail.beta?.raw || keyStats.beta?.raw || null;
-        const avgVolume = summaryDetail.averageVolume?.raw || price.averageDailyVolume10Day?.raw || null;
-        const fiftyTwoWeekHigh = summaryDetail.fiftyTwoWeekHigh?.raw || null;
-        const fiftyTwoWeekLow = summaryDetail.fiftyTwoWeekLow?.raw || null;
-        const sharesOutstanding = keyStats.sharesOutstanding?.raw || null;
-        const dividendYield = summaryDetail.dividendYield?.raw || null;
-
-        updateProviderHealth('yahoo', true);
-        return {
-          marketCap,
-          marketCapFormatted: formatMarketCap(marketCap),
-          peRatio,
-          eps,
-          beta,
-          fiftyTwoWeekHigh,
-          fiftyTwoWeekLow,
-          avgVolume,
-          sharesOutstanding,
-          dividendYield,
-          source: 'yahoo',
-        };
-      }
-    }
-
-    // Fallback: Try without crumb (might work for some endpoints)
     const chartResponse = await axios.get(`${YAHOO_BASE}/chart/${symbol}`, {
       params: { interval: '1d', range: '1y' },
       timeout: 10000,
@@ -432,12 +277,6 @@ export async function yahooGetFullMetrics(symbol: string = 'GME'): Promise<Compa
 // ============================================
 
 export async function getStockQuote(symbol: string = 'GME'): Promise<StockQuote | null> {
-  const stooqQuote = await stooqGetQuote(symbol);
-  if (stooqQuote) {
-    return stooqQuote;
-  }
-
-  // Fallback to Yahoo
   const yahooQuote = await yahooGetQuote(symbol);
   if (yahooQuote) {
     return yahooQuote;

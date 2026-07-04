@@ -55,7 +55,7 @@ function matchFirst(text: string, patterns: RegExp[]): RegExpMatchArray | null {
   return null;
 }
 
-async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: string; url: string }> {
+async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: string; reportDate: string | null; url: string }> {
   const submissionsResponse = await axios.get(`https://data.sec.gov/submissions/CIK${CIK}.json`, {
     timeout: 10000,
     headers: SEC_HEADERS,
@@ -69,6 +69,7 @@ async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: 
   const primaryDocument = recent.primaryDocument[index];
   const url = `https://www.sec.gov/Archives/edgar/data/1326380/${accession.replace(/-/g, '')}/${primaryDocument}`;
   const filingDate = recent.filingDate[index];
+  const reportDate = recent.reportDate?.[index] || null;
 
   const reportResponse = await axios.get(url, {
     timeout: 12000,
@@ -79,6 +80,7 @@ async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: 
   return {
     text: decodeSECText(String(reportResponse.data)),
     filingDate,
+    reportDate,
     url,
   };
 }
@@ -106,7 +108,7 @@ export async function GET() {
   };
 
   try {
-    const [{ text, filingDate, url }, btcPrice] = await Promise.all([
+    const [{ text, filingDate, reportDate, url }, btcPrice] = await Promise.all([
       getLatestAnnualReportText(),
       getBitcoinPrice(),
     ]);
@@ -119,8 +121,8 @@ export async function GET() {
     const segmentMatch = text.match(/United States\s+\$\s*([\d,.]+)\s+73\.5\s+%\s+\$\s*[\d,.]+[\s\S]{0,120}?Canada\s+([\d,.]+)\s+1\.1[\s\S]{0,80}?Australia\s+([\d,.]+)\s+13\.6[\s\S]{0,80}?Europe\s+([\d,.]+)\s+11\.8/i);
     const categoryMatch = text.match(/Hardware and accessories\s+\$\s*([\d,.]+)\s+50\.7[\s\S]{0,80}?Software\s+([\d,.]+)\s+20\.1[\s\S]{0,80}?Collectibles\s+([\d,.]+)\s+29\.2/i);
     const storesMatch = text.match(/Total Stores\s+([\d,]+)\s+1\s+\(([\d,]+)\)\s+([\d,]+)/i);
-    const storeByRegionMatch = text.match(/As of January 31, 2026, we had a total of\s+([\d,]+)\s+st ores[\s\S]{0,120}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in A ustralia/i)
-      || text.match(/As of January 31, 2026, we had a total of\s+([\d,]+)\s+stores[\s\S]{0,120}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in Australia/i);
+    const storeByRegionMatch = text.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+st\s*ores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in A\s*ustralia/i)
+      || text.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+stores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in Australia/i);
     const holdersMatch = text.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by registered holders[\s\S]{0,260}?approximately\s+([\d,.]+)\s+million were held in our direct stock purchase plan[\s\S]{0,220}?there were\s+([\d,]+)\s+record holders/i);
     const dtcMatch = text.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by Cede & Co\./i);
     const bitcoinMatch = matchFirst(text, [
@@ -226,7 +228,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      asOf: 'January 31, 2026',
+      asOf: reportDate || filingDate,
       filingDate,
       filingUrl: url,
       lastUpdated: new Date().toISOString(),

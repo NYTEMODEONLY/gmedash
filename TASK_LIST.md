@@ -23,7 +23,7 @@
 - [x] Volume Chart component
 - [x] News Section component
 - [x] SEC Filings component
-- [x] Ryan Cohen public-post component
+- [x] Remove unsupported Ryan Cohen/X widget until proper API access exists
 - [x] Loading and Error components
 
 ## API Integration
@@ -34,7 +34,7 @@
 - [x] SEC 10-K investor snapshot integration
 - [x] SEC annual turnaround progress integration
 - [x] SEC Form 3/4/5 insider transaction integration
-- [x] Free Ryan Cohen public-post fallback integration
+- [x] Options flow unavailable response instead of unreliable scraped/paid data
 
 ## Styling & Responsiveness
 - [x] Tailwind CSS configuration
@@ -70,3 +70,5 @@
 - [x] Test application with free APIs
 - [x] Verify no API keys required for core features
 - [x] Verify core dashboard sections expose source links
+- [x] Verify official GameStop IR press releases return real release URLs
+- [x] Push source-of-truth updates to GitHub for Vercel deployment

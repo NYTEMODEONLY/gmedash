@@ -12,7 +12,7 @@ export default function Footer() {
               regulatory filing, and investor relations endpoints.
             </p>
             <div className="text-xs text-gray-500 dark:text-gray-500">
-              <p>Data sources: Stooq, Yahoo Finance, SEC EDGAR/companyfacts/ownership, FINRA, GameStop IR, Google/Bing News RSS, Jina/X, Wikipedia, Coinbase</p>
+              <p>Data sources: Yahoo Finance, SEC EDGAR/companyfacts/ownership, FINRA, GameStop IR, Google/Bing News RSS, Wikipedia, Coinbase</p>
               <p>Charts powered by Recharts</p>
             </div>
           </div>
@@ -70,32 +70,12 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://www.marketwatch.com/investing/stock/gme"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gme-red transition-colors"
-                >
-                  MarketWatch - GME
-                </a>
-              </li>
-              <li>
-                <a
                   href="https://news.gamestop.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-gme-red transition-colors"
                 >
                   GameStop Investor Relations
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://x.com/ryancohen"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-gme-red transition-colors"
-                >
-                  Ryan Cohen on X
                 </a>
               </li>
               <li>

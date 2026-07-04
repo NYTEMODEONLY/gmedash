@@ -52,7 +52,7 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | Widget | Current Behavior | In-App Source Link |
 |--------|------------------|--------------------|
 | **Header / Controls** | Local refresh, theme, and live-mode state only | No external data source; browser/app state |
-| **Live Quote Card** | Current OHLCV quote with live refresh cadence | Stooq quote CSV, Yahoo Finance fallback, Yahoo Finance quote page, TradingView quote page |
+| **Live Quote Card** | Current OHLCV quote with live refresh cadence | Yahoo Finance chart API, Yahoo Finance quote page, TradingView quote page |
 | **Historical Price Chart** | End-of-day historical prices | Yahoo Finance GME history page |
 | **Volume Chart** | End-of-day historical volume | Yahoo Finance GME history page |
 | **Company Overview** | SEC identity, CEO, employees, headquarters, market metrics, founded year | SEC 10-K archive filing, SEC EDGAR company page, Yahoo Finance key statistics, Wikipedia page |
@@ -60,13 +60,12 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | **Turnaround Progress** | Year-over-year revenue, gross margin, net income, liquidity, debt, stores, registered shares, record holders, and shares outstanding | SEC companyfacts XBRL API and exact SEC 10-K archive filing links |
 | **Insider Transactions** | Recent Form 3/4/5 board, officer, and Section 16 transactions with buy/sell code summaries | Exact SEC ownership filing links and SEC EDGAR ownership page |
 | **Short Interest** | Live reported short-position history | FINRA Consolidated Short Interest page |
-| **Ryan Cohen Posts** | Free public feed when available, with official post links | Official X profile/post links, Nitter RSS mirror URL, Jina AI public X snapshot fallback URL |
-| **Press Releases** | Official GameStop announcements | Exact GameStop IR release links and GameStop IR news releases page |
+| **Press Releases** | Official GameStop announcements from the IR feed | Exact GameStop IR release links and GameStop IR news releases page |
 | **News** | Third-party GME news excluding official IR releases | Original article URLs, Google News GME search, Bing News GME search |
 | **SEC Filings** | Latest EDGAR filings with filing links | Exact SEC archive filing links and SEC EDGAR company page |
 | **Upcoming Events** | Confirmed events only; no estimates if sources are empty | GameStop IR events page and Yahoo Finance quote/chart metadata page |
-| **Footer Source Registry** | Project-level source directory | GameStop, GameStop IR, SEC EDGAR, Yahoo Finance, MarketWatch, X, FINRA, Coinbase, WhyDRS, DRSGME, GitHub |
-| **Options** | Not shown as a core card until a reliable free public source is wired | N/A |
+| **Footer Source Registry** | Project-level source directory | GameStop, GameStop IR, SEC EDGAR, Yahoo Finance, FINRA, Coinbase, WhyDRS, DRSGME, GitHub |
+| **Options** | Not shown as a core card until a reliable free public source is wired; API returns an unavailable state | N/A |
 
 ### Accuracy Contract
 
@@ -91,8 +90,8 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 
 | Data Type | Source | Cost | Status |
 |-----------|--------|------|--------|
-| Stock Quotes | Stooq quote CSV, Yahoo Finance fallback | Free | Active |
-| Historical Data | Yahoo Finance API | Free | Active |
+| Stock Quotes | Yahoo Finance chart API | Free | Active |
+| Historical Data | Yahoo Finance chart API | Free | Active |
 | News | Google News RSS, Bing News RSS (IR excluded) | Free | Active |
 | SEC Filings | SEC EDGAR Database | Free | Active |
 | Press Releases | GameStop Investor Relations (IR feed) | Free | Active |
@@ -102,7 +101,7 @@ The dashboard uses free public sources only. If a source is unavailable or does 
 | Insider Transactions | SEC Forms 3/4/5 ownership filings | Free | Active |
 | Upcoming Events | Confirmed Yahoo Finance metadata and GameStop IR links | Free | Active |
 | Short Interest | FINRA public API | Free | Active |
-| Ryan Cohen Posts | Nitter RSS mirror, Jina AI public X snapshot, X profile links | Free | Active |
+| Options Flow | No reliable free source configured; unavailable response only | Free | Disabled |
 
 ---
 
@@ -176,8 +175,7 @@ gmedash/
 │   │   ├── insider-transactions/ # SEC ownership transactions
 │   │   ├── events/         # Upcoming events
 │   │   ├── short-interest/ # FINRA short interest
-│   │   ├── twitter/        # External X profile fallback
-│   │   └── options-flow/   # Experimental public options lookup
+│   │   └── options-flow/   # Unavailable response until a reliable free source exists
 │   ├── globals.css         # Global styles & theme
 │   ├── layout.tsx          # Root layout with metadata
 │   └── page.tsx            # Main dashboard
@@ -191,7 +189,6 @@ gmedash/
 │   ├── PriceChart.tsx      # Price history chart
 │   ├── VolumeChart.tsx     # Volume chart
 │   ├── ShortingChart.tsx   # FINRA short interest
-│   ├── RyanCohenTwitter.tsx# Free public X/Ryan feed with official links
 │   ├── NewsSection.tsx     # News articles
 │   ├── SECFilings.tsx      # SEC filings table
 │   ├── PressReleases.tsx   # Press releases

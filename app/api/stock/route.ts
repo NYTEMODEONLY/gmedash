@@ -7,27 +7,56 @@ export const dynamic = 'force-dynamic';
 // Check if market is currently open
 function isMarketOpen(): boolean {
   const now = new Date();
-  const day = now.getDay();
-  const hours = now.getUTCHours();
-  const minutes = now.getUTCMinutes();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(now);
+  const partMap = parts.reduce<Record<string, string>>((acc, part) => {
+    if (part.type !== 'literal') {
+      acc[part.type] = part.value;
+    }
+    return acc;
+  }, {});
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+  const day = dayMap[partMap.weekday || 'Sun'];
+  const hours = Number(partMap.hour || 0);
+  const minutes = Number(partMap.minute || 0);
   const totalMinutes = hours * 60 + minutes;
 
   // Weekend
   if (day === 0 || day === 6) return false;
 
-  // Market hours: 9:30 AM - 4:00 PM EST = 14:30 - 21:00 UTC
-  const marketOpenUTC = 14 * 60 + 30;
-  const marketCloseUTC = 21 * 60;
+  const marketOpenET = 9 * 60 + 30;
+  const marketCloseET = 16 * 60;
 
-  return totalMinutes >= marketOpenUTC && totalMinutes < marketCloseUTC;
+  return totalMinutes >= marketOpenET && totalMinutes < marketCloseET;
 }
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const symbol = searchParams.get('symbol') || 'GME';
+  const symbol = (searchParams.get('symbol') || 'GME').toUpperCase();
   const responseHeaders = {
     'Cache-Control': 'no-store, max-age=0',
   };
+
+  if (symbol !== 'GME') {
+    return NextResponse.json(
+      { error: 'This dashboard is scoped to GME only.' },
+      { status: 400, headers: responseHeaders }
+    );
+  }
 
   try {
     // Check cache first
@@ -36,6 +65,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...cached.data,
         source: 'cache',
+        originalSource: cached.data.source,
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
       }, { headers: responseHeaders });
     }
@@ -60,6 +90,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...staleData,
         source: 'cache',
+        originalSource: staleData.source,
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
       }, { headers: responseHeaders });
@@ -78,6 +109,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...staleData,
         source: 'cache',
+        originalSource: staleData.source,
         stale: true,
         cacheAge: cache.getAge(CACHE_KEYS.STOCK_QUOTE),
       }, { headers: responseHeaders });

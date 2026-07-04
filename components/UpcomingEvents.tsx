@@ -96,6 +96,12 @@ export default function UpcomingEvents() {
     }
   };
 
+  const getEventUrl = (event: UpcomingEvent) => {
+    if (event.url) return event.url;
+    if (event.source === 'Yahoo Finance') return 'https://finance.yahoo.com/quote/GME';
+    return 'https://news.gamestop.com/events-and-presentations';
+  };
+
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
@@ -151,7 +157,7 @@ export default function UpcomingEvents() {
           {events.map((event, index) => (
             <a
               key={index}
-              href={event.url || 'https://news.gamestop.com/events-and-presentations'}
+              href={getEventUrl(event)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-start space-x-4 p-4 rounded-lg border border-gray-100 dark:border-gme-dark-300 hover:border-gray-200 dark:hover:border-gme-dark-400 hover:bg-gray-50 dark:hover:bg-gme-dark-200 transition-all"
@@ -166,9 +172,10 @@ export default function UpcomingEvents() {
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{event.description}</p>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500 dark:text-gray-400">
-                    {format(parseISO(event.date), 'MMMM d, yyyy')}
-                  </span>
+                  <div className="text-gray-500 dark:text-gray-400">
+                    <div>{format(parseISO(event.date), 'MMMM d, yyyy')}</div>
+                    {event.source && <div className="mt-0.5">Source: {event.source}</div>}
+                  </div>
                   <span className="text-indigo-600 dark:text-indigo-400 font-medium">
                     {formatDistanceToNow(parseISO(event.date), { addSuffix: true })}
                   </span>

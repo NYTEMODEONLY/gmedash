@@ -61,6 +61,9 @@ export interface StockQuote {
   volume: string;
   previousClose: number;
   source?: string;
+  originalSource?: string;
+  stale?: boolean;
+  cacheAge?: number;
 }
 
 export interface HistoricalData {
@@ -70,6 +73,17 @@ export interface HistoricalData {
   high: number;
   low: number;
   open: number;
+}
+
+export interface HistoricalDataResponse {
+  data: HistoricalData[];
+  source: string;
+  originalSource?: string;
+  stale?: boolean;
+  cacheAge?: number;
+  message?: string;
+  error?: string;
+  count?: number;
 }
 
 export interface ShortInterest {
@@ -198,23 +212,38 @@ const isMarketOpen = (date: Date): boolean => {
 export const getHistoricalData = async (
   symbol: string = 'GME',
   period: string = '1Y'
-): Promise<HistoricalData[]> => {
+): Promise<HistoricalDataResponse> => {
   try {
     const response = await axios.get(`/api/historical?symbol=${symbol}&period=${period}`, {
       timeout: 10000,
     });
 
-    // Handle new response format with data property
     const responseData = response.data;
     if (responseData?.data && Array.isArray(responseData.data)) {
-      return responseData.data;
+      return {
+        data: responseData.data,
+        source: responseData.source || 'unknown',
+        originalSource: responseData.originalSource,
+        stale: responseData.stale,
+        cacheAge: responseData.cacheAge,
+        message: responseData.message,
+        error: responseData.error,
+        count: responseData.count,
+      };
     }
 
     // Fallback for direct array response
-    return Array.isArray(responseData) ? responseData : [];
+    return {
+      data: Array.isArray(responseData) ? responseData : [],
+      source: Array.isArray(responseData) ? 'unknown' : 'none',
+    };
   } catch (error) {
     console.error('Error fetching historical data:', error);
-    return [];
+    return {
+      data: [],
+      source: 'error',
+      error: 'Failed to fetch historical data',
+    };
   }
 };
 

@@ -29,7 +29,6 @@ export const metadata: Metadata = {
     'GameStop stock price',
     'GME dashboard',
     'stock tracker',
-    'Ryan Cohen',
     'SEC filings',
     'GME news',
     'meme stock',
@@ -77,7 +76,6 @@ export const metadata: Metadata = {
     title: 'GME Dashboard | Real-Time GameStop Stock Tracker',
     description: 'Track GameStop (GME) stock in real-time with live price data, SEC filings, news aggregation, and investor insights.',
     images: ['/og-image.png'],
-    creator: '@ryancohen',
   },
   icons: {
     icon: [
@@ -144,7 +142,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://query1.finance.yahoo.com" />
-        <link rel="dns-prefetch" href="https://finnhub.io" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

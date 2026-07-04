@@ -5,6 +5,7 @@ import { StockQuote } from '@/lib/api';
 
 interface ExtendedStockQuote extends StockQuote {
   source?: string;
+  originalSource?: string;
   stale?: boolean;
   cacheAge?: number;
 }
@@ -12,9 +13,38 @@ interface ExtendedStockQuote extends StockQuote {
 interface StockInfoCardProps {
   stockData: ExtendedStockQuote | null;
   isLoading: boolean;
+  isLiveMode?: boolean;
 }
 
-export default function StockInfoCard({ stockData, isLoading }: StockInfoCardProps) {
+const sourceConfig: Record<string, { label: string; url: string; className: string }> = {
+  yahoo: {
+    label: 'Yahoo Finance',
+    url: 'https://finance.yahoo.com/quote/GME',
+    className: 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400',
+  },
+};
+
+const isRegularMarketOpen = (): boolean => {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(new Date());
+  const partMap = parts.reduce<Record<string, string>>((acc, part) => {
+    if (part.type !== 'literal') acc[part.type] = part.value;
+    return acc;
+  }, {});
+  const dayMap: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+  const day = dayMap[partMap.weekday || 'Sun'];
+  if (day === 0 || day === 6) return false;
+  const totalMinutes = Number(partMap.hour || 0) * 60 + Number(partMap.minute || 0);
+  return totalMinutes >= 9 * 60 + 30 && totalMinutes < 16 * 60;
+};
+
+export default function StockInfoCard({ stockData, isLoading, isLiveMode = true }: StockInfoCardProps) {
   const [priceFlash, setPriceFlash] = useState<'up' | 'down' | null>(null);
   const prevPriceRef = useRef<number | null>(null);
 
@@ -56,6 +86,14 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Data Available</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Unable to fetch stock data</p>
+          <a
+            href="https://finance.yahoo.com/quote/GME"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
+          >
+            Open Yahoo Finance source
+          </a>
         </div>
       </div>
     );
@@ -64,6 +102,18 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
   const isPositive = stockData.change >= 0;
   const changeColor = isPositive ? 'text-stock-green' : 'text-stock-red';
   const changeBgColor = isPositive ? 'bg-stock-green/10 border-stock-green/30' : 'bg-stock-red/10 border-stock-red/30';
+  const effectiveSource = stockData.source === 'cache'
+    ? stockData.originalSource || 'yahoo'
+    : stockData.source || 'yahoo';
+  const source = sourceConfig[effectiveSource] || sourceConfig.yahoo;
+  const sourceLabel = stockData.source === 'cache' ? `Cached from ${source.label}` : source.label;
+  const refreshLabel = stockData.stale
+    ? 'Data may be stale'
+    : !isLiveMode
+      ? 'Manual refresh only'
+      : isRegularMarketOpen()
+        ? 'Live: 30 sec refresh'
+        : 'Closed-market refresh: 5 min';
 
   // Calculate day range percentage
   const dayRange = stockData.high - stockData.low;
@@ -159,14 +209,6 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex flex-wrap gap-2">
           <a
-            href="https://stooq.com/q/?s=gme.us"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs px-2.5 py-1 bg-gray-100 dark:bg-gme-dark-300 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200 dark:hover:bg-gme-dark-400 transition-colors"
-          >
-            Stooq
-          </a>
-          <a
             href="https://finance.yahoo.com/quote/GME"
             target="_blank"
             rel="noopener noreferrer"
@@ -189,21 +231,17 @@ export default function StockInfoCard({ stockData, isLoading }: StockInfoCardPro
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gme-dark-300">
         <div className="flex items-center justify-between text-xs">
           <a
-            href={stockData.source === 'stooq' ? 'https://stooq.com/q/?s=gme.us' : 'https://finance.yahoo.com/quote/GME'}
+            href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`px-2 py-0.5 rounded hover:opacity-80 transition-opacity ${
-            stockData.source === 'finnhub' ? 'bg-stock-green/20 text-stock-green' :
-            stockData.source === 'yahoo' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' :
-            'bg-gray-100 dark:bg-gme-dark-300 text-gray-500 dark:text-gray-400'
-          }`}>
-            {stockData.source || 'Yahoo Finance'}
+            className={`px-2 py-0.5 rounded hover:opacity-80 transition-opacity ${source.className}`}>
+            {sourceLabel}
           </a>
           <span className="text-gray-500 dark:text-gray-400">
             {stockData.stale ? (
-              <span className="text-amber-600 dark:text-amber-500">Data may be stale</span>
+              <span className="text-amber-600 dark:text-amber-500">{refreshLabel}</span>
             ) : (
-              'Live: 30 sec refresh'
+              refreshLabel
             )}
           </span>
         </div>

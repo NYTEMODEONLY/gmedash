@@ -12,6 +12,14 @@ interface PressRelease {
   source: string;
 }
 
+interface PressReleaseResponse {
+  data: PressRelease[];
+  available: boolean;
+  source: string;
+  sourceUrl: string;
+  message?: string;
+}
+
 interface PressReleasesProps {
   autoRefresh?: boolean;
 }
@@ -25,12 +33,17 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
     try {
       setIsLoading(true);
       setError(null);
-      const response = await axios.get<PressRelease[]>('/api/press-releases', {
+      const response = await axios.get<PressRelease[] | PressReleaseResponse>('/api/press-releases', {
         timeout: 15000,
       });
 
       if (Array.isArray(response.data)) {
         setReleases(response.data);
+      } else if (Array.isArray(response.data.data)) {
+        setReleases(response.data.data);
+        if (!response.data.available) {
+          setError(response.data.message || 'No press releases available');
+        }
       } else {
         setError('No press releases available');
         setReleases([]);
@@ -182,10 +195,10 @@ export default function PressReleases({ autoRefresh = true }: PressReleasesProps
               rel="noopener noreferrer"
               className="text-gme-red hover:text-gme-red-dark font-medium transition-colors"
             >
-              GameStop Investor Relations
+              Official GameStop IR feed
             </a>
           </span>
-          <span>Auto-updates every 5 min</span>
+          <span>{autoRefresh ? 'Auto-updates every 5 min' : 'Manual refresh only'}</span>
         </div>
       </div>
     </div>

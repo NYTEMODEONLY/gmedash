@@ -6,9 +6,10 @@ import { NewsArticle } from '@/lib/api';
 interface NewsSectionProps {
   news: NewsArticle[];
   isLoading: boolean;
+  isLiveMode?: boolean;
 }
 
-export default function NewsSection({ news, isLoading }: NewsSectionProps) {
+export default function NewsSection({ news, isLoading, isLiveMode = true }: NewsSectionProps) {
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-gme-dark-100 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gme-dark-300 transition-colors duration-200">
@@ -37,6 +38,14 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
           </svg>
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No News Available</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Unable to fetch news articles</p>
+          <a
+            href="https://news.google.com/search?q=GameStop%20OR%20GME%20stock"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          >
+            Open Google News source
+          </a>
         </div>
       </div>
     );
@@ -76,7 +85,7 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
 
             <div className="flex justify-between items-center">
               <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                {article.source.name}
+                via {article.source.name}
               </span>
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 {format(parseISO(article.publishedAt), 'MMM dd, yyyy HH:mm')}
@@ -118,7 +127,7 @@ export default function NewsSection({ news, isLoading }: NewsSectionProps) {
             {' '}(IR excluded)
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Auto-refresh: 5 min
+            {isLiveMode ? 'Auto-refresh: 5 min' : 'Manual refresh only'}
           </div>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
