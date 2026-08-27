@@ -128,7 +128,7 @@ export default function TurnaroundProgress() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Turnaround Progress</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Year-over-year SEC filing trend for operations, liquidity, ownership, and store footprint
+            Annual 10-K year-end trend. Latest quarter cash is on Investor Snapshot.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -226,7 +226,7 @@ export default function TurnaroundProgress() {
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
             >
-              SEC companyfacts and 10-K filings
+              SEC 10-K year-end (not the latest 10-Q)
             </a>
           </span>
           <span>{data.lastUpdated ? `Updated ${new Date(data.lastUpdated).toLocaleString()}` : 'SEC sourced'}</span>
