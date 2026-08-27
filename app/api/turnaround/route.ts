@@ -235,9 +235,11 @@ export async function GET() {
             : 'Latest SEC annual filing',
         },
         {
-          label: 'Liquidity',
+          label: 'Liquidity (10-K year-end)',
           value: money(latest?.liquidity),
-          detail: `Cash ${money(latest?.cash)}; securities ${money(latest?.marketableSecurities)}`,
+          detail: latest?.fiscalYearEnd
+            ? `As of ${latest.fiscalYearEnd}. Cash ${money(latest?.cash)}; securities ${money(latest?.marketableSecurities)}`
+            : `Cash ${money(latest?.cash)}; securities ${money(latest?.marketableSecurities)}`,
         },
         {
           label: 'Store Footprint',
