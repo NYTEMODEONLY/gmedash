@@ -187,7 +187,7 @@ export async function GET() {
 
     const liquidityMatch = text.match(/Cash, cash equivalents and marketable securities\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
     const cashMatch = text.match(/Cash and cash equivalents\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
-    const marketableMatch = text.match(/Marketable securities\s+([\d,.]+)\s+[—\-–]?[\s$]*([\d,.]+)?/i);
+    const marketableMatch = text.match(/Marketable securities\s+([\d,.]+)/i);
     const debtMatch = text.match(/Long-term debt\s+([\d,.]+)\s+([\d,.]+)/i)
       || text.match(/Total debt\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
     const resultsMatch = text.match(/Net sales\s+\$\s*([\d,.]+)[\s\S]{0,80}?Gross profit\s+([\d,.]+)[\s\S]{0,400}?Net income\s+\$\s*([\d,.]+)/i);
@@ -266,7 +266,7 @@ export async function GET() {
           {
             label: 'Registered Shares',
             value: holdersMatch ? `${holdersMatch[1]}M (${holdersMatch[2]}%)` : 'N/A',
-            detail: `DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%)`,
+            detail: `As of 10-K${annual.reportDate ? ` ${annual.reportDate}` : ''} (annual HQ count). DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%). Notes close changes share count and this %, not the registered share count.`,
           },
           {
             label: 'Dividend Status',
@@ -303,6 +303,9 @@ export async function GET() {
       filingDate: operating.filingDate,
       filingUrl: operating.url,
       notesFilingUrl: notes?.url,
+      drsAsOf: annual.reportDate || annual.filingDate,
+      drsSource: 'SEC 10-K',
+      drsNote: 'Registered/DRS share count is the annual HQ count from the 10-K. It is not updated intra-year. After a notes-for-equity close, update shares outstanding and the DRS percentage only. Do not invent a new DRS figure.',
       lastUpdated: new Date().toISOString(),
       sections,
     }, { headers: responseHeaders });
