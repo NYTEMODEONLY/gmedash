@@ -90,7 +90,7 @@ function classify(form: string, items: string, snippet: string | null): { tag: s
       title: 'Convertible notes exchange',
       detail: snippet?.match(/outstanding long-term debt will be reduced by approximately \$[0-9.,]+ billion[\s\S]{0,120}/i)?.[0]
         || snippet?.slice(0, 280)
-        || 'Notes-for-equity 8-K. Share count/% update on close; DRS share count stays on the 10-K.',
+        || 'Notes-for-equity 8-K. DRS stays the annual HQ 10-K count.',
     };
   }
   if (form.startsWith('8-K')) {
@@ -167,7 +167,7 @@ export async function GET() {
       source: 'SEC EDGAR',
       sourceUrl: `https://www.sec.gov/edgar/browse/?CIK=${CIK}`,
       lastUpdated: new Date().toISOString(),
-      note: 'Filing-backed subsequent events only. DRS share count is annual (10-K / HQ count). Notes close updates shares outstanding and the DRS percentage, not the 66.2M figure.',
+      note: 'Filing-backed subsequent events only. DRS is the annual HQ count on the 10-K and is not computed intra-year.',
       events,
     }, { headers: responseHeaders });
   } catch (error) {

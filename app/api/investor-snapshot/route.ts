@@ -100,6 +100,15 @@ async function getLatestFiling(recent: any, forms: string[]): Promise<FilingText
   return getFilingText(recent, index);
 }
 
+function fiscalIncomeLabel(reportDate: string | null, isQuarterly: boolean): string {
+  if (!isQuarterly || !reportDate) return 'FY Net Income';
+  const month = Number(reportDate.slice(5, 7));
+  if (month >= 4 && month <= 6) return 'Q1 Net Income';
+  if (month >= 7 && month <= 9) return 'Q2 Net Income';
+  if (month >= 10 && month <= 12) return 'Q3 Net Income';
+  return 'FY Net Income';
+}
+
 async function getNotesExchange(recent: any): Promise<{
   principal: string;
   remaining: string;
@@ -120,9 +129,11 @@ async function getNotesExchange(recent: any): Promise<{
     const remaining = filing.text.match(
       /approximately \$([0-9.,]+)\s*billion aggregate principal amount of 2030 Notes and \$([0-9.,]+)\s*billion aggregate principal amount of 2032 Notes remaining outstanding/i
     );
-    const close = filing.text.match(
+    const expectedClose = filing.text.match(
       /Closing Date is expected to occur on or about ([A-Za-z]+ \d{1,2}, \d{4})/i
     );
+    const closed = /Closing Date occurred/i.test(filing.text)
+      || /completed the previously announced exchange/i.test(filing.text);
     if (reduced || exchange) {
       const principal = reduced?.[1]
         ? `$${reduced[1]}B notes-for-equity`
@@ -132,7 +143,11 @@ async function getNotesExchange(recent: any): Promise<{
       return {
         principal,
         remaining: remaining ? `~$${remaining[1]}B of 2030 and ~$${remaining[2]}B of 2032 remain` : 'Exchange retires debt without cash',
-        close: close ? `Expected close ${close[1]}` : 'Close pending',
+        close: closed
+          ? `Closed ${filing.reportDate || filing.filingDate}`
+          : expectedClose
+            ? `Expected close ${expectedClose[1]}`
+            : 'Close pending',
         url: filing.url,
         filingDate: filing.filingDate,
       };
@@ -204,7 +219,7 @@ export async function GET() {
     ]);
     const optionMatch = annualText.match(/strike prices ranging from\s+\$([\d,]+)\s+to\s+\$([\d,]+)\s+and maturities extending through\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/i);
 
-    const incomeLabel = useQuarterly ? 'Q1 Net Income' : 'FY Net Income';
+    const incomeLabel = fiscalIncomeLabel(operating.reportDate, useQuarterly);
     const collectiblesPct = categoryMatch?.[6] ? `${categoryMatch[6]}% of net sales` : undefined;
 
     const sections: SnapshotSection[] = [
@@ -266,7 +281,7 @@ export async function GET() {
           {
             label: 'Registered Shares',
             value: holdersMatch ? `${holdersMatch[1]}M (${holdersMatch[2]}%)` : 'N/A',
-            detail: `As of 10-K${annual.reportDate ? ` ${annual.reportDate}` : ''} (annual HQ count). DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%). Notes close changes share count and this %, not the registered share count.`,
+            detail: `As of 10-K${annual.reportDate ? ` ${annual.reportDate}` : ''} (annual HQ count). DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%). DRS is not computed intra-year.`,
           },
           {
             label: 'Dividend Status',
@@ -305,7 +320,7 @@ export async function GET() {
       notesFilingUrl: notes?.url,
       drsAsOf: annual.reportDate || annual.filingDate,
       drsSource: 'SEC 10-K',
-      drsNote: 'Registered/DRS share count is the annual HQ count from the 10-K. It is not updated intra-year. After a notes-for-equity close, update shares outstanding and the DRS percentage only. Do not invent a new DRS figure.',
+      drsNote: 'Registered/DRS is the annual HQ count from the 10-K. It is not computed or updated intra-year.',
       lastUpdated: new Date().toISOString(),
       sections,
     }, { headers: responseHeaders });

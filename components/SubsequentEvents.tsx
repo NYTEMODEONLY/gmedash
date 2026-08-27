@@ -137,7 +137,7 @@ export default function SubsequentEvents({ autoRefresh = true }: SubsequentEvent
       )}
 
       <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-        {data?.note || 'DRS is the annual HQ count on the 10-K. Notes close changes share count and the DRS percentage, not the 66.2M figure.'}
+        {data?.note || 'DRS is the annual HQ count on the 10-K. It is not computed intra-year.'}
       </div>
     </section>
   );
