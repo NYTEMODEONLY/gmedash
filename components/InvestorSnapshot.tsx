@@ -21,6 +21,9 @@ interface InvestorSnapshotResponse {
   filingDate?: string;
   filingUrl?: string;
   lastUpdated?: string;
+  drsAsOf?: string;
+  drsSource?: string;
+  drsNote?: string;
   sections: SnapshotSection[];
   error?: string;
 }
@@ -115,6 +118,17 @@ export default function InvestorSnapshot() {
           )}
         </div>
       </div>
+
+      {snapshot?.drsNote && (
+        <div className="mb-4 rounded-lg border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-300">
+            DRS as of 10-K{snapshot.drsAsOf ? ` · ${snapshot.drsAsOf}` : ''}
+          </div>
+          <p className="mt-1 text-sm text-amber-900 dark:text-amber-200/90">
+            {snapshot.drsNote}
+          </p>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 animate-pulse">
