@@ -100,14 +100,43 @@ async function getLatestFiling(recent: any, forms: string[]): Promise<FilingText
   return getFilingText(recent, index);
 }
 
+function fiscalIncomeLabel(reportDate: string | null, isQuarterly: boolean): string {
+  if (!isQuarterly || !reportDate) return 'FY Net Income';
+  const month = Number(reportDate.slice(5, 7));
+  if (month >= 4 && month <= 6) return 'Q1 Net Income';
+  if (month >= 7 && month <= 9) return 'Q2 Net Income';
+  if (month >= 10 && month <= 12) return 'Q3 Net Income';
+  return 'FY Net Income';
+}
+
+function parseMillions(value: string | undefined): number | null {
+  if (!value) return null;
+  const numeric = Number(String(value).replace(/,/g, ''));
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
 async function getNotesExchange(recent: any): Promise<{
   principal: string;
   remaining: string;
   close: string;
+  closed: boolean;
+  sharesIssuedMillion: number | null;
+  sharesOutstandingMillion: number | null;
   url: string;
   filingDate: string;
 } | null> {
   const forms: string[] = recent?.form || [];
+  let announced: {
+    principal: string;
+    remaining: string;
+    close: string;
+    closed: boolean;
+    sharesIssuedMillion: number | null;
+    sharesOutstandingMillion: number | null;
+    url: string;
+    filingDate: string;
+  } | null = null;
+
   for (let i = 0; i < forms.length && i < 40; i++) {
     if (forms[i] !== '8-K' && forms[i] !== '8-K/A') continue;
     const filing = await getFilingText(recent, i);
@@ -120,25 +149,46 @@ async function getNotesExchange(recent: any): Promise<{
     const remaining = filing.text.match(
       /approximately \$([0-9.,]+)\s*billion aggregate principal amount of 2030 Notes and \$([0-9.,]+)\s*billion aggregate principal amount of 2032 Notes remaining outstanding/i
     );
-    const close = filing.text.match(
+    const expectedClose = filing.text.match(
       /Closing Date is expected to occur on or about ([A-Za-z]+ \d{1,2}, \d{4})/i
     );
-    if (reduced || exchange) {
+    const closed = /the (notes )?exchange (has (been )?(closed|completed|consummated)|closed|was (completed|consummated)|was closed)/i.test(filing.text)
+      || /Closing Date occurred/i.test(filing.text)
+      || /completed the previously announced exchange/i.test(filing.text);
+    const sharesIssued = filing.text.match(
+      /issued (approximately )?([0-9.,]+)\s*million shares/i
+    );
+    const sharesOutstanding = filing.text.match(
+      /(?:there (?:were|are) (?:approximately )?|(?:shares|Class A common stock) outstanding[^\d]{0,80})([0-9.,]+)\s*million shares/i
+    ) || filing.text.match(
+      /approximately ([0-9.,]+)\s*million shares of Class A common stock (?:outstanding|issued and outstanding)/i
+    );
+
+    if (reduced || exchange || (closed && (sharesIssued || sharesOutstanding))) {
       const principal = reduced?.[1]
         ? `$${reduced[1]}B notes-for-equity`
         : exchange
           ? `$${(Number(exchange[1].replace(/,/g, '')) / 1000 + Number(exchange[2].replace(/,/g, ''))).toFixed(1)}B notes-for-equity`
-          : 'N/A';
-      return {
+          : announced?.principal || 'Notes-for-equity';
+      const parsed = {
         principal,
-        remaining: remaining ? `~$${remaining[1]}B of 2030 and ~$${remaining[2]}B of 2032 remain` : 'Exchange retires debt without cash',
-        close: close ? `Expected close ${close[1]}` : 'Close pending',
+        remaining: remaining ? `~$${remaining[1]}B of 2030 and ~$${remaining[2]}B of 2032 remain` : (announced?.remaining || 'Exchange retires debt without cash'),
+        close: closed
+          ? `Closed ${filing.reportDate || filing.filingDate}`
+          : expectedClose
+            ? `Expected close ${expectedClose[1]}`
+            : (announced?.close || 'Close pending'),
+        closed,
+        sharesIssuedMillion: parseMillions(sharesIssued?.[2]),
+        sharesOutstandingMillion: parseMillions(sharesOutstanding?.[1]),
         url: filing.url,
         filingDate: filing.filingDate,
       };
+      if (closed && (parsed.sharesOutstandingMillion || parsed.sharesIssuedMillion)) return parsed;
+      if (!announced) announced = parsed;
     }
   }
-  return null;
+  return announced;
 }
 
 async function getBitcoinPrice(): Promise<number | null> {
@@ -204,7 +254,7 @@ export async function GET() {
     ]);
     const optionMatch = annualText.match(/strike prices ranging from\s+\$([\d,]+)\s+to\s+\$([\d,]+)\s+and maturities extending through\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/i);
 
-    const incomeLabel = useQuarterly ? 'Q1 Net Income' : 'FY Net Income';
+    const incomeLabel = fiscalIncomeLabel(operating.reportDate, useQuarterly);
     const collectiblesPct = categoryMatch?.[6] ? `${categoryMatch[6]}% of net sales` : undefined;
 
     const sections: SnapshotSection[] = [
@@ -265,8 +315,23 @@ export async function GET() {
           },
           {
             label: 'Registered Shares',
-            value: holdersMatch ? `${holdersMatch[1]}M (${holdersMatch[2]}%)` : 'N/A',
-            detail: `As of 10-K${annual.reportDate ? ` ${annual.reportDate}` : ''} (annual HQ count). DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%). Notes close changes share count and this %, not the registered share count.`,
+            value: (() => {
+              if (!holdersMatch) return 'N/A';
+              const drsMillion = parseMillions(holdersMatch[1]);
+              const soMillion = notes?.closed ? notes.sharesOutstandingMillion : null;
+              if (drsMillion && soMillion && soMillion > 0) {
+                return `${holdersMatch[1]}M (${((drsMillion / soMillion) * 100).toFixed(1)}%)`;
+              }
+              return `${holdersMatch[1]}M (${holdersMatch[2]}%)`;
+            })(),
+            detail: (() => {
+              const asOf = `As of 10-K${annual.reportDate ? ` ${annual.reportDate}` : ''} (annual HQ count)`;
+              const base = `DSPP ${holdersMatch?.[3] || 'N/A'}M; DTC/Cede ${dtcMatch?.[1] || 'N/A'}M (${dtcMatch?.[2] || 'N/A'}%)`;
+              if (notes?.closed && notes.sharesOutstandingMillion) {
+                return `${asOf}. ${base}. DRS % uses post-close shares outstanding ${notes.sharesOutstandingMillion}M from the close 8-K; the 66.2M count is unchanged.`;
+              }
+              return `${asOf}. ${base}. Notes close updates share count and this %, not the registered share count.`;
+            })(),
           },
           {
             label: 'Dividend Status',
@@ -282,7 +347,7 @@ export async function GET() {
           {
             label: 'Notes Exchange',
             value: notes?.principal || 'N/A',
-            detail: notes ? `${notes.close}. ${notes.remaining}` : 'No subsequent notes-for-equity 8-K found',
+            detail: notes ? `${notes.close}. ${notes.remaining}${notes.closed && notes.sharesOutstandingMillion ? `; shares outstanding ${notes.sharesOutstandingMillion}M` : ''}` : 'No subsequent notes-for-equity 8-K found',
           },
           {
             label: 'Pledged Bitcoin',
@@ -305,7 +370,7 @@ export async function GET() {
       notesFilingUrl: notes?.url,
       drsAsOf: annual.reportDate || annual.filingDate,
       drsSource: 'SEC 10-K',
-      drsNote: 'Registered/DRS share count is the annual HQ count from the 10-K. It is not updated intra-year. After a notes-for-equity close, update shares outstanding and the DRS percentage only. Do not invent a new DRS figure.',
+      drsNote: 'Registered/DRS share count is the annual HQ count from the 10-K. It is not updated intra-year. A notes-close 8-K updates shares outstanding and the DRS percentage only; the 66.2M figure is not invented.',
       lastUpdated: new Date().toISOString(),
       sections,
     }, { headers: responseHeaders });
