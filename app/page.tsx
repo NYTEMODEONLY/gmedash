@@ -12,6 +12,7 @@ import SECFilings from '@/components/SECFilings';
 import PressReleases from '@/components/PressReleases';
 import InvestorSiteChanges from '@/components/InvestorSiteChanges';
 import InvestorSnapshot from '@/components/InvestorSnapshot';
+import SubsequentEvents from '@/components/SubsequentEvents';
 import TurnaroundProgress from '@/components/TurnaroundProgress';
 import InsiderTransactions from '@/components/InsiderTransactions';
 import Footer from '@/components/Footer';
@@ -245,6 +246,10 @@ export default function Dashboard() {
 
         <div className="mb-8">
           <InvestorSnapshot />
+        </div>
+
+        <div className="mb-8">
+          <SubsequentEvents autoRefresh={isLiveMode} />
         </div>
 
         <div className="mb-8">
