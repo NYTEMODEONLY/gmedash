@@ -41,11 +41,11 @@ export default function Dashboard() {
 
   // Loading states
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingStock, setIsLoadingStock] = useState(false);
-  const [isLoadingHistorical, setIsLoadingHistorical] = useState(false);
-  const [isLoadingShorting, setIsLoadingShorting] = useState(false);
-  const [isLoadingNews, setIsLoadingNews] = useState(false);
-  const [isLoadingSEC, setIsLoadingSEC] = useState(false);
+  const [isLoadingStock, setIsLoadingStock] = useState(true);
+  const [isLoadingHistorical, setIsLoadingHistorical] = useState(true);
+  const [isLoadingShorting, setIsLoadingShorting] = useState(true);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+  const [isLoadingSEC, setIsLoadingSEC] = useState(true);
 
   // UI state
   const [selectedPeriod, setSelectedPeriod] = useState('1Y');
@@ -80,14 +80,14 @@ export default function Dashboard() {
     const [quoteResult, historicalResult, shortResult, newsResult, filingsResult] = results;
     let hadError = false;
 
-    if (quoteResult.status === 'fulfilled') {
+    if (quoteResult.status === 'fulfilled' && quoteResult.value) {
       setStockData(quoteResult.value);
     } else {
       hadError = true;
     }
     setIsLoadingStock(false);
 
-    if (historicalResult.status === 'fulfilled') {
+    if (historicalResult.status === 'fulfilled' && historicalResult.value.data?.length) {
       setHistoricalData(historicalResult.value.data);
       setHistoricalMeta(historicalResult.value);
     } else {
@@ -95,14 +95,14 @@ export default function Dashboard() {
     }
     setIsLoadingHistorical(false);
 
-    if (shortResult.status === 'fulfilled') {
+    if (shortResult.status === 'fulfilled' && shortResult.value.length) {
       setShortingData(shortResult.value);
     } else {
       hadError = true;
     }
     setIsLoadingShorting(false);
 
-    if (newsResult.status === 'fulfilled') {
+    if (newsResult.status === 'fulfilled' && newsResult.value.length) {
       setNewsData(newsResult.value);
       lastNewsRefreshRef.current = Date.now();
     } else {
@@ -110,7 +110,7 @@ export default function Dashboard() {
     }
     setIsLoadingNews(false);
 
-    if (filingsResult.status === 'fulfilled') {
+    if (filingsResult.status === 'fulfilled' && filingsResult.value.length) {
       setSecFilings(filingsResult.value);
       lastSECRefreshRef.current = Date.now();
     } else {
