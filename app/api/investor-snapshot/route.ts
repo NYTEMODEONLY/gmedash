@@ -17,7 +17,7 @@ interface SnapshotSection {
 
 const CIK = '0001326380';
 const SEC_HEADERS = {
-  'User-Agent': 'GMEDASH-SEC-Reader/1.0 contact@example.com',
+  'User-Agent': 'GMEDASH-SEC-Reader/1.0 contact@nytemode.com',
   Accept: 'application/json,text/html,application/xhtml+xml',
 };
 
@@ -55,22 +55,30 @@ function matchFirst(text: string, patterns: RegExp[]): RegExpMatchArray | null {
   return null;
 }
 
-async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: string; reportDate: string | null; url: string }> {
+interface FilingText {
+  text: string;
+  form: string;
+  filingDate: string;
+  reportDate: string | null;
+  url: string;
+}
+
+async function getSubmissions() {
   const submissionsResponse = await axios.get(`https://data.sec.gov/submissions/CIK${CIK}.json`, {
     timeout: 10000,
     headers: SEC_HEADERS,
   });
+  return submissionsResponse.data?.filings?.recent;
+}
 
-  const recent = submissionsResponse.data?.filings?.recent;
-  const index = recent?.form?.findIndex((form: string) => form === '10-K') ?? -1;
-  if (index < 0) throw new Error('No GameStop 10-K found in SEC submissions');
+function filingUrl(accession: string, primaryDocument: string) {
+  return `https://www.sec.gov/Archives/edgar/data/1326380/${accession.replace(/-/g, '')}/${primaryDocument}`;
+}
 
+async function getFilingText(recent: any, index: number): Promise<FilingText> {
   const accession = recent.accessionNumber[index];
   const primaryDocument = recent.primaryDocument[index];
-  const url = `https://www.sec.gov/Archives/edgar/data/1326380/${accession.replace(/-/g, '')}/${primaryDocument}`;
-  const filingDate = recent.filingDate[index];
-  const reportDate = recent.reportDate?.[index] || null;
-
+  const url = filingUrl(accession, primaryDocument);
   const reportResponse = await axios.get(url, {
     timeout: 12000,
     responseType: 'text',
@@ -79,10 +87,58 @@ async function getLatestAnnualReportText(): Promise<{ text: string; filingDate: 
 
   return {
     text: decodeSECText(String(reportResponse.data)),
-    filingDate,
-    reportDate,
+    form: recent.form[index],
+    filingDate: recent.filingDate[index],
+    reportDate: recent.reportDate?.[index] || null,
     url,
   };
+}
+
+async function getLatestFiling(recent: any, forms: string[]): Promise<FilingText | null> {
+  const index = recent?.form?.findIndex((form: string) => forms.includes(form)) ?? -1;
+  if (index < 0) return null;
+  return getFilingText(recent, index);
+}
+
+async function getNotesExchange(recent: any): Promise<{
+  principal: string;
+  remaining: string;
+  close: string;
+  url: string;
+  filingDate: string;
+} | null> {
+  const forms: string[] = recent?.form || [];
+  for (let i = 0; i < forms.length && i < 40; i++) {
+    if (forms[i] !== '8-K' && forms[i] !== '8-K/A') continue;
+    const filing = await getFilingText(recent, i);
+    const exchange = filing.text.match(
+      /exchange approximately \(i\) \$([0-9.,]+)\s*million aggregate principal amount of the outstanding 2030 Notes, and \(ii\) \$([0-9.,]+)\s*billion aggregate principal amount of the outstanding 2032 Notes/i
+    );
+    const reduced = filing.text.match(
+      /outstanding long-term debt will be reduced by approximately \$([0-9.,]+)\s*billion/i
+    );
+    const remaining = filing.text.match(
+      /approximately \$([0-9.,]+)\s*billion aggregate principal amount of 2030 Notes and \$([0-9.,]+)\s*billion aggregate principal amount of 2032 Notes remaining outstanding/i
+    );
+    const close = filing.text.match(
+      /Closing Date is expected to occur on or about ([A-Za-z]+ \d{1,2}, \d{4})/i
+    );
+    if (reduced || exchange) {
+      const principal = reduced?.[1]
+        ? `$${reduced[1]}B notes-for-equity`
+        : exchange
+          ? `$${(Number(exchange[1].replace(/,/g, '')) / 1000 + Number(exchange[2].replace(/,/g, ''))).toFixed(1)}B notes-for-equity`
+          : 'N/A';
+      return {
+        principal,
+        remaining: remaining ? `~$${remaining[1]}B of 2030 and ~$${remaining[2]}B of 2032 remain` : 'Exchange retires debt without cash',
+        close: close ? `Expected close ${close[1]}` : 'Close pending',
+        url: filing.url,
+        filingDate: filing.filingDate,
+      };
+    }
+  }
+  return null;
 }
 
 async function getBitcoinPrice(): Promise<number | null> {
@@ -108,34 +164,53 @@ export async function GET() {
   };
 
   try {
-    const [{ text, filingDate, reportDate, url }, btcPrice] = await Promise.all([
-      getLatestAnnualReportText(),
+    const recent = await getSubmissions();
+    const [annual, quarterly, notes, btcPrice] = await Promise.all([
+      getLatestFiling(recent, ['10-K']),
+      getLatestFiling(recent, ['10-Q']),
+      getNotesExchange(recent),
       getBitcoinPrice(),
     ]);
 
+    if (!annual) throw new Error('No GameStop 10-K found in SEC submissions');
+
+    const useQuarterly = Boolean(
+      quarterly
+      && quarterly.reportDate
+      && annual.reportDate
+      && quarterly.reportDate > annual.reportDate
+    );
+    const operating = useQuarterly && quarterly ? quarterly : annual;
+    const operatingLabel = useQuarterly ? 'SEC 10-Q' : 'SEC 10-K';
+    const text = operating.text;
+    const annualText = annual.text;
+
     const liquidityMatch = text.match(/Cash, cash equivalents and marketable securities\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
     const cashMatch = text.match(/Cash and cash equivalents\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
-    const marketableMatch = text.match(/Marketable securities\s+([\d,.]+)\s+([\d,.]+)/i);
-    const debtMatch = text.match(/Total debt\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
-    const resultsMatch = text.match(/Net sales\s+\$\s*([\d,.]+)\s+100\.0\s+%\s+\$\s*([\d,.]+)[\s\S]{0,500}?Gross profit\s+([\d,.]+)[\s\S]{0,700}?Net income\s+\$\s*([\d,.]+)/i);
-    const segmentMatch = text.match(/United States\s+\$\s*([\d,.]+)\s+73\.5\s+%\s+\$\s*[\d,.]+[\s\S]{0,120}?Canada\s+([\d,.]+)\s+1\.1[\s\S]{0,80}?Australia\s+([\d,.]+)\s+13\.6[\s\S]{0,80}?Europe\s+([\d,.]+)\s+11\.8/i);
-    const categoryMatch = text.match(/Hardware and accessories\s+\$\s*([\d,.]+)\s+50\.7[\s\S]{0,80}?Software\s+([\d,.]+)\s+20\.1[\s\S]{0,80}?Collectibles\s+([\d,.]+)\s+29\.2/i);
-    const storesMatch = text.match(/Total Stores\s+([\d,]+)\s+1\s+\(([\d,]+)\)\s+([\d,]+)/i);
-    const storeByRegionMatch = text.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+st\s*ores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in A\s*ustralia/i)
-      || text.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+stores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in Australia/i);
-    const holdersMatch = text.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by registered holders[\s\S]{0,260}?approximately\s+([\d,.]+)\s+million were held in our direct stock purchase plan[\s\S]{0,220}?there were\s+([\d,]+)\s+record holders/i);
-    const dtcMatch = text.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by Cede & Co\./i);
-    const bitcoinMatch = matchFirst(text, [
+    const marketableMatch = text.match(/Marketable securities\s+([\d,.]+)\s+[—\-–]?[\s$]*([\d,.]+)?/i);
+    const debtMatch = text.match(/Long-term debt\s+([\d,.]+)\s+([\d,.]+)/i)
+      || text.match(/Total debt\s+\$\s*([\d,.]+)\s+\$\s*([\d,.]+)/i);
+    const resultsMatch = text.match(/Net sales\s+\$\s*([\d,.]+)[\s\S]{0,80}?Gross profit\s+([\d,.]+)[\s\S]{0,400}?Net income\s+\$\s*([\d,.]+)/i);
+    const categoryMatch = text.match(/Hardware and accessories\s+\$\s*([\d,.]+)\s+([\d.]+)\s*%[\s\S]{0,80}?Software\s+([\d,.]+)\s+([\d.]+)[\s\S]{0,80}?Collectibles\s+([\d,.]+)\s+([\d.]+)/i);
+    const storesMatch = annualText.match(/Total Stores\s+([\d,]+)\s+1\s+\(([\d,]+)\)\s+([\d,]+)/i);
+    const storeByRegionMatch = annualText.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+st\s*ores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in A\s*ustralia/i)
+      || annualText.match(/As of [A-Za-z]+ \d{1,2}, \d{4}, we had a total of\s+([\d,]+)\s+stores[\s\S]{0,160}?([\d,]+)\s+in the United States,\s+([\d,]+)\s+in Europe,\s+and\s+([\d,]+)\s+in Australia/i);
+    const holdersMatch = annualText.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by registered holders[\s\S]{0,260}?approximately\s+([\d,.]+)\s+million were held in our direct stock purchase plan[\s\S]{0,220}?there were\s+([\d,]+)\s+record holders/i);
+    const dtcMatch = annualText.match(/approximately\s+([\d,.]+)\s+million shares\s+\(([\d.]+)%\)\s+were held by Cede & Co\./i);
+    const bitcoinMatch = matchFirst(annualText, [
       /pledged\s+([\d,]+)\s+Bitcoin[\s\S]{0,260}?digital assets receivable with a fair value of\s+\$\s*([\d,.]+)\s+million[\s\S]{0,120}?and\s+\$\s*([\d,.]+)\s+million as of January 31, 2026/i,
       /pledged\s+([\d,]+)\s+of the Bitcoin[\s\S]{0,420}?Additions \(Cost of\s+\$\s*([\d,.]+)\s+million/i,
       /covered-call option contracts referencing approximately\s+([\d,]+)\s+Bitcoin[\s\S]{0,120}?strike prices ranging from\s+\$([\d,]+)\s+to\s+\$([\d,]+)/i,
     ]);
-    const optionMatch = text.match(/strike prices ranging from\s+\$([\d,]+)\s+to\s+\$([\d,]+)\s+and maturities extending through\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/i);
+    const optionMatch = annualText.match(/strike prices ranging from\s+\$([\d,]+)\s+to\s+\$([\d,]+)\s+and maturities extending through\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})/i);
+
+    const incomeLabel = useQuarterly ? 'Q1 Net Income' : 'FY Net Income';
+    const collectiblesPct = categoryMatch?.[6] ? `${categoryMatch[6]}% of net sales` : undefined;
 
     const sections: SnapshotSection[] = [
       {
         title: 'Balance Sheet',
-        source: 'SEC 10-K',
+        source: operatingLabel,
         metrics: [
           {
             label: 'Cash + Marketable Securities',
@@ -143,25 +218,27 @@ export async function GET() {
             detail: `Cash ${moneyMillions(cashMatch?.[1])}; securities ${moneyMillions(marketableMatch?.[1])}`,
           },
           {
-            label: 'Total Debt',
+            label: 'Long-term Debt',
             value: moneyMillions(debtMatch?.[1]),
-            detail: 'Includes convertible notes and other reported debt',
+            detail: notes
+              ? `${notes.principal} announced; ${notes.close}`
+              : 'Convertible notes and other reported long-term debt',
           },
           {
-            label: 'FY Net Income',
-            value: moneyMillions(resultsMatch?.[4]),
-            detail: `Net sales ${moneyMillions(resultsMatch?.[1])}; gross profit ${moneyMillions(resultsMatch?.[3])}`,
+            label: incomeLabel,
+            value: moneyMillions(resultsMatch?.[3]),
+            detail: `Net sales ${moneyMillions(resultsMatch?.[1])}; gross profit ${moneyMillions(resultsMatch?.[2])}`,
           },
         ],
       },
       {
         title: 'Business Mix',
-        source: 'SEC 10-K',
+        source: operatingLabel,
         metrics: [
           {
             label: 'Stores',
             value: numberWithCommas(storeByRegionMatch?.[1] || storesMatch?.[3]),
-            detail: `US ${numberWithCommas(storeByRegionMatch?.[2])}; Europe ${numberWithCommas(storeByRegionMatch?.[3])}; Australia ${numberWithCommas(storeByRegionMatch?.[4])}`,
+            detail: `US ${numberWithCommas(storeByRegionMatch?.[2])}; Europe ${numberWithCommas(storeByRegionMatch?.[3])}; Australia ${numberWithCommas(storeByRegionMatch?.[4])} (10-K)`,
           },
           {
             label: 'Store Reduction',
@@ -170,8 +247,10 @@ export async function GET() {
           },
           {
             label: 'Collectibles Sales',
-            value: moneyMillions(categoryMatch?.[3]),
-            detail: `Hardware ${moneyMillions(categoryMatch?.[1])}; software ${moneyMillions(categoryMatch?.[2])}`,
+            value: moneyMillions(categoryMatch?.[5]),
+            detail: collectiblesPct
+              ? `${collectiblesPct}; hardware ${moneyMillions(categoryMatch?.[1])}; software ${moneyMillions(categoryMatch?.[3])}`
+              : `Hardware ${moneyMillions(categoryMatch?.[1])}; software ${moneyMillions(categoryMatch?.[3])}`,
           },
         ],
       },
@@ -198,17 +277,17 @@ export async function GET() {
       },
       {
         title: 'Capital Allocation',
-        source: 'SEC 10-K / Coinbase spot BTC',
+        source: notes ? 'SEC 10-K / 8-K / Coinbase' : 'SEC 10-K / Coinbase spot BTC',
         metrics: [
+          {
+            label: 'Notes Exchange',
+            value: notes?.principal || 'N/A',
+            detail: notes ? `${notes.close}. ${notes.remaining}` : 'No subsequent notes-for-equity 8-K found',
+          },
           {
             label: 'Pledged Bitcoin',
             value: bitcoinMatch ? `${numberWithCommas(bitcoinMatch[1])} BTC` : 'N/A',
             detail: btcPrice && bitcoinMatch ? `BTC spot ~$${Math.round(btcPrice).toLocaleString()}; not a holding valuation` : 'Covered-call collateral disclosure',
-          },
-          {
-            label: 'BTC Receivable',
-            value: bitcoinMatch?.[3] ? moneyMillions(bitcoinMatch[3]) : 'N/A',
-            detail: bitcoinMatch?.[2] ? `At derecognition ${moneyMillions(bitcoinMatch[2])}` : 'Digital asset receivable as of fiscal year-end',
           },
           {
             label: 'Covered Calls',
@@ -219,18 +298,11 @@ export async function GET() {
       },
     ];
 
-    if (segmentMatch) {
-      sections[1].metrics.push({
-        label: 'Segment Sales',
-        value: moneyMillions(segmentMatch[1]),
-        detail: `US; Australia ${moneyMillions(segmentMatch[3])}; Europe ${moneyMillions(segmentMatch[4])}`,
-      });
-    }
-
     return NextResponse.json({
-      asOf: reportDate || filingDate,
-      filingDate,
-      filingUrl: url,
+      asOf: operating.reportDate || operating.filingDate,
+      filingDate: operating.filingDate,
+      filingUrl: operating.url,
+      notesFilingUrl: notes?.url,
       lastUpdated: new Date().toISOString(),
       sections,
     }, { headers: responseHeaders });

@@ -167,7 +167,7 @@ export default function InvestorSnapshot() {
       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gme-dark-300">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>
-            All company facts are sourced from the latest GameStop SEC 10-K unless noted. BTC spot context:{' '}
+            Cash, mix, and earnings come from the latest 10-Q when it is newer than the 10-K. DRS and store count stay on the 10-K until a later filing updates them. Subsequent events such as the notes exchange come from 8-Ks. BTC spot context:{' '}
             <a
               href={coinbaseBtcUrl}
               target="_blank"
