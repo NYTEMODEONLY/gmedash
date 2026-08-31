@@ -174,39 +174,39 @@ Works on any platform supporting Next.js:
 ```
 gmedash/
 ├── app/
-│   ├── api/                 # API routes
-│   │   ├── stock/          # Live stock quote
-│   │   ├── historical/     # Historical price data
-│   │   ├── news/           # News aggregation
-│   │   ├── sec/            # SEC filings
-│   │   ├── press-releases/ # Press releases
-│   │   ├── company-info/   # Company metrics
-│   │   ├── investor-snapshot/ # SEC-backed investor facts
-│   │   ├── turnaround/     # SEC year-over-year turnaround metrics
-│   │   ├── insider-transactions/ # SEC ownership transactions
+│   ├── api/                       # API routes
+│   │   ├── stock/                 # Live stock quote
+│   │   ├── historical/            # Historical price data
+│   │   ├── news/                  # News aggregation
+│   │   ├── sec/                   # SEC filings
+│   │   ├── press-releases/        # Press releases
+│   │   ├── company-info/          # Company metrics
+│   │   ├── investor-snapshot/     # SEC-backed investor facts
+│   │   ├── turnaround/            # SEC year-over-year turnaround metrics
+│   │   ├── insider-transactions/  # SEC ownership transactions
 │   │   ├── investor-site-changes/ # GameStop IR homepage change monitor
-│   │   ├── feedback/      # Anonymous feedback to GitHub Issues
-│   │   ├── short-interest/ # FINRA short interest
-│   │   └── options-flow/   # Unavailable response until a reliable free source exists
-│   ├── globals.css         # Global styles & theme
-│   ├── layout.tsx          # Root layout with metadata
-│   └── page.tsx            # Main dashboard
+│   │   ├── feedback/              # Anonymous feedback to GitHub Issues
+│   │   ├── short-interest/        # FINRA short interest
+│   │   └── options-flow/          # Unavailable response until a reliable free source exists
+│   ├── globals.css                # Global styles & theme
+│   ├── layout.tsx                 # Root layout with metadata
+│   └── page.tsx                   # Main dashboard
 ├── components/
-│   ├── Header.tsx          # Header with theme toggle
-│   ├── StockInfoCard.tsx   # Live stock card
-│   ├── CompanyOverview.tsx # Company information
-│   ├── InvestorSnapshot.tsx# SEC-backed investor facts
-│   ├── TurnaroundProgress.tsx # SEC annual trend dashboard
-│   ├── InsiderTransactions.tsx# SEC Form 3/4/5 transactions
-│   ├── PriceChart.tsx      # Price history chart
-│   ├── VolumeChart.tsx     # Volume chart
-│   ├── ShortingChart.tsx   # FINRA short interest
-│   ├── NewsSection.tsx     # News articles
-│   ├── SECFilings.tsx      # SEC filings table
-│   ├── PressReleases.tsx   # Press releases
-│   ├── InvestorSiteChanges.tsx # GameStop IR homepage change monitor
-│   ├── FeedbackForm.tsx   # Anonymous feedback submission form
-│   └── Footer.tsx          # Footer
+│   ├── Header.tsx                 # Header with theme toggle
+│   ├── StockInfoCard.tsx          # Live stock card
+│   ├── CompanyOverview.tsx        # Company information
+│   ├── InvestorSnapshot.tsx       # SEC-backed investor facts
+│   ├── TurnaroundProgress.tsx     # SEC annual trend dashboard
+│   ├── InsiderTransactions.tsx    # SEC Form 3/4/5 transactions
+│   ├── PriceChart.tsx             # Price history chart
+│   ├── VolumeChart.tsx            # Volume chart
+│   ├── ShortingChart.tsx          # FINRA short interest
+│   ├── NewsSection.tsx            # News articles
+│   ├── SECFilings.tsx             # SEC filings table
+│   ├── PressReleases.tsx          # Press releases
+│   ├── InvestorSiteChanges.tsx    # GameStop IR homepage change monitor
+│   ├── FeedbackForm.tsx           # Anonymous feedback submission form
+│   └── Footer.tsx                 # Footer
 ├── lib/
 │   ├── api.ts              # API client
 │   ├── ThemeContext.tsx    # Theme provider
